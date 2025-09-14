@@ -1,18 +1,15 @@
 // src/app/api/tasks/route.ts
-import { NextResponse } from 'next/server';
-
-// Временная заглушка для тестирования
-const mockTasks = [
-  { id: '1', title: 'Пример задачи 1', isCompleted: false, createdAt: new Date() },
-  { id: '2', title: 'Пример задачи 2', isCompleted: true, createdAt: new Date() },
-];
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
 
 export async function GET() {
   try {
-    console.log('✅ API: Возвращаем mock задачи');
-    return NextResponse.json(mockTasks);
+    const tasks = await prisma.task.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
+    return NextResponse.json(tasks);
   } catch (error) {
-    console.error('❌ API Error:', error);
+    console.error('Error fetching tasks:', error);
     return NextResponse.json(
       { error: 'Failed to fetch tasks' },
       { status: 500 }
@@ -20,21 +17,21 @@ export async function GET() {
   }
 }
 
-export async function POST(request: Request) {
+export async function POST(req: NextRequest) {
   try {
-    const { title } = await request.json();
-    const newTask = {
-      id: Date.now().toString(),
-      title: title || 'Новая задача',
-      isCompleted: false,
-      createdAt: new Date(),
-    };
-    mockTasks.push(newTask);
+    const { title, description } = await req.json();
     
-    console.log('✅ API: Создана новая задача:', newTask);
-    return NextResponse.json(newTask);
+    const task = await prisma.task.create({
+      data: {
+        title,
+        description: description || null,
+        isCompleted: false,
+      },
+    });
+    
+    return NextResponse.json(task);
   } catch (error) {
-    console.error('❌ API Error:', error);
+    console.error('Error creating task:', error);
     return NextResponse.json(
       { error: 'Failed to create task' },
       { status: 500 }
