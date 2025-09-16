@@ -33,7 +33,7 @@
 
 ## 📸 Screenshots
 
-![Dashboard Preview](/images/dashboard-preview.png)
+![Dashboard Preview](/public/images/dashboard-preview.png)
 
 ## 🚀 Getting Started
 
