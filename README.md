@@ -8,7 +8,7 @@
 
 ## ✨ Live Demo
 
-🔗 **[View Live Application](https://focus-frame.vercel.app)**
+🔗 **[View Live Application](https://focus-frame-7ilpxjv5q-evvas-projects-6b48ca01.vercel.app)**
 
 ## 🎯 Features
 
@@ -33,7 +33,7 @@
 
 ## 📸 Screenshots
 
-![Dashboard Preview](https://via.placeholder.com/800x400/3B82F6/FFFFFF?text=FocusFrame+Dashboard) *Add real screenshot later*
+![Dashboard Preview](/images/dashboard-preview.png)
 
 ## 🚀 Getting Started
 
@@ -48,3 +48,90 @@
    ```bash
    git clone https://github.com/ge-lang/focus-frame.git
    cd focus-frame
+```
+
+1. Install dependencies
+   ```bash
+   npm install
+   ```
+2. Setup environment variables
+   ```bash
+   cp .env.example .env
+   # Fill in your variables:
+   # DATABASE_URL="your_postgresql_connection_string"
+   # AUTH_SECRET="your_random_secret"
+   # NEXTAUTH_URL="http://localhost:3000"
+   ```
+3. Setup database
+   ```bash
+   npx prisma generate
+   npx prisma db push
+   ```
+4. Run development server
+   ```bash
+   npm run dev
+   ```
+5. Open your browser Navigate to http://localhost:3000
+
+📁 Project Structure
+
+```
+src/
+├── app/                 # Next.js App Router
+│   ├── api/            # API routes (Tasks, Weather, News)
+│   ├── dashboard/      # Dashboard pages
+│   ├── auth/           # Authentication pages
+│   └── layout.tsx      # Root layout
+├── components/         # React components
+│   ├── widgets/        # Widget components
+│   └── contexts/       # State management
+├── lib/               # Utilities and configurations
+└── types/             # TypeScript definitions
+```
+
+🔌 API Routes
+
+· GET /api/tasks - Fetch all tasks
+· POST /api/tasks - Create new task
+· PUT /api/tasks/[id] - Update task
+· GET /api/weather - Weather data
+· GET /api/news - News feed
+
+🌐 Deployment
+
+Vercel Deployment
+
+1. Push to GitHub
+2. Import project in Vercel
+3. Add environment variables in Vercel Dashboard
+4. Deploy! 🚀
+
+Environment Variables
+
+```env
+DATABASE_URL="postgresql://username:password@host/dbname?sslmode=require"
+AUTH_SECRET="your_random_secret_string"
+NEXTAUTH_URL="https://your-app.vercel.app"
+```
+
+🤝 Contributing
+
+This is a portfolio project. Feel free to fork and adapt for your own needs!
+
+📄 License
+
+MIT License - feel free to use this project for your portfolio.
+
+🎓 Learning Resources
+
+· Next.js Documentation
+· Prisma Documentation
+· Tailwind CSS Documentation
+
+---
+
+Built with ❤️ using Next.js, TypeScript, and Tailwind CSS
+
+```
+
+
