@@ -1,5 +1,5 @@
 // src/app/page.tsx
-import Link from 'next/link';
+/*import Link from 'next/link';
 
 export default function Home() {
   return (
@@ -15,5 +15,30 @@ export default function Home() {
         </Link>
       </div>
     </div>
+  );
+}*/
+
+// src/app/page.tsx
+import  AuthGuard  from '@/components/auth-guard';
+import { DashboardGrid } from '@/components/dashboard-grid';
+import { EditToggle } from '@/components/edit-toggle';
+import { WidgetPicker } from '@/components/widget-picker';
+import { AuthButton } from '@/components/auth-button';
+
+export default function Home() {
+  return (
+    <AuthGuard>
+      <main className="container mx-auto p-6">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold">Focus Frame</h1>
+          <div className="flex items-center space-x-4">
+            <AuthButton />
+            <WidgetPicker />
+            <EditToggle />
+          </div>
+        </div>
+        <DashboardGrid />
+      </main>
+    </AuthGuard>
   );
 }

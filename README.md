@@ -132,6 +132,5 @@ MIT License - feel free to use this project for your portfolio.
 
 Built with ❤️ using Next.js, TypeScript, and Tailwind CSS
 
-```
 
 

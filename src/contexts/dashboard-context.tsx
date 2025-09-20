@@ -17,6 +17,7 @@ export interface LayoutItem {
   w: number;
   h: number;
   static?: boolean;
+  type: WidgetType;
 }
 
 export interface DashboardState {
@@ -33,20 +34,26 @@ type DashboardAction =
   | { type: 'LOAD_STATE'; payload: DashboardState }
   | { type: 'TOGGLE_EDIT' };
 
-// Начальное состояние
+
+  // Начальное состояние
 const initialState: DashboardState = {
   widgets: [
     { id: 'todo-1', type: 'todo', colSpan: 1 },
     { id: 'weather-1', type: 'weather', colSpan: 1 },
     { id: 'news-1', type: 'news', colSpan: 2 },
+    { id: 'pomodoro-1', type: 'pomodoro', colSpan: 1 },
+    { id: 'calendar-1', type: 'calendar', colSpan: 1 },
   ],
   layout: [
-    { i: 'todo-1', x: 0, y: 0, w: 1, h: 2 },
-    { i: 'weather-1', x: 1, y: 0, w: 1, h: 1 },
-    { i: 'news-1', x: 0, y: 2, w: 2, h: 1 },
+    { i: 'todo-1', x: 0, y: 0, w: 1, h: 2, type: 'todo' },
+    { i: 'weather-1', x: 1, y: 0, w: 1, h: 1, type: 'weather' },
+    { i: 'news-1', x: 0, y: 2, w: 2, h: 1, type: 'news' },
+    { i: 'pomodoro-1', x: 2, y: 0, w: 1, h: 2, type: 'pomodoro' },
+    { i: 'calendar-1', x: 2, y: 2, w: 1, h: 2, type: 'calendar' },
   ],
   isEditing: false,
 };
+
 
 // Редюсер
 function dashboardReducer(state: DashboardState, action: DashboardAction): DashboardState {

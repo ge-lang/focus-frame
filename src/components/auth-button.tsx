@@ -1,18 +1,33 @@
 // src/components/auth-button.tsx
 'use client';
+import { useSession, signIn, signOut } from "next-auth/react";
+import { AnimatedButton } from "./animated-button";
 
-// Убедитесь, что импортируете из правильного места
-import { signIn, signOut, useSession } from "next-auth/react";
-
-export default function AuthButton() {
+export function AuthButton() {
   const { data: session } = useSession();
 
   if (session) {
     return (
-      <div>
-        {session.user?.name} <button onClick={() => signOut()}>Sign out</button>
+      <div className="flex items-center space-x-4">
+        <span className="text-sm text-gray-700">
+          Welcome, {session.user?.name}!
+        </span>
+        <AnimatedButton
+          onClick={() => signOut()}
+          className="px-3 py-1 bg-red-500 text-white rounded text-sm"
+        >
+          Sign Out
+        </AnimatedButton>
       </div>
     );
   }
-  return <button onClick={() => signIn("google")}>Sign in with Google</button>;
+
+  return (
+    <AnimatedButton
+      onClick={() => signIn("google")}
+      className="px-3 py-1 bg-blue-500 text-white rounded text-sm"
+    >
+      Sign In
+    </AnimatedButton>
+  );
 }

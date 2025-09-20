@@ -2,3 +2,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Стили для маленьких кнопок */
+.btn-small {
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+}
+
+.btn-small:hover {
+  transform: scale(1.1);
+}

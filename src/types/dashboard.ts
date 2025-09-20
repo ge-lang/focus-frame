@@ -1,5 +1,6 @@
 // src/types/dashboard.ts
-export type WidgetType = 'todo' | 'weather' | 'news' | 'calendar' | 'pomodoro';
+export type WidgetType = 'todo' | 'weather' | 'news' | 'pomodoro' | 'calendar';
+//export type WidgetType = 'todo' | 'weather' | 'news';
 
 export interface Widget {
   id: string;
@@ -14,6 +15,7 @@ export interface LayoutItem {
   w: number;
   h: number;
   static?: boolean;
+  type: WidgetType;
 }
 
 export interface DashboardState {
@@ -21,3 +23,5 @@ export interface DashboardState {
   layout: LayoutItem[];
   isEditing: boolean;
 }
+
+

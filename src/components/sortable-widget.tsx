@@ -3,8 +3,10 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { WidgetRenderer } from './widget-renderer';
+import { motion } from 'framer-motion';
+import { WidgetType } from '@/types/dashboard'; // Добавляем импорт
 
-export function SortableWidget({ id, type }: { id: string; type: string }) {
+export function SortableWidget({ id, type }: { id: string; type: WidgetType }) { // Меняем string на WidgetType
   const {
     attributes,
     listeners,
@@ -17,18 +19,28 @@ export function SortableWidget({ id, type }: { id: string; type: string }) {
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
   };
 
   return (
-    <div
+    <motion.div
       ref={setNodeRef}
       style={style}
       {...attributes}
       {...listeners}
-      className="cursor-grab active:cursor-grabbing"
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ 
+        opacity: isDragging ? 0.6 : 1,
+        scale: isDragging ? 1.05 : 1,
+      }}
+      whileHover={{
+        scale: 1.02,
+        transition: { duration: 0.2 }
+      }}
+      className={`cursor-grab active:cursor-grabbing ${
+        isDragging ? 'z-50 rotate-2' : ''
+      }`}
     >
       <WidgetRenderer type={type} id={id} />
-    </div>
+    </motion.div>
   );
 }

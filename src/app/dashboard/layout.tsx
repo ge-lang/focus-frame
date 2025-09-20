@@ -9,7 +9,7 @@ export default function DashboardLayout({
 }) {
   return (
     <AuthGuard>
-      <DashboardProvider>
+      <DashboardProvider> {/* Добавьте сюда */}
         {children}
       </DashboardProvider>
     </AuthGuard>
