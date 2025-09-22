@@ -1,9 +1,11 @@
-// src/components/sortable-widget.tsx
+// src/components/sortable-widget.tsx (улучшенная версия)
 'use client';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { WidgetRenderer } from './widget-renderer';
 import { useDashboard } from '@/contexts/dashboard-context';
+import { motion } from 'framer-motion';
+import { GripVertical } from 'lucide-react';
 
 interface SortableWidgetProps {
   id: string;
@@ -12,8 +14,6 @@ interface SortableWidgetProps {
 
 export function SortableWidget({ id, type }: SortableWidgetProps) {
   const { state } = useDashboard();
-  const { widgets } = state;
-  
   const {
     attributes,
     listeners,
@@ -28,8 +28,7 @@ export function SortableWidget({ id, type }: SortableWidgetProps) {
     transition,
   };
 
-  // Находим виджет по ID
-  const widget = widgets.find(w => w.id === id);
+  const widget = state.widgets.find(w => w.id === id);
 
   if (!widget) {
     return (
@@ -42,14 +41,24 @@ export function SortableWidget({ id, type }: SortableWidgetProps) {
   }
 
   return (
-    <div
+    <motion.div
       ref={setNodeRef}
       style={style}
-      {...attributes}
-      {...listeners}
-      className={isDragging ? 'opacity-50' : ''}
+      className={`relative group ${isDragging ? 'opacity-50' : ''}`}
+      whileHover={{ scale: 1.01 }}
     >
+      {/* Ручка для перетаскивания */}
+      <div
+        {...attributes}
+        {...listeners}
+        className="absolute -top-2 -left-2 z-10 bg-gray-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-grab shadow-lg"
+        title="Drag to rearrange"
+      >
+        <GripVertical size={14} />
+      </div>
+
+      {/* Виджет с контекстным меню */}
       <WidgetRenderer widget={widget} />
-    </div>
+    </motion.div>
   );
 }

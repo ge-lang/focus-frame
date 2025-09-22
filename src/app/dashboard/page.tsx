@@ -4,6 +4,8 @@ import Header from '@/components/header';
 import { DashboardGrid } from '@/components/dashboard-grid';
 import { useDashboard } from '@/contexts/dashboard-context';
 
+import Dashboard  from '@/components/dashboard';
+
 export default function DashboardPage() {
   const { state, toggleEdit } = useDashboard();
 
@@ -23,7 +25,10 @@ export default function DashboardPage() {
         </div>
 
         <DashboardGrid />
+
+         <Dashboard />
       </main>
     </div>
   );
 }
+
