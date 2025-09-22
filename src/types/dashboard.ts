@@ -1,11 +1,23 @@
 // src/types/dashboard.ts
-export type WidgetType = 'todo' | 'weather' | 'news' | 'pomodoro' | 'calendar';
-//export type WidgetType = 'todo' | 'weather' | 'news';
+export type WidgetType = 
+  | 'todo' 
+  | 'weather' 
+  | 'news' 
+  | 'pomodoro'
+  | 'calendar'
+  | 'stocks'       // Новый: акции
+  | 'notes'        // Новый: заметки  
+  | 'analytics'    // Новый: аналитика
+  | 'bookmarks'    // Новый: закладки
+  | 'goals';       // Новый: цели
 
 export interface Widget {
   id: string;
   type: WidgetType;
   colSpan: number;
+  rowSpan?: number;
+  title?: string;
+  config?: Record<string, any>;
 }
 
 export interface LayoutItem {
@@ -14,8 +26,11 @@ export interface LayoutItem {
   y: number;
   w: number;
   h: number;
-  static?: boolean;
   type: WidgetType;
+  minW?: number;
+  minH?: number;
+  maxW?: number;
+  maxH?: number;
 }
 
 export interface DashboardState {
@@ -23,5 +38,3 @@ export interface DashboardState {
   layout: LayoutItem[];
   isEditing: boolean;
 }
-
-

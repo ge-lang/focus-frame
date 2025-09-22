@@ -5,7 +5,15 @@ import { AnimatedWidget } from '@/components/animated-widget';
 import { AnimatedButton } from '@/components/animated-button';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
 
-export default function CalendarWidget() {
+
+
+// src/components/widgets/calendar-widget.tsx
+interface CalendarWidgetProps {
+  widgetId: string;
+  title?: string;
+}
+
+export default function CalendarWidget({ widgetId, title }: CalendarWidgetProps)  {
   const [currentDate, setCurrentDate] = useState(new Date());
 
   const today = new Date();

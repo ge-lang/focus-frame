@@ -7,12 +7,17 @@ import { AnimatedButton } from '@/components/animated-button';
 import { Plus, Check, Trash2, Edit, Save, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+interface TaskWidgetProps {
+  widgetId: string;
+  title?: string;
+}
+
 interface EditState {
   id: string | null;
   title: string;
 }
 
-export default function TaskWidget() {
+export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
   const { data: tasks = [], isLoading, error } = useTasks();
   const createMutation = useCreateTask();
   const updateMutation = useUpdateTask();
@@ -83,7 +88,9 @@ export default function TaskWidget() {
 
   return (
     <AnimatedWidget>
-      <h3 className="font-semibold text-lg mb-4">Tasks ({tasks.length})</h3>
+      <h3 className="font-semibold text-lg mb-4">
+        {title || 'Tasks'} ({tasks.length})
+      </h3>
       
       <form onSubmit={handleSubmit} className="mb-4">
         <div className="flex">

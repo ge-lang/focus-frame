@@ -35,14 +35,17 @@ const containerVariants = {
 
 const itemVariants = { 
   hidden: { opacity: 0, y: 20, scale: 0.95 },
-   visible: { opacity: 1, y: 0, scale: 1, 
-    transition: { duration: 0.4, ease: easeOut, },
-   }, };
-
+  visible: { 
+    opacity: 1, 
+    y: 0, 
+    scale: 1, 
+    transition: { duration: 0.4, ease: easeOut },
+  }, 
+};
 
 export function DashboardGrid() {
   const { state, updateLayout } = useDashboard();
-  const { layout, isEditing } = state;
+  const { layout, isEditing, widgets } = state;
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -65,7 +68,10 @@ export function DashboardGrid() {
     }
   }
 
-  
+  // Функция для получения виджета по ID
+  const getWidgetById = (id: string) => {
+    return widgets.find(widget => widget.id === id);
+  };
 
   // Режим просмотра (без drag-and-drop)
   if (!isEditing) {
@@ -76,15 +82,18 @@ export function DashboardGrid() {
         animate="visible"
         className="grid grid-cols-1 lg:grid-cols-3 gap-6"
       >
-        {layout.map((item) => (
-          <motion.div
-            key={item.i}
-            variants={itemVariants}
-            className={item.w > 1 ? 'lg:col-span-2' : ''}
-          >
-            <WidgetRenderer type={item.type} id={item.i} />
-          </motion.div>
-        ))}
+        {layout.map((item) => {
+          const widget = getWidgetById(item.i);
+          return widget ? (
+            <motion.div
+              key={item.i}
+              variants={itemVariants}
+              className={item.w > 1 ? 'lg:col-span-2' : ''}
+            >
+              <WidgetRenderer widget={widget} />
+            </motion.div>
+          ) : null;
+        })}
       </motion.div>
     );
   }
@@ -103,15 +112,18 @@ export function DashboardGrid() {
           animate="visible"
           className="grid grid-cols-1 lg:grid-cols-3 gap-6"
         >
-          {layout.map((item) => (
-            <motion.div
-              key={item.i}
-              variants={itemVariants}
-              className={item.w > 1 ? 'lg:col-span-2' : ''}
-            >
-              <SortableWidget id={item.i} type={item.type} />
-            </motion.div>
-          ))}
+          {layout.map((item) => {
+            const widget = getWidgetById(item.i);
+            return widget ? (
+              <motion.div
+                key={item.i}
+                variants={itemVariants}
+                className={item.w > 1 ? 'lg:col-span-2' : ''}
+              >
+                <SortableWidget id={item.i} type={item.type} />
+              </motion.div>
+            ) : null;
+          })}
         </motion.div>
       </SortableContext>
     </DndContext>

@@ -11,18 +11,19 @@ interface AnimatedWidgetProps {
 export function AnimatedWidget({ children, className = '' }: AnimatedWidgetProps) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20, scale: 0.95 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ 
-        duration: 0.4,
-        ease: "easeOut"
-      }}
-      whileHover={{ 
-        scale: 1.02,
-        boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)"
-      }}
-      whileTap={{ scale: 0.98 }}
-      className={`bg-white p-6 rounded-lg shadow-md border transition-colors ${className}`}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.3 }}
+      className={`
+        rounded-xl p-4 backdrop-blur-sm
+        bg-white/80 dark:bg-gray-800/80
+        border border-white/20 dark:border-gray-700/30
+        shadow-lg shadow-black/5
+        hover:shadow-xl hover:shadow-black/10
+        transition-all duration-300
+        ${className}
+      `}
     >
       {children}
     </motion.div>

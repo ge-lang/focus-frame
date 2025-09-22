@@ -3,10 +3,17 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { WidgetRenderer } from './widget-renderer';
-import { motion } from 'framer-motion';
-import { WidgetType } from '@/types/dashboard'; // Добавляем импорт
+import { useDashboard } from '@/contexts/dashboard-context';
 
-export function SortableWidget({ id, type }: { id: string; type: WidgetType }) { // Меняем string на WidgetType
+interface SortableWidgetProps {
+  id: string;
+  type: string;
+}
+
+export function SortableWidget({ id, type }: SortableWidgetProps) {
+  const { state } = useDashboard();
+  const { widgets } = state;
+  
   const {
     attributes,
     listeners,
@@ -21,26 +28,28 @@ export function SortableWidget({ id, type }: { id: string; type: WidgetType }) {
     transition,
   };
 
+  // Находим виджет по ID
+  const widget = widgets.find(w => w.id === id);
+
+  if (!widget) {
+    return (
+      <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+        <div className="p-4 border border-dashed border-gray-300 rounded-lg">
+          Widget not found: {id}
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <motion.div
+    <div
       ref={setNodeRef}
       style={style}
       {...attributes}
       {...listeners}
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ 
-        opacity: isDragging ? 0.6 : 1,
-        scale: isDragging ? 1.05 : 1,
-      }}
-      whileHover={{
-        scale: 1.02,
-        transition: { duration: 0.2 }
-      }}
-      className={`cursor-grab active:cursor-grabbing ${
-        isDragging ? 'z-50 rotate-2' : ''
-      }`}
+      className={isDragging ? 'opacity-50' : ''}
     >
-      <WidgetRenderer type={type} id={id} />
-    </motion.div>
+      <WidgetRenderer widget={widget} />
+    </div>
   );
 }

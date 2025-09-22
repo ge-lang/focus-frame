@@ -4,7 +4,7 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { SessionProviderWrapper } from '@/components/session-provider-wrapper';
 import QueryProvider from '@/providers/query-provider';
-import { DashboardProvider } from '@/contexts/dashboard-context'; // Добавьте импорт
+import { DashboardProvider } from '@/contexts/dashboard-context';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -12,6 +12,19 @@ export const metadata: Metadata = {
   title: 'FocusFrame',
   description: 'Your Personal Productivity Dashboard',
 };
+
+// Создаем клиентский компонент-обертку
+function ProvidersWrapper({ children }: { children: React.ReactNode }) {
+  return (
+    <SessionProviderWrapper>
+      <QueryProvider>
+        <DashboardProvider>
+          {children}
+        </DashboardProvider>
+      </QueryProvider>
+    </SessionProviderWrapper>
+  );
+}
 
 export default function RootLayout({
   children,
@@ -21,13 +34,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <SessionProviderWrapper>
-          <QueryProvider>
-            <DashboardProvider> {/* Оберните в DashboardProvider */}
-              {children}
-            </DashboardProvider>
-          </QueryProvider>
-        </SessionProviderWrapper>
+        <ProvidersWrapper>
+          {children}
+        </ProvidersWrapper>
       </body>
     </html>
   );

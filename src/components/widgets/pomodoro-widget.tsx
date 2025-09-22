@@ -6,10 +6,18 @@ import { AnimatedButton } from '@/components/animated-button';
 import { Play, Pause, RotateCcw, AlarmClock } from 'lucide-react';
 import { motion } from 'framer-motion';
 
+
+
+// src/components/widgets/pomodoro-widget.tsx
+interface PomodoroWidgetProps {
+  widgetId: string;
+  title?: string;
+}
+
 const WORK_TIME = 25 * 60; // 25 minutes in seconds
 const BREAK_TIME = 5 * 60; // 5 minutes in seconds
 
-export default function PomodoroWidget() {
+export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)  {
   const [timeLeft, setTimeLeft] = useState(WORK_TIME);
   const [isActive, setIsActive] = useState(false);
   const [isWorkTime, setIsWorkTime] = useState(true);
