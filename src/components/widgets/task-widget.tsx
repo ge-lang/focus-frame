@@ -28,6 +28,8 @@ interface EditState {
   dueDate: string;
 }
 
+type DueDateFilter = 'all' | 'overdue' | 'today' | 'upcoming' | 'none';
+
 // Helper functions
 const getStatusLabel = (status: TaskStatus) => {
   switch (status) {
@@ -51,6 +53,21 @@ const formatFocusTime = (seconds?: number) => {
   if (!seconds) return null;
   const minutes = Math.round(seconds / 60);
   return minutes < 60 ? `${minutes}m focused` : `${Math.floor(minutes / 60)}h ${minutes % 60}m focused`;
+};
+
+const getDueDateMeta = (dueDate: string | null) => {
+  if (!dueDate) return null;
+
+  const date = new Date(`${dueDate.slice(0, 10)}T00:00:00`);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
+  if (date < today) return { label: 'Overdue', className: 'text-red-600 font-medium', type: 'overdue' as const };
+  if (date.getTime() === today.getTime()) return { label: 'Due today', className: 'text-orange-600 font-medium', type: 'today' as const };
+  if (date.getTime() === tomorrow.getTime()) return { label: 'Due tomorrow', className: 'text-yellow-700 font-medium', type: 'upcoming' as const };
+  return { label: date.toLocaleDateString(), className: 'text-gray-500', type: 'upcoming' as const };
 };
 
 // Task card component
@@ -161,10 +178,10 @@ function TaskCard({
               {task.priority}
             </span>
             
-            {task.dueDate && (
-              <span className="flex items-center text-gray-500 text-xs">
+            {getDueDateMeta(task.dueDate) && (
+              <span className={`flex items-center text-xs ${getDueDateMeta(task.dueDate)?.className}`}>
                 <Calendar size={10} className="mr-1" />
-                {new Date(task.dueDate).toLocaleDateString()}
+                {getDueDateMeta(task.dueDate)?.label}
               </span>
             )}
           </div>
@@ -268,11 +285,33 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
   });
   const [isAdding, setIsAdding] = useState(false);
   const [draggedTask, setDraggedTask] = useState<{ task: Task; status: TaskStatus } | null>(null);
+  const [search, setSearch] = useState('');
+  const [priorityFilter, setPriorityFilter] = useState<'all' | Task['priority']>('all');
+  const [dueDateFilter, setDueDateFilter] = useState<DueDateFilter>('all');
   const tasksByStatus = useMemo<Record<TaskStatus, Task[]>>(() => ({
     todo: tasks.filter((task) => task.status === 'todo'),
     in_progress: tasks.filter((task) => task.status === 'in_progress'),
     done: tasks.filter((task) => task.status === 'done'),
   }), [tasks]);
+  const visibleTasksByStatus = useMemo<Record<TaskStatus, Task[]>>(() => {
+    const matchesFilters = (task: Task) => {
+      const matchesSearch = task.title.toLowerCase().includes(search.trim().toLowerCase()) || task.description?.toLowerCase().includes(search.trim().toLowerCase());
+      const matchesPriority = priorityFilter === 'all' || task.priority === priorityFilter;
+      const dueDate = getDueDateMeta(task.dueDate);
+      const matchesDueDate = dueDateFilter === 'all' ||
+        (dueDateFilter === 'none' && !dueDate) ||
+        (dueDateFilter === 'overdue' && dueDate?.type === 'overdue') ||
+        (dueDateFilter === 'today' && dueDate?.type === 'today') ||
+        (dueDateFilter === 'upcoming' && dueDate?.type === 'upcoming');
+      return matchesSearch && matchesPriority && matchesDueDate;
+    };
+
+    return {
+      todo: tasksByStatus.todo.filter(matchesFilters),
+      in_progress: tasksByStatus.in_progress.filter(matchesFilters),
+      done: tasksByStatus.done.filter(matchesFilters),
+    };
+  }, [dueDateFilter, priorityFilter, search, tasksByStatus]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -433,13 +472,36 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
           )}
         </AnimatePresence>
 
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-4">
+          <input
+            type="search"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Search tasks..."
+            className="sm:col-span-1 w-full p-2 border border-gray-300 rounded text-sm"
+          />
+          <select value={priorityFilter} onChange={(event) => setPriorityFilter(event.target.value as 'all' | Task['priority'])} className="p-2 border border-gray-300 rounded text-sm">
+            <option value="all">All priorities</option>
+            <option value="high">High priority</option>
+            <option value="medium">Medium priority</option>
+            <option value="low">Low priority</option>
+          </select>
+          <select value={dueDateFilter} onChange={(event) => setDueDateFilter(event.target.value as DueDateFilter)} className="p-2 border border-gray-300 rounded text-sm">
+            <option value="all">All deadlines</option>
+            <option value="overdue">Overdue</option>
+            <option value="today">Due today</option>
+            <option value="upcoming">Upcoming</option>
+            <option value="none">No deadline</option>
+          </select>
+        </div>
+
         {/* Responsive column grid */}
         <div className="flex-1">
           {isLoading && <p className="text-sm text-gray-500">Loading tasks…</p>}
 
           {/* Desktop: 3 columns */}
           <div className="hidden lg:grid grid-cols-3 gap-4 h-full">
-            {(Object.entries(tasksByStatus) as [TaskStatus, Task[]][]).map(([status, statusTasks]) => (
+            {(Object.entries(visibleTasksByStatus) as [TaskStatus, Task[]][]).map(([status, statusTasks]) => (
               <TaskColumn
                 key={status}
                 status={status as TaskStatus}
@@ -458,7 +520,7 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
 
           {/* Tablet: 2 columns */}
           <div className="hidden md:grid lg:hidden grid-cols-2 gap-4 h-full">
-            {(Object.entries(tasksByStatus).slice(0, 2) as [TaskStatus, Task[]][]).map(([status, statusTasks]) => (
+            {(Object.entries(visibleTasksByStatus).slice(0, 2) as [TaskStatus, Task[]][]).map(([status, statusTasks]) => (
               <TaskColumn
                 key={status}
                 status={status as TaskStatus}
@@ -478,7 +540,7 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
           {/* Mobile: horizontal scrolling */}
           <div className="md:hidden flex overflow-x-auto pb-4 space-x-4 h-full">
             <div className="flex space-x-4 min-w-max">
-              {(Object.entries(tasksByStatus) as [TaskStatus, Task[]][]).map(([status, statusTasks]) => (
+              {(Object.entries(visibleTasksByStatus) as [TaskStatus, Task[]][]).map(([status, statusTasks]) => (
                 <div key={status} className="w-64 flex-shrink-0">
                   <TaskColumn
                     status={status as TaskStatus}
