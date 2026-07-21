@@ -42,7 +42,7 @@ export default function AnalyticsWidget({ title }: AnalyticsWidgetProps) {
   const [showDetails, setShowDetails] = useState(false);
   const { data, isLoading, refetch, isFetching } = useAnalytics(timeRange);
 
-  const focusGoal = (timeRange === 'today' ? 1 : timeRange === 'week' ? 7 : timeRange === 'month' ? 30 : 365) * 100;
+  const focusGoal = (timeRange === 'today' ? 1 : timeRange === 'week' ? 7 : timeRange === 'month' ? 30 : 365) * (data?.dailyFocusGoal ?? 100);
 
   return (
     <AnimatedWidget className="bg-gradient-to-br from-purple-50 via-blue-50 to-pink-50">

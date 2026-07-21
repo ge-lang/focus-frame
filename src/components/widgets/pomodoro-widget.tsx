@@ -6,6 +6,7 @@ import { Play, Pause, Square, RotateCcw, Settings, Bell, BellOff } from 'lucide-
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCreateFocusSession } from '@/hooks/use-analytics';
 import { useTasks } from '@/hooks/use-tasks';
+import { useUpdateUserSettings, useUserSettings } from '@/hooks/use-settings';
 
 interface PomodoroWidgetProps {
   widgetId: string;
@@ -45,6 +46,8 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
   const { mutate: createFocusSession } = useCreateFocusSession();
   const { data: tasks = [] } = useTasks();
   const [selectedTaskId, setSelectedTaskId] = useState('');
+  const { data: userSettings } = useUserSettings();
+  const { mutate: updateUserSettings } = useUpdateUserSettings();
 
   // Initialize the audio context on first interaction
   useEffect(() => {
@@ -125,6 +128,12 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
   const handleTimerComplete = () => {
     // Play the notification sound
     playNotificationSound();
+
+    if (userSettings?.notificationsEnabled && typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+      new Notification(mode === 'work' ? 'Focus session completed' : 'Break completed', {
+        body: mode === 'work' ? 'Great work. Time for a break.' : 'Ready for another focus session?',
+      });
+    }
 
     createFocusSession({
       duration: (mode === 'work' ? settings.workTime : mode === 'break' ? settings.breakTime : settings.longBreakTime) * 60,
@@ -211,6 +220,17 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
       case 'longBreak': return 'Long Break';
       default: return '';
     }
+  };
+
+  const toggleNotifications = async (enabled: boolean) => {
+    if (!enabled) {
+      updateUserSettings({ notificationsEnabled: false });
+      return;
+    }
+
+    if (typeof Notification === 'undefined') return;
+    const permission = await Notification.requestPermission();
+    updateUserSettings({ notificationsEnabled: permission === 'granted' });
   };
 
   return (
@@ -315,6 +335,39 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
                   />
                   Auto-start work sessions
                 </label>
+                <label className="flex items-center text-xs">
+                  <input
+                    type="checkbox"
+                    checked={userSettings?.notificationsEnabled ?? false}
+                    onChange={(e) => void toggleNotifications(e.target.checked)}
+                    className="mr-2"
+                  />
+                  Browser notifications when a session ends
+                </label>
+              </div>
+              <div className="grid grid-cols-2 gap-3 mt-3 pt-3 border-t border-gray-200">
+                <div>
+                  <label className="block text-xs text-gray-600 mb-1">Daily focus goal (min)</label>
+                  <input
+                    type="number"
+                    min="15"
+                    max="960"
+                    value={userSettings?.dailyFocusGoal ?? 100}
+                    onChange={(e) => updateUserSettings({ dailyFocusGoal: Math.max(15, Math.min(960, parseInt(e.target.value) || 15)) })}
+                    className="w-full p-1 border border-gray-300 rounded text-center"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-600 mb-1">Daily Pomodoro goal</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="20"
+                    value={userSettings?.dailyPomodoroGoal ?? 4}
+                    onChange={(e) => updateUserSettings({ dailyPomodoroGoal: Math.max(1, Math.min(20, parseInt(e.target.value) || 1)) })}
+                    className="w-full p-1 border border-gray-300 rounded text-center"
+                  />
+                </div>
               </div>
               <div className="flex space-x-2 mt-3">
                 <button

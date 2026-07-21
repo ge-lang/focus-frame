@@ -11,6 +11,7 @@ export interface AnalyticsData {
   streak: number;
   peakHours: string[];
   dailyFocus: Array<{ label: string; minutes: number }>;
+  dailyFocusGoal: number;
 }
 
 async function request(url: string, options?: RequestInit) {

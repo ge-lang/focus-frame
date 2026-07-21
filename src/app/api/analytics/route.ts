@@ -27,16 +27,17 @@ export async function GET(request: NextRequest) {
   const previousStart = new Date(start);
   previousStart.setDate(previousStart.getDate() - days);
 
-  const [sessions, previousSessions, completedTasks, completedGoals] = await Promise.all([
+  const [sessions, previousSessions, completedTasks, completedGoals, settings] = await Promise.all([
     prisma.focusSession.findMany({ where: { userId, type: 'work', completedAt: { gte: start } }, select: { duration: true, completedAt: true } }),
     prisma.focusSession.findMany({ where: { userId, type: 'work', completedAt: { gte: previousStart, lt: start } }, select: { duration: true } }),
     prisma.task.count({ where: { userId, isCompleted: true, updatedAt: { gte: start } } }),
     prisma.goal.count({ where: { userId, completed: true, updatedAt: { gte: start } } }),
+    prisma.userSettings.findUnique({ where: { userId } }),
   ]);
 
   const focusSeconds = sessions.reduce((total, session) => total + session.duration, 0);
   const previousFocusSeconds = previousSessions.reduce((total, session) => total + session.duration, 0);
-  const focusGoalSeconds = days * 4 * 25 * 60;
+  const focusGoalSeconds = days * (settings?.dailyFocusGoal ?? 100) * 60;
   const taskGoal = days * 3;
   const productivity = Math.round(Math.min(100, ((focusSeconds / focusGoalSeconds) * 70 + (completedTasks / taskGoal) * 30)));
   const trend = previousFocusSeconds ? Math.round(((focusSeconds - previousFocusSeconds) / previousFocusSeconds) * 100) : focusSeconds ? 100 : 0;
@@ -73,5 +74,6 @@ export async function GET(request: NextRequest) {
     streak,
     peakHours,
     dailyFocus,
+    dailyFocusGoal: settings?.dailyFocusGoal ?? 100,
   });
 }
