@@ -59,7 +59,7 @@ export function WidgetPicker() {
 
   return (
     <div className="relative" ref={pickerRef}>
-      {/* Кнопка добавления - используем motion.button вместо AnimatedButton для анимаций */}
+      {/* Add button — use motion.button instead of AnimatedButton for animations */}
       <motion.button
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center space-x-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg transition-colors"
@@ -70,11 +70,11 @@ export function WidgetPicker() {
         <span>Add Widget</span>
       </motion.button>
 
-      {/* Выпадающее меню */}
+      {/* Dropdown menu */}
       <AnimatePresence>
         {isOpen && (
           <>
-            {/* Затемнение фона */}
+            {/* Backdrop overlay */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -83,7 +83,7 @@ export function WidgetPicker() {
               onClick={() => setIsOpen(false)}
             />
             
-            {/* Меню выбора */}
+            {/* Selection menu */}
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: -10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -91,7 +91,7 @@ export function WidgetPicker() {
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
               className="absolute top-full right-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-gray-200 z-50 overflow-hidden"
             >
-              {/* Заголовок */}
+              {/* Header */}
               <div className="flex justify-between items-center p-4 border-b border-gray-100">
                 <h3 className="font-semibold text-gray-900">Add Widget</h3>
                 <button
@@ -102,7 +102,7 @@ export function WidgetPicker() {
                 </button>
               </div>
 
-              {/* Список виджетов */}
+              {/* Widget list */}
               <div className="max-h-96 overflow-y-auto">
                 <div className="p-2">
                   {WIDGET_TYPES.map((widget) => (
@@ -133,7 +133,7 @@ export function WidgetPicker() {
                 </div>
               </div>
 
-              {/* Футер с информацией */}
+              {/* Informational footer */}
               <div className="p-3 border-t border-gray-100 bg-gray-50">
                 <p className="text-xs text-gray-500 text-center">
                   {state.widgets.length} widgets on dashboard

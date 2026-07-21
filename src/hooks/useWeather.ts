@@ -42,7 +42,7 @@ interface UseWeatherReturn {
   isDemo: boolean;
 }
 
-// Кэш для хранения данных погоды
+// Cache for weather data
 const weatherCache = new Map();
 
 export function useWeather(initialCity: string = 'Amsterdam'): UseWeatherReturn {
@@ -73,10 +73,10 @@ export function useWeather(initialCity: string = 'Amsterdam'): UseWeatherReturn 
   const [isLoading, setIsLoading] = useState(true);
   const [isDemo, setIsDemo] = useState(true);
 
-  // Генерация демо-данных с реалистичными значениями
+  // Generate demo data with realistic values
   const generateDemoData = useCallback((currentCity: string) => {
     const now = Date.now();
-    const baseTemp = 15 + Math.sin(now / 10000000) * 10; // Колебания температуры
+    const baseTemp = 15 + Math.sin(now / 10000000) * 10; // Temperature fluctuations
     const hour = new Date().getHours();
     const isDay = hour > 6 && hour < 20;
     
@@ -92,8 +92,8 @@ export function useWeather(initialCity: string = 'Amsterdam'): UseWeatherReturn 
       windDirection: Math.floor(Math.random() * 360),
       pressure: 1000 + Math.floor(Math.random() * 30),
       visibility: 10000,
-      sunrise: Math.floor((now - 3600000) / 1000), // 1 час назад
-      sunset: Math.floor((now + 3600000) / 1000),  // через 1 час
+      sunrise: Math.floor((now - 3600000) / 1000), // 1 hour ago
+      sunset: Math.floor((now + 3600000) / 1000),  // In 1 hour
       cloudiness: Math.floor(Math.random() * 100),
       uvIndex: Math.floor(Math.random() * 11),
       dewPoint: Math.round(baseTemp - 5 - Math.random() * 5),
@@ -103,14 +103,14 @@ export function useWeather(initialCity: string = 'Amsterdam'): UseWeatherReturn 
     };
   }, []);
 
-  // Генерация демо-прогноза
+  // Generate a demo forecast
   const generateDemoForecast = useCallback(() => {
     const forecastItems: ForecastItem[] = [];
     const baseTemp = 15;
     
     for (let i = 0; i < 5; i++) {
       forecastItems.push({
-        dt: Date.now() / 1000 + i * 3 * 3600, // Каждые 3 часа
+        dt: Date.now() / 1000 + i * 3 * 3600, // Every 3 hours
         temp: Math.round(baseTemp + Math.sin(i) * 5),
         icon: i % 2 === 0 ? '01d' : '02d',
         description: i % 3 === 0 ? 'clear sky' : 'few clouds',
@@ -124,7 +124,7 @@ export function useWeather(initialCity: string = 'Amsterdam'): UseWeatherReturn 
     const cacheKey = `weather_${cityName.toLowerCase()}`;
     const now = Date.now();
     
-    // Проверяем кэш (актуальность 10 минут)
+    // Check the cache (valid for 10 minutes)
     if (!forceRefresh && weatherCache.has(cacheKey)) {
       const cached = weatherCache.get(cacheKey);
       if (now - cached.timestamp < 10 * 60 * 1000) {
@@ -142,8 +142,8 @@ export function useWeather(initialCity: string = 'Amsterdam'): UseWeatherReturn 
 
       const API_KEY = process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY;
 
-      // Проверка API ключа
-      if (!API_KEY || API_KEY === 'ваш_ключ_здесь') {
+      // Check the API key
+      if (!API_KEY || API_KEY === 'your_api_key_here') {
         const demoWeather = generateDemoData(cityName);
         const demoForecast = generateDemoForecast();
         
@@ -164,7 +164,7 @@ export function useWeather(initialCity: string = 'Amsterdam'): UseWeatherReturn 
 
       setIsDemo(false);
 
-      // Параллельные запросы для текущей погоды и прогноза
+      // Fetch current weather and the forecast in parallel
       const [currentResponse, forecastResponse] = await Promise.all([
         axios.get(`https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=${API_KEY}&units=metric&lang=en`),
         axios.get(`https://api.openweathermap.org/data/2.5/forecast?q=${cityName}&appid=${API_KEY}&units=metric&cnt=5`)
@@ -173,7 +173,7 @@ export function useWeather(initialCity: string = 'Amsterdam'): UseWeatherReturn 
       const currentData = currentResponse.data;
       const forecastData = forecastResponse.data;
 
-      // Расчет UV индекса и точки росы (упрощенно)
+      // Calculate the UV index and dew point (simplified)
       const uvIndex = Math.min(Math.floor(currentData.main.temp / 5), 11);
       const dewPoint = currentData.main.temp - ((100 - currentData.main.humidity) / 5);
 
@@ -206,7 +206,7 @@ export function useWeather(initialCity: string = 'Amsterdam'): UseWeatherReturn 
         description: item.weather[0].description,
       }));
 
-      // Сохраняем в кэш
+      // Save to cache
       weatherCache.set(cacheKey, {
         weather: newWeather,
         forecast: newForecast,
@@ -220,7 +220,7 @@ export function useWeather(initialCity: string = 'Amsterdam'): UseWeatherReturn 
     } catch (error: any) {
       console.error('Weather fetch error:', error);
       
-      // При ошибке используем демо-данные
+      // Use demo data if an error occurs
       const demoWeather = generateDemoData(cityName);
       const demoForecast = generateDemoForecast();
       
@@ -239,14 +239,14 @@ export function useWeather(initialCity: string = 'Amsterdam'): UseWeatherReturn 
     fetchWeatherData(city, true);
   }, [city, fetchWeatherData]);
 
-  // Основной эффект для загрузки данных
+  // Main effect for loading data
   useEffect(() => {
     if (city) {
       fetchWeatherData(city);
     }
   }, [city, fetchWeatherData]);
 
-  // Авто-обновление каждые 15 минут
+  // Automatically refresh every 15 minutes
   useEffect(() => {
     const interval = setInterval(() => {
       fetchWeatherData(city);
@@ -270,7 +270,7 @@ export function useWeather(initialCity: string = 'Amsterdam'): UseWeatherReturn 
   };
 }
 
-// Вспомогательные функции
+// Helper functions
 export const getWindDirection = (degrees: number): string => {
   const directions = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
   return directions[Math.round(degrees / 22.5) % 16];
@@ -295,7 +295,7 @@ export const formatTime = (timestamp: number): string => {
 export const getMoonPhase = (): string => {
   const phases = ['🌑 New', '🌒 Waxing Crescent', '🌓 First Quarter', '🌔 Waxing Gibbous', 
                  '🌕 Full', '🌖 Waning Gibbous', '🌗 Last Quarter', '🌘 Waning Crescent'];
-  const cycle = 29.53; // Лунный цикл в днях
+  const cycle = 29.53; // Lunar cycle in days
   const knownNewMoon = new Date('2024-01-11').getTime();
   const daysSinceNewMoon = (Date.now() - knownNewMoon) / (1000 * 60 * 60 * 24);
   const phaseIndex = Math.floor((daysSinceNewMoon % cycle) / (cycle / 8));

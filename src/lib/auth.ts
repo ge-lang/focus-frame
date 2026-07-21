@@ -2,7 +2,7 @@
 import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 
-// Расширяем типы NextAuth
+// Extend the NextAuth types
 declare module "next-auth" {
   interface Session {
     user: {

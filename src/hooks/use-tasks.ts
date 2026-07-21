@@ -41,7 +41,7 @@ export function useUpdateTask() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, title, isCompleted }: { id: string; title?: string; isCompleted?: boolean }) =>
-      fetch(`/api/tasks/${id}`, {  // Теперь ID передается в URL, а не в params
+      fetch(`/api/tasks/${id}`, {  // The ID is now passed in the URL rather than params
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title, isCompleted }),
@@ -59,7 +59,7 @@ export function useDeleteTask() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) =>
-      fetch(`/api/tasks/${id}`, {  // ID в URL
+      fetch(`/api/tasks/${id}`, {  // ID in the URL
         method: 'DELETE',
       }).then((res) => {
         if (!res.ok) throw new Error('Failed to delete task');

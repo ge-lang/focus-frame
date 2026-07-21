@@ -3,23 +3,23 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
-    // Заглушка для новостей
+    // News placeholder
     const newsData = [
       {
-        title: 'Технологические новости',
-        description: 'Последние обновления в мире технологий',
+        title: 'Technology News',
+        description: 'The latest updates from the world of technology',
         url: '#'
       },
       {
-        title: 'Советы по продуктивности', 
-        description: 'Как улучшить ваш рабочий процесс',
+        title: 'Productivity Tips',
+        description: 'How to improve your workflow',
         url: '#'
       }
     ];
 
     return NextResponse.json(newsData);
   } catch {
-    // Убираем неиспользуемую переменную error
+    // Remove the unused error variable
     return NextResponse.json(
       { error: 'Failed to fetch news' },
       { status: 500 }

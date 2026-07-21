@@ -11,10 +11,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
-    // ... можно добавить другие провайдеры (Email, GitHub)
+    // ... additional providers (Email, GitHub) can be added here
   ],
   callbacks: {
-    // Важный костыль для совместимости с Prisma Adapter и Next.js 14
+    // Important workaround for compatibility with Prisma Adapter and Next.js 14
     async session({ session, user }) {
       if (session.user) {
         session.user.id = user.id;

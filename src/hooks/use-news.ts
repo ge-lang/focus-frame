@@ -19,7 +19,7 @@ interface NewsData {
   isDemo: boolean;
 }
 
-// Mock данные для демо-режима
+// Mock data for demo mode
 const mockNews: NewsArticle[] = [
   {
     title: 'New AI Breakthrough in Medical Research',
@@ -86,9 +86,9 @@ export function useNews(category: string = 'general') {
 
         const API_KEY = process.env.NEXT_PUBLIC_GNEWS_API_KEY;
 
-        // Если нет API ключа, используем демо-данные
+        // Use demo data if no API key is available
         if (!API_KEY || API_KEY === 'your_gnews_api_key_here') {
-          // Имитация загрузки
+          // Simulate loading
           await new Promise(resolve => setTimeout(resolve, 500));
           
           setNews({
@@ -100,7 +100,7 @@ export function useNews(category: string = 'general') {
           return;
         }
 
-        // Реальные данные от GNews API
+        // Live data from the GNews API
         const response = await fetch(
           `https://gnews.io/api/v4/top-headlines?category=${category}&lang=en&apikey=${API_KEY}&max=10`
         );
@@ -130,7 +130,7 @@ export function useNews(category: string = 'general') {
 
       } catch (error) {
         console.error('Error fetching news:', error);
-        // При ошибке используем демо-данные
+        // Use demo data if an error occurs
         setNews({
           articles: mockNews,
           loading: false,

@@ -11,7 +11,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
-      {/* Заголовок и управление */}
+      {/* Header and controls */}
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">My Dashboard</h1>
@@ -33,10 +33,10 @@ export default function Dashboard() {
         )}
       </div>
 
-      {/* Сетка виджетов */}
+      {/* Widget grid */}
       <DashboardGrid />
 
-      {/* Пустое состояние */}
+      {/* Empty state */}
       {state.widgets.length === 0 && !state.isEditing && (
         <div className="text-center py-12">
           <div className="text-6xl mb-4">📺</div>

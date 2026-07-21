@@ -5,15 +5,15 @@ const { writeFileSync } = require('fs');
 console.log('Starting Vercel build process...');
 
 try {
-  // 1. Генерируем Prisma Client
+  // 1. Generate the Prisma Client
   console.log('Step 1: Generating Prisma Client...');
   execSync('npx prisma generate', { stdio: 'inherit' });
   
-  // 2. Выполняем миграции
+  // 2. Run migrations
   console.log('Step 2: Running database migrations...');
   execSync('npx prisma migrate deploy', { stdio: 'inherit' });
   
-  // 3. Собираем Next.js приложение
+  // 3. Build the Next.js application
   console.log('Step 3: Building Next.js application...');
   execSync('npx next build', { stdio: 'inherit' });
   

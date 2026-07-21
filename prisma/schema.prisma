@@ -43,7 +43,7 @@ model User {
   image         String?
   accounts      Account[]
   sessions      Session[]
-  tasks         Task[] // Связь один-ко-многим с задачами
+  tasks         Task[] // One-to-many relationship with tasks
 }
 
 model VerificationToken {
@@ -61,8 +61,8 @@ model Task {
   isCompleted Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  userId      String? // Больше не опционально, но мы пока оставим для плавного перехода
+  userId      String? // No longer optional, but retained temporarily for a smooth migration
 
-  // Это связь с моделью User (для аутентификации)
+  // This is a relationship with the User model (for authentication)
   user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

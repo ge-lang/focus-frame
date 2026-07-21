@@ -23,7 +23,7 @@ interface AnalyticsWidgetProps {
 
 interface AnalyticsData {
   productivity: number;
-  focusTime: number; // в минутах
+  focusTime: number; // In minutes
   completedTasks: number;
   weeklyTrend: number;
   dailyGoal: number;
@@ -50,7 +50,7 @@ const timeRanges: TimeRange[] = [
   { label: 'Year', value: 'year' }
 ];
 
-// Генерация реалистичных демо-данных
+// Generate realistic demo data
 const generateDemoData = (range: TimeRange['value']): AnalyticsData => {
   const baseProductivity = 65 + Math.random() * 30;
   const baseFocusTime = range === 'today' ? 384 : range === 'week' ? 2688 : range === 'month' ? 11520 : 138240;
@@ -74,7 +74,7 @@ const generateDemoData = (range: TimeRange['value']): AnalyticsData => {
   };
 };
 
-// Форматирование времени
+// Time formatting
 const formatTime = (minutes: number): string => {
   if (minutes < 60) return `${minutes}m`;
   const hours = Math.floor(minutes / 60);
@@ -82,7 +82,7 @@ const formatTime = (minutes: number): string => {
   return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
 };
 
-// Цвета для индикаторов
+// Indicator colors
 const getTrendColor = (trend: number): string => {
   if (trend > 0) return 'text-green-600';
   if (trend < 0) return 'text-red-600';
@@ -104,7 +104,7 @@ export default function AnalyticsWidget({ widgetId, title }: AnalyticsWidgetProp
 
   useEffect(() => {
     setIsLoading(true);
-    // Имитация загрузки данных
+    // Simulate data loading
     const timer = setTimeout(() => {
       setData(generateDemoData(timeRange));
       setIsLoading(false);
@@ -126,13 +126,13 @@ export default function AnalyticsWidget({ widgetId, title }: AnalyticsWidgetProp
   };
 
   const productivityProgress = calculateProgress(data.productivity, data.dailyGoal);
-  const focusProgress = calculateProgress(data.focusTime, 8 * 60); // 8 часов цели
-  const tasksProgress = calculateProgress(data.completedTasks, 10); // 10 задач цели
+  const focusProgress = calculateProgress(data.focusTime, 8 * 60); // 8-hour target
+  const tasksProgress = calculateProgress(data.completedTasks, 10); // 10-task target
 
   return (
     <AnimatedWidget className="bg-gradient-to-br from-purple-50 via-blue-50 to-pink-50">
       <div className="h-full flex flex-col">
-        {/* Заголовок и управление */}
+        {/* Header and controls */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-6 gap-3">
           <div>
             <h3 className="font-semibold text-lg text-gray-800 flex items-center">
@@ -163,7 +163,7 @@ export default function AnalyticsWidget({ widgetId, title }: AnalyticsWidgetProp
           </div>
         </div>
 
-        {/* Переключение периода */}
+        {/* Period switcher */}
         <div className="flex gap-1 mb-6">
           {timeRanges.map((range) => (
             <button
@@ -180,9 +180,9 @@ export default function AnalyticsWidget({ widgetId, title }: AnalyticsWidgetProp
           ))}
         </div>
 
-        {/* Основные метрики */}
+        {/* Key metrics */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          {/* Продуктивность */}
+          {/* Productivity */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -204,7 +204,7 @@ export default function AnalyticsWidget({ widgetId, title }: AnalyticsWidgetProp
             </div>
           </motion.div>
 
-          {/* Фокус-тайм */}
+          {/* Focus time */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -225,7 +225,7 @@ export default function AnalyticsWidget({ widgetId, title }: AnalyticsWidgetProp
             </div>
           </motion.div>
 
-          {/* Завершенные задачи */}
+          {/* Completed tasks */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -246,7 +246,7 @@ export default function AnalyticsWidget({ widgetId, title }: AnalyticsWidgetProp
             </div>
           </motion.div>
 
-          {/* Отвлечения */}
+          {/* Distractions */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -268,7 +268,7 @@ export default function AnalyticsWidget({ widgetId, title }: AnalyticsWidgetProp
           </motion.div>
         </div>
 
-        {/* Детальная аналитика */}
+        {/* Detailed analytics */}
         <AnimatePresence>
           {showDetails && (
             <motion.div
@@ -277,7 +277,7 @@ export default function AnalyticsWidget({ widgetId, title }: AnalyticsWidgetProp
               exit={{ opacity: 0, height: 0 }}
               className="space-y-4 overflow-hidden"
             >
-              {/* Распределение задач */}
+              {/* Task distribution */}
               <div className="bg-white/80 rounded-xl p-4 shadow-sm border border-white/50">
                 <h4 className="font-medium text-gray-800 mb-3">Task Distribution</h4>
                 <div className="space-y-2">
@@ -302,7 +302,7 @@ export default function AnalyticsWidget({ widgetId, title }: AnalyticsWidgetProp
                 </div>
               </div>
 
-              {/* Пиковые часы */}
+              {/* Peak hours */}
               <div className="bg-white/80 rounded-xl p-4 shadow-sm border border-white/50">
                 <h4 className="font-medium text-gray-800 mb-3">Peak Productivity Hours</h4>
                 <div className="flex gap-2">
@@ -314,7 +314,7 @@ export default function AnalyticsWidget({ widgetId, title }: AnalyticsWidgetProp
                 </div>
               </div>
 
-              {/* Еженедельный прогресс */}
+              {/* Weekly progress */}
               <div className="bg-white/80 rounded-xl p-4 shadow-sm border border-white/50">
                 <h4 className="font-medium text-gray-800 mb-3">Weekly Progress</h4>
                 <div className="flex gap-1">
@@ -337,7 +337,7 @@ export default function AnalyticsWidget({ widgetId, title }: AnalyticsWidgetProp
           )}
         </AnimatePresence>
 
-        {/* Футер */}
+        {/* Footer */}
         <div className="mt-auto pt-4 border-t border-gray-200/50">
           <p className="text-xs text-gray-500 text-center">
             📊 Analytics updated just now • 

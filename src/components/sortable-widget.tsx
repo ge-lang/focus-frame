@@ -1,4 +1,4 @@
-// src/components/sortable-widget.tsx (улучшенная версия)
+// src/components/sortable-widget.tsx (improved version)
 'use client';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -47,7 +47,7 @@ export function SortableWidget({ id, type }: SortableWidgetProps) {
       className={`relative group ${isDragging ? 'opacity-50' : ''}`}
       whileHover={{ scale: 1.01 }}
     >
-      {/* Ручка для перетаскивания */}
+      {/* Drag handle */}
       <div
         {...attributes}
         {...listeners}
@@ -57,7 +57,7 @@ export function SortableWidget({ id, type }: SortableWidgetProps) {
         <GripVertical size={14} />
       </div>
 
-      {/* Виджет с контекстным меню */}
+      {/* Widget with a context menu */}
       <WidgetRenderer widget={widget} />
     </motion.div>
   );

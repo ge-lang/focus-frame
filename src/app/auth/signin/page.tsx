@@ -5,7 +5,7 @@ import { AnimatedButton } from "@/components/animated-button";
 import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 
-// Компонент для использования useSearchParams с Suspense
+// Component that uses useSearchParams with Suspense
 function SignInContent() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') || '/';
@@ -42,7 +42,7 @@ function SignInContent() {
   );
 }
 
-// Основной компонент страницы
+// Main page component
 export default function SignIn() {
   return (
     <Suspense fallback={

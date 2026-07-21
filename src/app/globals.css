@@ -3,7 +3,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Стили для маленьких кнопок */
+/* Styles for small buttons */
 .btn-small {
   padding: 0.25rem 0.5rem;
   border-radius: 0.25rem;
@@ -13,7 +13,7 @@
   transform: scale(1.1);
 }
 
-/* Добавьте в globals.css */
+/* Add to globals.css */
 .widget-hover {
   transition: all 0.3s ease;
 }

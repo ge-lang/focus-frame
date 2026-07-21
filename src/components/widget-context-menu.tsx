@@ -23,7 +23,7 @@ export function WidgetContextMenu({ widgetId, children }: WidgetContextMenuProps
 
   return (
     <div className="relative">
-      {/* Триггер контекстного меню */}
+      {/* Context menu trigger */}
       {state.isEditing && (
         <button
           onClick={() => setIsOpen(!isOpen)}
@@ -36,7 +36,7 @@ export function WidgetContextMenu({ widgetId, children }: WidgetContextMenuProps
 
       {children}
 
-      {/* Контекстное меню */}
+      {/* Context menu */}
       <AnimatePresence>
         {isOpen && (
           <>
@@ -46,7 +46,7 @@ export function WidgetContextMenu({ widgetId, children }: WidgetContextMenuProps
               onClick={() => setIsOpen(false)}
             />
             
-            {/* Меню */}
+            {/* Menu */}
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}

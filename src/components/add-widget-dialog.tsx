@@ -46,13 +46,13 @@ export default function AddWidgetDialog() {
   };
 
   const canAddWidget = (type: WidgetType) => {
-    // Можно добавить логику ограничений если нужно
+    // Add limit logic here if needed
     return true;
   };
 
   return (
     <>
-      {/* Кнопка добавления */}
+      {/* Add button */}
       <AnimatedButton
         onClick={() => setIsOpen(true)}
         className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700"
@@ -60,11 +60,11 @@ export default function AddWidgetDialog() {
         <Plus size={24} />
       </AnimatedButton>
 
-      {/* Модальное окно */}
+      {/* Modal */}
       <AnimatePresence>
         {isOpen && (
           <>
-            {/* Затемнение фона */}
+            {/* Backdrop overlay */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -73,7 +73,7 @@ export default function AddWidgetDialog() {
               className="fixed inset-0 bg-black bg-opacity-50 z-40"
             />
             
-            {/* Диалоговое окно */}
+            {/* Dialog */}
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}

@@ -32,8 +32,8 @@ const popularCities = [
   'Antwerpen', 'Yalta', 'Sevastopol', 'Madrid', 'Istanbul'
 ];
 
-// Расширяем хук useWeather для получения дополнительных данных
-// Нужно обновить хук useWeather чтобы он возвращал больше данных
+// Extend useWeather to retrieve additional data
+// Update useWeather so it returns more data
 interface ExtendedWeatherData {
   temp: number;
   feelsLike: number;
@@ -63,7 +63,7 @@ export default function WeatherWidget({
   const [showDetails, setShowDetails] = useState(false);
   const [unit, setUnit] = useState<'celsius' | 'fahrenheit'>('celsius');
 
-  // Конвертация температуры
+  // Temperature conversion
   const displayTemp = unit === 'celsius' ? weather.temp : Math.round((weather.temp * 9/5) + 32);
   const displayFeelsLike = unit === 'celsius' ? weather.feelsLike : Math.round((weather.feelsLike * 9/5) + 32);
 
@@ -84,7 +84,7 @@ export default function WeatherWidget({
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    // Здесь можно добавить принудительное обновление данных
+    // A forced data refresh can be added here
     setTimeout(() => setIsRefreshing(false), 1000);
   };
 
@@ -98,7 +98,7 @@ export default function WeatherWidget({
   };
 
   const getUVIndex = (temp: number, time: number) => {
-    // Простая имитация UV индекса на основе температуры и времени
+    // Simple UV index simulation based on temperature and time
     const baseUV = Math.min(Math.max(Math.floor(temp / 10), 1), 11);
     return baseUV;
   };
@@ -127,7 +127,7 @@ export default function WeatherWidget({
   return (
     <AnimatedWidget className={`bg-gradient-to-br ${gradient} h-full`}>
       <div className="h-full flex flex-col">
-        {/* Заголовок и управление */}
+        {/* Header and controls */}
         <div className="flex justify-between items-center mb-4">
           <div className="flex items-center">
             <MapPin size={18} className="text-gray-600 mr-2" />
@@ -155,7 +155,7 @@ export default function WeatherWidget({
           </div>
         </div>
 
-        {/* Режим редактирования города */}
+        {/* City editing mode */}
         <AnimatePresence>
           {isEditing && (
             <motion.div
@@ -210,10 +210,10 @@ export default function WeatherWidget({
           )}
         </AnimatePresence>
 
-        {/* Основная погодная информация */}
+        {/* Main weather information */}
         {!isEditing && (
           <div className="flex-1">
-            {/* Город и переключение единиц */}
+            {/* City and unit switcher */}
             <div className="flex justify-between items-center mb-4">
               <div 
                 onClick={() => setIsEditing(true)}
@@ -233,7 +233,7 @@ export default function WeatherWidget({
               </button>
             </div>
 
-            {/* Основные показатели */}
+            {/* Primary metrics */}
             <div className="text-center mb-6">
               <WeatherIcon icon={weather.icon} className="text-6xl mb-2 mx-auto" />
               
@@ -250,7 +250,7 @@ export default function WeatherWidget({
               </div>
             </div>
 
-            {/* Быстрые метрики */}
+            {/* Quick metrics */}
             <div className="grid grid-cols-2 gap-3 mb-4">
               <div className="bg-white/30 rounded-lg p-3 text-center">
                 <Droplets size={16} className="mx-auto mb-1 text-blue-500" />
@@ -265,7 +265,7 @@ export default function WeatherWidget({
               </div>
             </div>
 
-            {/* Кнопка деталей */}
+            {/* Details button */}
             <button
               onClick={() => setShowDetails(!showDetails)}
               className="w-full py-2 bg-white/50 rounded-lg hover:bg-white transition-colors text-sm font-medium mb-4"
@@ -273,7 +273,7 @@ export default function WeatherWidget({
               {showDetails ? 'Hide Details' : 'Show Details'}
             </button>
 
-            {/* Детальная информация */}
+            {/* Detailed information */}
             <AnimatePresence>
               {showDetails && (
                 <motion.div
@@ -329,7 +329,7 @@ export default function WeatherWidget({
           </div>
         )}
 
-        {/* Статус ошибки */}
+        {/* Error status */}
         {weather.error && (
           <div className="mt-2 p-2 bg-red-100 text-red-700 rounded text-xs text-center">
             ⚠️ {weather.error}
@@ -340,13 +340,13 @@ export default function WeatherWidget({
   );
 }
 
-// Функция для получения градиента по температуре
+// Get a gradient based on temperature
 const getTemperatureGradient = (temp: number) => {
-  if (temp < -10) return 'from-blue-200 to-indigo-300';      // Очень холодно
-  if (temp < 0) return 'from-blue-100 to-blue-300';         // Холодно
-  if (temp < 10) return 'from-blue-50 to-cyan-100';         // Прохладно
-  if (temp < 20) return 'from-green-50 to-emerald-100';     // Умеренно
-  if (temp < 30) return 'from-yellow-50 to-orange-100';     // Тепло
-  if (temp < 35) return 'from-orange-100 to-red-200';       // Жарко
-  return 'from-red-200 to-pink-300';                        // Очень жарко
+  if (temp < -10) return 'from-blue-200 to-indigo-300';      // Very cold
+  if (temp < 0) return 'from-blue-100 to-blue-300';         // Cold
+  if (temp < 10) return 'from-blue-50 to-cyan-100';         // Cool
+  if (temp < 20) return 'from-green-50 to-emerald-100';     // Mild
+  if (temp < 30) return 'from-yellow-50 to-orange-100';     // Warm
+  if (temp < 35) return 'from-orange-100 to-red-200';       // Hot
+  return 'from-red-200 to-pink-300';                        // Very hot
 };

@@ -60,7 +60,7 @@ export default function NewsWidget({ widgetId, title }: NewsWidgetProps) {
   return (
     <AnimatedWidget className="bg-gradient-to-br from-blue-50 to-cyan-100">
       <div className="h-full flex flex-col">
-        {/* Заголовок и статус */}
+        {/* Header and status */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-4 gap-2">
           <div className="flex items-center gap-2">
             <Newspaper size={20} className="text-blue-600" />
@@ -86,7 +86,7 @@ export default function NewsWidget({ widgetId, title }: NewsWidgetProps) {
             </div>
           </div>
           
-          {/* Статус API */}
+          {/* API status */}
           <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs ${
             isDemo 
               ? 'bg-orange-100 text-orange-800' 
@@ -96,7 +96,7 @@ export default function NewsWidget({ widgetId, title }: NewsWidgetProps) {
           </div>
         </div>
 
-        {/* Категории */}
+        {/* Categories */}
         <div className="flex flex-wrap gap-1 mb-4">
           {categories.map(category => (
             <button
@@ -115,7 +115,7 @@ export default function NewsWidget({ widgetId, title }: NewsWidgetProps) {
           ))}
         </div>
 
-        {/* Состояние загрузки */}
+        {/* Loading state */}
         {loading && (
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center">
@@ -125,7 +125,7 @@ export default function NewsWidget({ widgetId, title }: NewsWidgetProps) {
           </div>
         )}
 
-        {/* Ошибка */}
+        {/* Error */}
         {error && !loading && (
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center text-red-600">
@@ -134,7 +134,7 @@ export default function NewsWidget({ widgetId, title }: NewsWidgetProps) {
           </div>
         )}
 
-        {/* Список новостей */}
+        {/* News list */}
         {!loading && !error && (
           <div className="flex-1 overflow-y-auto space-y-3 pr-1">
             {articles.map((article, index) => (
@@ -184,7 +184,7 @@ export default function NewsWidget({ widgetId, title }: NewsWidgetProps) {
           </div>
         )}
 
-        {/* Футер с инструкцией по API */}
+        {/* Footer with API instructions */}
         <div className="mt-4 pt-3 border-t border-gray-200/50">
           <div className="text-center">
             {isDemo ? (

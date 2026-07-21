@@ -2,7 +2,7 @@
 import { Widget } from '@/types/dashboard';
 import TaskWidget from './widgets/task-widget';
 import WeatherWidget from './widgets/weather-widget';
-import NewsWidget from './widgets/news-widget'; // ← этот импорт
+import NewsWidget from './widgets/news-widget'; // ← this import
 import PomodoroWidget from './widgets/pomodoro-widget';
 import CalendarWidget from './widgets/calendar-widget';
 import StocksWidget from './widgets/stocks-widget';
@@ -32,7 +32,7 @@ export function WidgetRenderer({ widget }: WidgetRendererProps) {
       case 'weather':
         return <WeatherWidget widgetId={widget.id} title={widget.title} />;
       case 'news':
-        return <NewsWidget widgetId={widget.id} title={widget.title} />; // ← теперь будет работать
+        return <NewsWidget widgetId={widget.id} title={widget.title} />; // ← now it will work
       case 'pomodoro':
         return <PomodoroWidget widgetId={widget.id} title={widget.title} />;
       case 'calendar':

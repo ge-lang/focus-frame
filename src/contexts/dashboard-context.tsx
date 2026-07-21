@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
 import { WidgetType } from '@/types/dashboard';
 
-// Типы
+// Types
 export interface Widget {
   id: string;
   type: WidgetType;
@@ -32,7 +32,7 @@ export interface DashboardState {
   isEditing: boolean;
 }
 
-// Типы действий
+// Action types
 type DashboardAction =
   | { type: 'ADD_WIDGET'; payload: Widget }
   | { type: 'REMOVE_WIDGET'; payload: string }
@@ -40,11 +40,11 @@ type DashboardAction =
   | { type: 'LOAD_STATE'; payload: DashboardState }
   | { type: 'TOGGLE_EDIT' };
 
-// Начальное состояние
+// Initial state
 // src/contexts/dashboard-context.tsx
 const initialState: DashboardState = {
   widgets: [
-    { id: 'todo-1', type: 'todo', colSpan: 2, rowSpan: 2 }, // ← измените colSpan на 2
+    { id: 'todo-1', type: 'todo', colSpan: 2, rowSpan: 2 }, // ← set colSpan to 2
     { id: 'weather-1', type: 'weather', colSpan: 1, rowSpan: 1 },
     { id: 'news-1', type: 'news', colSpan: 2, rowSpan: 1 },
     { id: 'pomodoro-1', type: 'pomodoro', colSpan: 1, rowSpan: 1 },
@@ -70,7 +70,7 @@ const initialState: DashboardState = {
   isEditing: false,
 };
 
-// Редюсер
+// Reducer
 function dashboardReducer(state: DashboardState, action: DashboardAction): DashboardState {
   switch (action.type) {
     case 'ADD_WIDGET':
@@ -106,7 +106,7 @@ function dashboardReducer(state: DashboardState, action: DashboardAction): Dashb
   }
 }
 
-// Тип контекста
+// Context type
 interface DashboardContextType {
   state: DashboardState;
   dispatch: React.Dispatch<DashboardAction>;
@@ -116,64 +116,64 @@ interface DashboardContextType {
   toggleEdit: () => void;
 }
 
-// Создаем контекст
+// Create the context
 const DashboardContext = createContext<DashboardContextType | null>(null);
 
-// Провайдер
+// Provider
 export function DashboardProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(dashboardReducer, initialState);
 
   
  
- // Исправленная функция addWidget для dashboard-context.tsx
+ // Updated addWidget function for dashboard-context.tsx
 
-// В dashboard-context.tsx - функция addWidget
+// addWidget function in dashboard-context.tsx
 const addWidget = (type: WidgetType, config?: { title?: string; colSpan?: number; rowSpan?: number }) => {
-  // Определяем базовые настройки для каждого типа виджета
+  // Define default settings for each widget type
   const defaultConfigs: Record<WidgetType, { colSpan: number; rowSpan: number }> = {
-    todo: { colSpan: 2, rowSpan: 2 },        // Широкий виджет (2 колонки)
-    weather: { colSpan: 1, rowSpan: 1 },     // Узкий виджет (1 колонка)
-    news: { colSpan: 2, rowSpan: 1 },        // Широкий виджет (2 колонки)
-    pomodoro: { colSpan: 1, rowSpan: 1 },    // Узкий виджет
-    calendar: { colSpan: 1, rowSpan: 2 },    // Узкий но высокий
-    stocks: { colSpan: 1, rowSpan: 1 },      // Узкий виджет
-    notes: { colSpan: 1, rowSpan: 1 },       // Узкий виджет
-    analytics: { colSpan: 2, rowSpan: 2 },   // Большой виджет (2x2)
-    bookmarks: { colSpan: 1, rowSpan: 1 },   // Узкий виджет
-    goals: { colSpan: 1, rowSpan: 1 },       // Узкий виджет
+    todo: { colSpan: 2, rowSpan: 2 },        // Wide widget (2 columns)
+    weather: { colSpan: 1, rowSpan: 1 },     // Narrow widget (1 column)
+    news: { colSpan: 2, rowSpan: 1 },        // Wide widget (2 columns)
+    pomodoro: { colSpan: 1, rowSpan: 1 },    // Narrow widget
+    calendar: { colSpan: 1, rowSpan: 2 },    // Narrow but tall
+    stocks: { colSpan: 1, rowSpan: 1 },      // Narrow widget
+    notes: { colSpan: 1, rowSpan: 1 },       // Narrow widget
+    analytics: { colSpan: 2, rowSpan: 2 },   // Large widget (2x2)
+    bookmarks: { colSpan: 1, rowSpan: 1 },   // Narrow widget
+    goals: { colSpan: 1, rowSpan: 1 },       // Narrow widget
   };
 
-  // Получаем настройки по умолчанию для данного типа виджета
+  // Get the default settings for this widget type
   const defaultConfig = defaultConfigs[type];
   
-  // Создаем новый виджет, используя переданные настройки или настройки по умолчанию
+  // Create a widget using the supplied settings or the defaults
   const newWidget: Widget = {
     id: `${type}-${Date.now()}`,
     type,
-    colSpan: config?.colSpan || defaultConfig.colSpan,      // Берем из config или defaultConfig
-    rowSpan: config?.rowSpan || defaultConfig.rowSpan,      // Берем из config или defaultConfig
+    colSpan: config?.colSpan || defaultConfig.colSpan,      // Use config or defaultConfig
+    rowSpan: config?.rowSpan || defaultConfig.rowSpan,      // Use config or defaultConfig
     title: config?.title,
     config: config,
   };
   
-  // Создаем новый элемент layout
+  // Create a new layout item
   const newLayoutItem: LayoutItem = {
     i: newWidget.id,
-    x: 0, // временная позиция
-    y: 0, // временная позиция
-    w: newWidget.colSpan,    // Используем colSpan из виджета
-    h: newWidget.rowSpan || 1, // Используем rowSpan из виджета
+    x: 0, // Temporary position
+    y: 0, // Temporary position
+    w: newWidget.colSpan,    // Use the widget's colSpan
+    h: newWidget.rowSpan || 1, // Use the widget's rowSpan
     type: newWidget.type,
     minW: 1,
     minH: 1,
   };
 
-  // Находим максимальную Y позицию для размещения внизу
+  // Find the maximum Y position to place the widget at the bottom
   const maxY = state.layout.reduce((max, item) => Math.max(max, item.y + item.h), 0);
   newLayoutItem.y = maxY;
 
-  // Ищем свободное место по X
-  const gridColumns = 3; // предполагаем 3 колонки
+  // Find a free X position
+  const gridColumns = 3; // Assume three columns
   let placed = false;
   
   for (let x = 0; x <= gridColumns - newLayoutItem.w; x++) {
@@ -189,13 +189,13 @@ const addWidget = (type: WidgetType, config?: { title?: string; colSpan?: number
     }
   }
 
-  // Если не нашли место на текущей строке, размещаем на новой
+  // If there is no space in the current row, place it in a new one
   if (!placed) {
     newLayoutItem.x = 0;
     newLayoutItem.y = maxY + 1;
   }
 
-  // Диспатчим обновления
+  // Dispatch the updates
   dispatch({ 
     type: 'ADD_WIDGET', 
     payload: newWidget 
@@ -238,7 +238,7 @@ const addWidget = (type: WidgetType, config?: { title?: string; colSpan?: number
   );
 }
 
-// Хук для использования контекста
+// Hook for using the context
 export function useDashboard() {
   const context = useContext(DashboardContext);
   if (!context) {

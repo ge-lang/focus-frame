@@ -1,6 +1,6 @@
 // next.config.js
 module.exports = {
   experimental: {
-    optimizeCss: false // отключим оптимизацию CSS
+    optimizeCss: false // Disable CSS optimization
   }
 }

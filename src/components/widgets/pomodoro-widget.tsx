@@ -13,7 +13,7 @@ interface PomodoroWidgetProps {
 type TimerMode = 'work' | 'break' | 'longBreak';
 
 interface PomodoroSettings {
-  workTime: number; // в минутах
+  workTime: number; // In minutes
   breakTime: number;
   longBreakTime: number;
   longBreakInterval: number;
@@ -33,7 +33,7 @@ const defaultSettings: PomodoroSettings = {
 };
 
 export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps) {
-  const [timeLeft, setTimeLeft] = useState(25 * 60); // в секундах
+  const [timeLeft, setTimeLeft] = useState(25 * 60); // In seconds
   const [isRunning, setIsRunning] = useState(false);
   const [mode, setMode] = useState<TimerMode>('work');
   const [pomodoroCount, setPomodoroCount] = useState(0);
@@ -41,7 +41,7 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
   const [settings, setSettings] = useState<PomodoroSettings>(defaultSettings);
   const audioContextRef = useRef<AudioContext | null>(null);
 
-  // Инициализация аудио контекста при первом взаимодействии
+  // Initialize the audio context on first interaction
   useEffect(() => {
     const initAudio = () => {
       if (!audioContextRef.current) {
@@ -52,7 +52,7 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
       }
     };
 
-    // Инициализируем аудио при первом клике на виджет
+    // Initialize audio on the first widget click
     const handleClick = () => {
       initAudio();
       document.removeEventListener('click', handleClick);
@@ -62,12 +62,12 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
     return () => document.removeEventListener('click', handleClick);
   }, []);
 
-  // Инициализация времени из настроек
+  // Initialize time from the settings
   useEffect(() => {
     setTimeLeft(settings.workTime * 60);
   }, [settings.workTime]);
 
-  // Таймер
+  // Timer
   useEffect(() => {
     let interval: NodeJS.Timeout;
     
@@ -76,41 +76,41 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
         setTimeLeft(time => time - 1);
       }, 1000);
     } else if (isRunning && timeLeft === 0) {
-      // Таймер завершился
+      // Timer completed
       handleTimerComplete();
     }
     
     return () => clearInterval(interval);
   }, [isRunning, timeLeft]);
 
-  // Функция для воспроизведения встроенного звука
+  // Play the built-in sound
   const playNotificationSound = () => {
     if (!settings.soundEnabled || !audioContextRef.current) return;
 
     try {
       const audioContext = audioContextRef.current;
       
-      // Создаем осциллятор для генерации звука
+      // Create an oscillator to generate sound
       const oscillator = audioContext.createOscillator();
       const gainNode = audioContext.createGain();
       
-      // Подключаем узлы
+      // Connect the nodes
       oscillator.connect(gainNode);
       gainNode.connect(audioContext.destination);
       
-      // Настраиваем звук - два коротких бипа
-      oscillator.frequency.value = 800; // Высота тона (Гц)
-      oscillator.type = 'sine'; // Тип волны (синусоида)
+      // Configure two short beeps
+      oscillator.frequency.value = 800; // Pitch (Hz)
+      oscillator.type = 'sine'; // Wave type (sine)
       
-      // Настраиваем громкость с плавным затуханием
+      // Configure volume with a smooth fade-out
       const now = audioContext.currentTime;
       gainNode.gain.setValueAtTime(0, now);
-      gainNode.gain.linearRampToValueAtTime(0.3, now + 0.1); // Быстро нарастает
-      gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.3); // Плавно затухает
+      gainNode.gain.linearRampToValueAtTime(0.3, now + 0.1); // Ramps up quickly
+      gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.3); // Fades out smoothly
       
-      // Воспроизводим звук
+      // Play the sound
       oscillator.start(now);
-      oscillator.stop(now + 0.3); // Короткий звук 300ms
+      oscillator.stop(now + 0.3); // Short 300 ms sound
       
     } catch (error) {
       console.log('Sound playback error:', error);
@@ -118,14 +118,14 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
   };
 
   const handleTimerComplete = () => {
-    // Воспроизводим звук уведомления
+    // Play the notification sound
     playNotificationSound();
     
     if (mode === 'work') {
       const newPomodoroCount = pomodoroCount + 1;
       setPomodoroCount(newPomodoroCount);
       
-      // Определяем следующий режим
+      // Determine the next mode
       const nextMode = newPomodoroCount % settings.longBreakInterval === 0 ? 'longBreak' : 'break';
       setMode(nextMode);
       setTimeLeft((nextMode === 'longBreak' ? settings.longBreakTime : settings.breakTime) * 60);
@@ -136,7 +136,7 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
         setIsRunning(false);
       }
     } else {
-      // Завершился перерыв - возвращаемся к работе
+      // The break is over — return to work
       setMode('work');
       setTimeLeft(settings.workTime * 60);
       
@@ -203,7 +203,7 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
   return (
     <AnimatedWidget className="bg-gradient-to-br from-orange-50 to-red-100">
       <div className="h-full flex flex-col">
-        {/* Заголовок и настройки */}
+        {/* Header and settings */}
         <div className="flex justify-between items-center mb-4">
           <h3 className="font-semibold text-lg text-gray-800">
             {title || 'Pomodoro Timer'}
@@ -228,7 +228,7 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
           </div>
         </div>
 
-        {/* Настройки */}
+        {/* Settings */}
         <AnimatePresence>
           {showSettings && (
             <motion.div
@@ -321,9 +321,9 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
           )}
         </AnimatePresence>
 
-        {/* Таймер */}
+        {/* Timer */}
         <div className="flex-1 flex flex-col items-center justify-center">
-          {/* Прогресс круг */}
+          {/* Progress circle */}
           <div className="relative mb-6">
             <div className="w-48 h-48 rounded-full bg-white/50 shadow-inner">
               <svg className="w-full h-full" viewBox="0 0 100 100">
@@ -363,7 +363,7 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
             </div>
           </div>
 
-          {/* Счетчик помидоров */}
+          {/* Pomodoro counter */}
           <div className="flex space-x-1 mb-6">
             {Array.from({ length: Math.max(4, settings.longBreakInterval) }).map((_, index) => (
               <div
@@ -378,7 +378,7 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
             ))}
           </div>
 
-          {/* Управление */}
+          {/* Controls */}
           <div className="flex space-x-3">
             {!isRunning ? (
               <button
@@ -415,7 +415,7 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
             </button>
           </div>
 
-          {/* Пропустить */}
+          {/* Skip */}
           <button
             onClick={skipToNext}
             className="mt-4 text-sm text-gray-600 hover:text-gray-800 underline"
@@ -424,7 +424,7 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
           </button>
         </div>
 
-        {/* Статистика */}
+        {/* Statistics */}
         <div className="mt-4 pt-3 border-t border-gray-200">
           <div className="flex justify-between text-xs text-gray-600">
             <span>Completed: {pomodoroCount}</span>

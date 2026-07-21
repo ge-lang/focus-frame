@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   description: 'Your Personal Productivity Dashboard',
 };
 
-// Создаем клиентский компонент-обертку
+// Create a client-side wrapper component
 function ProvidersWrapper({ children }: { children: React.ReactNode }) {
   return (
     <SessionProviderWrapper>

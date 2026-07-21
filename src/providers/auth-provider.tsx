@@ -1,5 +1,5 @@
 // src/providers/auth-provider.tsx
-'use client'; // Важно: это клиентский компонент
+'use client'; // Important: this is a client component
 
 import { SessionProvider } from 'next-auth/react';
 

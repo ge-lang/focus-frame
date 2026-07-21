@@ -21,7 +21,7 @@ import { WidgetRenderer } from './widget-renderer';
 import { motion } from 'framer-motion';
 import { easeOut } from 'framer-motion';
 
-// Анимации для контейнера и элементов
+// Animations for the container and its items
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
@@ -68,12 +68,12 @@ export function DashboardGrid() {
     }
   }
 
-  // Функция для получения виджета по ID
+  // Get a widget by ID
   const getWidgetById = (id: string) => {
     return widgets.find(widget => widget.id === id);
   };
 
-  // Режим просмотра (без drag-and-drop)
+  // View mode (without drag and drop)
   if (!isEditing) {
     return (
       <motion.div
@@ -98,7 +98,7 @@ export function DashboardGrid() {
     );
   }
 
-  // Режим редактирования (с drag-and-drop)
+  // Edit mode (with drag and drop)
   return (
     <DndContext
       sensors={sensors}

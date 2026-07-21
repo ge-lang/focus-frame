@@ -29,7 +29,7 @@ interface EditState {
   dueDate: string;
 }
 
-// Mock данные для демо
+// Mock data for the demo
 const initialTasks: Record<TaskStatus, Task[]> = {
   'todo': [
     {
@@ -79,7 +79,7 @@ const initialTasks: Record<TaskStatus, Task[]> = {
   ]
 };
 
-// Вспомогательные функции
+// Helper functions
 const getStatusLabel = (status: TaskStatus) => {
   switch (status) {
     case 'todo': return 'To Do';
@@ -98,7 +98,7 @@ const getPriorityColor = (priority: string) => {
   };
 };
 
-// Компонент карточки задачи
+// Task card component
 function TaskCard({ 
   task, 
   status, 
@@ -131,13 +131,13 @@ function TaskCard({
       onDragStart={() => onDragStart(task, status)}
       className="bg-white rounded-lg p-3 shadow-sm border cursor-move group relative"
     >
-      {/* Ручка для перетаскивания */}
+      {/* Drag handle */}
       <div className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab">
         <GripVertical size={12} className="text-gray-400" />
       </div>
 
       {isEditing ? (
-        // Режим редактирования
+        // Edit mode
         <div className="ml-4 space-y-2">
           <input
             type="text"
@@ -169,7 +169,7 @@ function TaskCard({
           </div>
         </div>
       ) : (
-        // Режим просмотра
+        // View mode
         <div className="ml-4">
           <div className="flex items-start justify-between">
             <div className="flex-1">
@@ -219,7 +219,7 @@ function TaskCard({
   );
 }
 
-// Компонент колонки
+// Column component
 function TaskColumn({ 
   status, 
   tasks, 
@@ -289,7 +289,7 @@ function TaskColumn({
   );
 }
 
-// Основной компонент
+// Main component
 export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
   const [tasks, setTasks] = useState<Record<TaskStatus, Task[]>>(initialTasks);
   const [newTask, setNewTask] = useState({
@@ -377,7 +377,7 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
     }
   };
 
-  // Drag and Drop функции
+  // Drag and drop functions
   const handleDragStart = (task: Task, status: TaskStatus) => {
     setDraggedTask({ task, status });
   };
@@ -392,12 +392,12 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
       setTasks(prev => {
         const updatedTasks = { ...prev };
         
-        // Удаляем задачу из старого статуса
+        // Remove the task from its previous status
         updatedTasks[draggedTask.status] = updatedTasks[draggedTask.status].filter(
           t => t.id !== draggedTask.task.id
         );
         
-        // Добавляем задачу в новый статус
+        // Add the task to its new status
         updatedTasks[newStatus] = [
           ...updatedTasks[newStatus],
           { ...draggedTask.task, updatedAt: new Date().toISOString() }
@@ -416,7 +416,7 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
   return (
     <AnimatedWidget className="bg-gradient-to-br from-purple-50 to-indigo-100 w-full">
       <div className="h-full flex flex-col">
-        {/* Заголовок */}
+        {/* Header */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-2">
           <div>
             <h3 className="font-semibold text-lg text-gray-800">
@@ -444,7 +444,7 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
           </AnimatedButton>
         </div>
 
-        {/* Форма добавления задачи */}
+        {/* Task creation form */}
         <AnimatePresence>
           {isAdding && (
             <motion.div
@@ -506,9 +506,9 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
           )}
         </AnimatePresence>
 
-        {/* Адаптивная сетка колонок */}
+        {/* Responsive column grid */}
         <div className="flex-1">
-          {/* Десктоп: 3 колонки */}
+          {/* Desktop: 3 columns */}
           <div className="hidden lg:grid grid-cols-3 gap-4 h-full">
             {(Object.entries(tasks) as [TaskStatus, Task[]][]).map(([status, statusTasks]) => (
               <TaskColumn
@@ -527,7 +527,7 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
             ))}
           </div>
 
-          {/* Планшет: 2 колонки */}
+          {/* Tablet: 2 columns */}
           <div className="hidden md:grid lg:hidden grid-cols-2 gap-4 h-full">
             {(Object.entries(tasks).slice(0, 2) as [TaskStatus, Task[]][]).map(([status, statusTasks]) => (
               <TaskColumn
@@ -546,7 +546,7 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
             ))}
           </div>
 
-          {/* Мобильные: горизонтальная прокрутка */}
+          {/* Mobile: horizontal scrolling */}
           <div className="md:hidden flex overflow-x-auto pb-4 space-x-4 h-full">
             <div className="flex space-x-4 min-w-max">
               {(Object.entries(tasks) as [TaskStatus, Task[]][]).map(([status, statusTasks]) => (

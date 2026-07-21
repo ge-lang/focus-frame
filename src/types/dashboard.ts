@@ -5,11 +5,11 @@ export type WidgetType =
   | 'news' 
   | 'pomodoro'
   | 'calendar'
-  | 'stocks'       // Новый: акции
-  | 'notes'        // Новый: заметки  
-  | 'analytics'    // Новый: аналитика
-  | 'bookmarks'    // Новый: закладки
-  | 'goals';       // Новый: цели
+  | 'stocks'       // New: stocks
+  | 'notes'        // New: notes
+  | 'analytics'    // New: analytics
+  | 'bookmarks'    // New: bookmarks
+  | 'goals';       // New: goals
 
 export interface Widget {
   id: string;

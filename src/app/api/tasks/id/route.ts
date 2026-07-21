@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-// Альтернативный вариант API route
+// Alternative API route implementation
 export async function PUT(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -37,9 +37,9 @@ export async function PUT(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    // Получаем ID из URL path
+    // Get the ID from the URL path
     const url = new URL(request.url);
-    const id = url.pathname.split('/').pop(); // получаем ID из пути
+    const id = url.pathname.split('/').pop(); // Get the ID from the path
     
     if (!id) {
       return NextResponse.json(
