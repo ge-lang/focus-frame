@@ -61,6 +61,7 @@
    # DATABASE_URL="your_postgresql_connection_string"
    # AUTH_SECRET="your_random_secret"
    # NEXTAUTH_URL="http://localhost:3000"
+   # GNEWS_API_KEY="your_gnews_api_key_here"
    ```
 3. Setup database
    ```bash
@@ -112,6 +113,7 @@ Environment Variables
 DATABASE_URL="postgresql://username:password@host/dbname?sslmode=require"
 AUTH_SECRET="your_random_secret_string"
 NEXTAUTH_URL="https://your-app.vercel.app"
+GNEWS_API_KEY="your_gnews_api_key_here"
 ```
 
 🤝 Contributing
@@ -131,6 +133,5 @@ MIT License - feel free to use this project for your portfolio.
 ---
 
 Built with ❤️ using Next.js, TypeScript, and Tailwind CSS
-
 
 

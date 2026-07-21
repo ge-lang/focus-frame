@@ -206,7 +206,7 @@ export default function NewsWidget({ widgetId, title }: NewsWidgetProps) {
                   1. Visit <a href="https://gnews.io" className="text-blue-400 underline">gnews.io</a><br />
                   2. Get free API key<br />
                   3. Add to <code>.env.local</code>:<br />
-                  <code>NEXT_PUBLIC_GNEWS_API_KEY=your_key_here</code>
+                  <code>GNEWS_API_KEY=your_key_here</code>
                 </div>
               </div>
             ) : (

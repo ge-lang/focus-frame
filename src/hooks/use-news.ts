@@ -84,26 +84,8 @@ export function useNews(category: string = 'general') {
       try {
         setNews(prev => ({ ...prev, loading: true, error: null }));
 
-        const API_KEY = process.env.NEXT_PUBLIC_GNEWS_API_KEY;
-
-        // Use demo data if no API key is available
-        if (!API_KEY || API_KEY === 'your_gnews_api_key_here') {
-          // Simulate loading
-          await new Promise(resolve => setTimeout(resolve, 500));
-          
-          setNews({
-            articles: mockNews,
-            loading: false,
-            error: null,
-            isDemo: true
-          });
-          return;
-        }
-
-        // Live data from the GNews API
-        const response = await fetch(
-          `https://gnews.io/api/v4/top-headlines?category=${category}&lang=en&apikey=${API_KEY}&max=10`
-        );
+        // Fetch live data through the server so the API key stays private.
+        const response = await fetch(`/api/news?category=${encodeURIComponent(category)}`);
 
         if (!response.ok) {
           throw new Error('Failed to fetch news');
