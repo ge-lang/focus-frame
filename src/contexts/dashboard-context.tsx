@@ -1,6 +1,6 @@
 // src/contexts/dashboard-context.tsx
 'use client';
-import React, { createContext, useContext, useReducer, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useReducer, useRef, ReactNode } from 'react';
 import { WidgetType } from '@/types/dashboard';
 
 // Types
@@ -122,6 +122,49 @@ const DashboardContext = createContext<DashboardContextType | null>(null);
 // Provider
 export function DashboardProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(dashboardReducer, initialState);
+  const hasLoaded = useRef(false);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    fetch('/api/dashboard')
+      .then((response) => response.ok ? response.json() : null)
+      .then((data) => {
+        if (isMounted && data?.state) {
+          dispatch({
+            type: 'LOAD_STATE',
+            payload: { ...data.state, isEditing: false },
+          });
+        }
+      })
+      .catch((error) => console.error('Failed to load dashboard:', error))
+      .finally(() => {
+        if (isMounted) hasLoaded.current = true;
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!hasLoaded.current) return;
+
+    const timeoutId = window.setTimeout(() => {
+      fetch('/api/dashboard', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          state: {
+            widgets: state.widgets,
+            layout: state.layout,
+          },
+        }),
+      }).catch((error) => console.error('Failed to save dashboard:', error));
+    }, 500);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [state.widgets, state.layout]);
 
   
  

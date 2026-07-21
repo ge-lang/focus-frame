@@ -1,20 +1,19 @@
 // src/components/widgets/task-widget.tsx
 'use client';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { AnimatedWidget } from '@/components/animated-widget';
 import { AnimatedButton } from '@/components/animated-button';
-import { 
+import {
   Plus, 
   Trash2, 
   Edit, 
-  Save, 
-  X, 
   Calendar,
   Flag,
   GripVertical
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Task, TaskStatus } from '@/types/task';
+import { useCreateTask, useDeleteTask, useTasks, useUpdateTask } from '@/hooks/use-tasks';
 
 interface TaskWidgetProps {
   widgetId: string;
@@ -29,61 +28,11 @@ interface EditState {
   dueDate: string;
 }
 
-// Mock data for the demo
-const initialTasks: Record<TaskStatus, Task[]> = {
-  'todo': [
-    {
-      id: '1',
-      title: 'Design new dashboard layout',
-      description: 'Create wireframes and mockups',
-      priority: 'high',
-      dueDate: '2024-01-15',
-      tags: ['design', 'ui'],
-      createdAt: '2024-01-10',
-      updatedAt: '2024-01-10'
-    },
-    {
-      id: '2',
-      title: 'Buy groceries',
-      description: 'Milk, eggs, bread, fruits',
-      priority: 'medium',
-      dueDate: '2024-01-12',
-      tags: ['personal'],
-      createdAt: '2024-01-10',
-      updatedAt: '2024-01-10'
-    }
-  ],
-  'in-progress': [
-    {
-      id: '3',
-      title: 'Implement drag and drop',
-      description: 'Add DnD functionality for tasks',
-      priority: 'high',
-      dueDate: '2024-01-14',
-      tags: ['development'],
-      createdAt: '2024-01-09',
-      updatedAt: '2024-01-10'
-    }
-  ],
-  'done': [
-    {
-      id: '4',
-      title: 'Set up project structure',
-      description: 'Initialize Next.js project with TypeScript',
-      priority: 'medium',
-      dueDate: '2024-01-08',
-      tags: ['setup'],
-      createdAt: '2024-01-07',
-      updatedAt: '2024-01-08'
-    }
-  ]
-};
-
 // Helper functions
 const getStatusLabel = (status: TaskStatus) => {
   switch (status) {
     case 'todo': return 'To Do';
-    case 'in-progress': return 'In Progress';
+    case 'in_progress': return 'In Progress';
     case 'done': return 'Done';
     default: return status;
   }
@@ -96,6 +45,12 @@ const getPriorityColor = (priority: string) => {
     case 'low': return 'green';
     default: return 'gray';
   };
+};
+
+const formatFocusTime = (seconds?: number) => {
+  if (!seconds) return null;
+  const minutes = Math.round(seconds / 60);
+  return minutes < 60 ? `${minutes}m focused` : `${Math.floor(minutes / 60)}h ${minutes % 60}m focused`;
 };
 
 // Task card component
@@ -213,6 +168,9 @@ function TaskCard({
               </span>
             )}
           </div>
+          {formatFocusTime(task.focusSeconds) && (
+            <p className="text-xs text-purple-600 mt-2">⏱ {formatFocusTime(task.focusSeconds)}</p>
+          )}
         </div>
       )}
     </motion.div>
@@ -251,7 +209,7 @@ function TaskColumn({
     >
       <div className={`p-3 rounded-t-lg text-center font-medium ${
         status === 'todo' ? 'bg-blue-100 text-blue-800' :
-        status === 'in-progress' ? 'bg-yellow-100 text-yellow-800' :
+        status === 'in_progress' ? 'bg-yellow-100 text-yellow-800' :
         'bg-green-100 text-green-800'
       }`}>
         <div className="font-semibold text-sm">{getStatusLabel(status)}</div>
@@ -260,7 +218,7 @@ function TaskColumn({
       
       <div className={`flex-1 overflow-y-auto p-3 space-y-3 ${
         status === 'todo' ? 'bg-blue-50' :
-        status === 'in-progress' ? 'bg-yellow-50' :
+        status === 'in_progress' ? 'bg-yellow-50' :
         'bg-green-50'
       } rounded-b-lg`}>
         <AnimatePresence>
@@ -291,7 +249,10 @@ function TaskColumn({
 
 // Main component
 export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
-  const [tasks, setTasks] = useState<Record<TaskStatus, Task[]>>(initialTasks);
+  const { data: tasks = [], isLoading } = useTasks();
+  const { mutateAsync: createTask } = useCreateTask();
+  const { mutateAsync: updateTask } = useUpdateTask();
+  const { mutateAsync: deleteTask } = useDeleteTask();
   const [newTask, setNewTask] = useState({
     title: '',
     description: '',
@@ -307,32 +268,29 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
   });
   const [isAdding, setIsAdding] = useState(false);
   const [draggedTask, setDraggedTask] = useState<{ task: Task; status: TaskStatus } | null>(null);
+  const tasksByStatus = useMemo<Record<TaskStatus, Task[]>>(() => ({
+    todo: tasks.filter((task) => task.status === 'todo'),
+    in_progress: tasks.filter((task) => task.status === 'in_progress'),
+    done: tasks.filter((task) => task.status === 'done'),
+  }), [tasks]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newTask.title.trim()) {
-      const task: Task = {
-        id: Date.now().toString(),
+      await createTask({
         title: newTask.title.trim(),
-        description: newTask.description.trim(),
+        description: newTask.description.trim() || null,
         priority: newTask.priority,
-        dueDate: newTask.dueDate,
-        tags: [],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
-      
-      setTasks(prev => ({
-        ...prev,
-        todo: [...prev.todo, task]
-      }));
+        dueDate: newTask.dueDate || null,
+        status: 'todo',
+      });
       
       setNewTask({ title: '', description: '', priority: 'medium', dueDate: '' });
       setIsAdding(false);
     }
   };
 
-  const handleEdit = (task: Task, status: TaskStatus) => {
+  const handleEdit = (task: Task) => {
     setEditState({ 
       id: task.id, 
       title: task.title, 
@@ -342,38 +300,22 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
     });
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (editState.id && editState.title.trim()) {
-      setTasks(prev => {
-        const updatedTasks = { ...prev };
-        Object.keys(updatedTasks).forEach(status => {
-          const taskIndex = updatedTasks[status as TaskStatus].findIndex(t => t.id === editState.id);
-          if (taskIndex !== -1) {
-            updatedTasks[status as TaskStatus][taskIndex] = {
-              ...updatedTasks[status as TaskStatus][taskIndex],
-              title: editState.title.trim(),
-              description: editState.description.trim(),
-              priority: editState.priority,
-              dueDate: editState.dueDate,
-              updatedAt: new Date().toISOString()
-            };
-          }
-        });
-        return updatedTasks;
+      await updateTask({
+        id: editState.id,
+        title: editState.title.trim(),
+        description: editState.description.trim() || null,
+        priority: editState.priority,
+        dueDate: editState.dueDate || null,
       });
       setEditState({ id: null, title: '', description: '', priority: 'medium', dueDate: '' });
     }
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm('Are you sure you want to delete this task?')) {
-      setTasks(prev => {
-        const updatedTasks = { ...prev };
-        Object.keys(updatedTasks).forEach(status => {
-          updatedTasks[status as TaskStatus] = updatedTasks[status as TaskStatus].filter(t => t.id !== id);
-        });
-        return updatedTasks;
-      });
+      await deleteTask(id);
     }
   };
 
@@ -386,31 +328,16 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
     e.preventDefault();
   };
 
-  const handleDrop = (e: React.DragEvent, newStatus: TaskStatus) => {
+  const handleDrop = async (e: React.DragEvent, newStatus: TaskStatus) => {
     e.preventDefault();
     if (draggedTask && draggedTask.status !== newStatus) {
-      setTasks(prev => {
-        const updatedTasks = { ...prev };
-        
-        // Remove the task from its previous status
-        updatedTasks[draggedTask.status] = updatedTasks[draggedTask.status].filter(
-          t => t.id !== draggedTask.task.id
-        );
-        
-        // Add the task to its new status
-        updatedTasks[newStatus] = [
-          ...updatedTasks[newStatus],
-          { ...draggedTask.task, updatedAt: new Date().toISOString() }
-        ];
-        
-        return updatedTasks;
-      });
+      await updateTask({ id: draggedTask.task.id, status: newStatus });
     }
     setDraggedTask(null);
   };
 
-  const totalTasks = Object.values(tasks).reduce((sum, statusTasks) => sum + statusTasks.length, 0);
-  const completedTasks = tasks.done.length;
+  const totalTasks = tasks.length;
+  const completedTasks = tasksByStatus.done.length;
   const completionPercentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
   return (
@@ -508,9 +435,11 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
 
         {/* Responsive column grid */}
         <div className="flex-1">
+          {isLoading && <p className="text-sm text-gray-500">Loading tasks…</p>}
+
           {/* Desktop: 3 columns */}
           <div className="hidden lg:grid grid-cols-3 gap-4 h-full">
-            {(Object.entries(tasks) as [TaskStatus, Task[]][]).map(([status, statusTasks]) => (
+            {(Object.entries(tasksByStatus) as [TaskStatus, Task[]][]).map(([status, statusTasks]) => (
               <TaskColumn
                 key={status}
                 status={status as TaskStatus}
@@ -529,7 +458,7 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
 
           {/* Tablet: 2 columns */}
           <div className="hidden md:grid lg:hidden grid-cols-2 gap-4 h-full">
-            {(Object.entries(tasks).slice(0, 2) as [TaskStatus, Task[]][]).map(([status, statusTasks]) => (
+            {(Object.entries(tasksByStatus).slice(0, 2) as [TaskStatus, Task[]][]).map(([status, statusTasks]) => (
               <TaskColumn
                 key={status}
                 status={status as TaskStatus}
@@ -549,7 +478,7 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
           {/* Mobile: horizontal scrolling */}
           <div className="md:hidden flex overflow-x-auto pb-4 space-x-4 h-full">
             <div className="flex space-x-4 min-w-max">
-              {(Object.entries(tasks) as [TaskStatus, Task[]][]).map(([status, statusTasks]) => (
+              {(Object.entries(tasksByStatus) as [TaskStatus, Task[]][]).map(([status, statusTasks]) => (
                 <div key={status} className="w-64 flex-shrink-0">
                   <TaskColumn
                     status={status as TaskStatus}

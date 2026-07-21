@@ -4,6 +4,8 @@ import { AnimatedWidget } from '@/components/animated-widget';
 import { useState, useEffect, useRef } from 'react';
 import { Play, Pause, Square, RotateCcw, Settings, Bell, BellOff } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useCreateFocusSession } from '@/hooks/use-analytics';
+import { useTasks } from '@/hooks/use-tasks';
 
 interface PomodoroWidgetProps {
   widgetId: string;
@@ -40,6 +42,9 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
   const [showSettings, setShowSettings] = useState(false);
   const [settings, setSettings] = useState<PomodoroSettings>(defaultSettings);
   const audioContextRef = useRef<AudioContext | null>(null);
+  const { mutate: createFocusSession } = useCreateFocusSession();
+  const { data: tasks = [] } = useTasks();
+  const [selectedTaskId, setSelectedTaskId] = useState('');
 
   // Initialize the audio context on first interaction
   useEffect(() => {
@@ -120,6 +125,12 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
   const handleTimerComplete = () => {
     // Play the notification sound
     playNotificationSound();
+
+    createFocusSession({
+      duration: (mode === 'work' ? settings.workTime : mode === 'break' ? settings.breakTime : settings.longBreakTime) * 60,
+      type: mode === 'longBreak' ? 'long_break' : mode,
+      ...(mode === 'work' && selectedTaskId ? { taskId: selectedTaskId } : {}),
+    });
     
     if (mode === 'work') {
       const newPomodoroCount = pomodoroCount + 1;
@@ -165,7 +176,9 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
   const skipToNext = () => {
     setIsRunning(false);
     if (mode === 'work') {
-      handleTimerComplete();
+      const nextMode = pomodoroCount > 0 && pomodoroCount % settings.longBreakInterval === 0 ? 'longBreak' : 'break';
+      setMode(nextMode);
+      setTimeLeft((nextMode === 'longBreak' ? settings.longBreakTime : settings.breakTime) * 60);
     } else {
       setMode('work');
       setTimeLeft(settings.workTime * 60);
@@ -377,6 +390,20 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
               />
             ))}
           </div>
+
+          {mode === 'work' && (
+            <select
+              value={selectedTaskId}
+              onChange={(event) => setSelectedTaskId(event.target.value)}
+              className="w-full max-w-xs mb-4 p-2 text-sm border border-gray-300 rounded-lg bg-white/70"
+              aria-label="Task for this focus session"
+            >
+              <option value="">No task selected</option>
+              {tasks.filter((task) => !task.isCompleted).map((task) => (
+                <option key={task.id} value={task.id}>{task.title}</option>
+              ))}
+            </select>
+          )}
 
           {/* Controls */}
           <div className="flex space-x-3">

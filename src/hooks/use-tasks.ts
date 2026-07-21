@@ -1,12 +1,14 @@
 // src/hooks/use-tasks.ts
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import type { Task, TaskStatus } from '@/types/task';
 
-export interface Task {
-  id: string;
+type TaskInput = {
   title: string;
-  isCompleted: boolean;
-  createdAt: string;
-}
+  description?: string | null;
+  priority?: Task['priority'];
+  dueDate?: string | null;
+  status?: TaskStatus;
+};
 
 export function useTasks() {
   return useQuery<Task[]>({
@@ -21,7 +23,7 @@ export function useTasks() {
 export function useCreateTask() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (newTask: { title: string }) =>
+    mutationFn: (newTask: TaskInput) =>
       fetch('/api/tasks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -40,11 +42,11 @@ export function useCreateTask() {
 export function useUpdateTask() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, title, isCompleted }: { id: string; title?: string; isCompleted?: boolean }) =>
+    mutationFn: ({ id, ...updates }: Partial<TaskInput> & { id: string; isCompleted?: boolean }) =>
       fetch(`/api/tasks/${id}`, {  // The ID is now passed in the URL rather than params
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, isCompleted }),
+        body: JSON.stringify(updates),
       }).then((res) => {
         if (!res.ok) throw new Error('Failed to update task');
         return res.json();

@@ -1,10 +1,10 @@
 // src/auth.ts
-import NextAuth from "next-auth";
+import NextAuth, { NextAuthOptions } from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 import Google from "next-auth/providers/google";
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
+export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
     Google({
@@ -13,6 +13,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
     // ... additional providers (Email, GitHub) can be added here
   ],
+  pages: {
+    signIn: '/auth/signin',
+  },
   callbacks: {
     // Important workaround for compatibility with Prisma Adapter and Next.js 14
     async session({ session, user }) {
@@ -22,4 +25,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return session;
     },
   },
-});
+};
+
+export const authHandler = NextAuth(authOptions);

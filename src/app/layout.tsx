@@ -4,7 +4,6 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { SessionProviderWrapper } from '@/components/session-provider-wrapper';
 import QueryProvider from '@/providers/query-provider';
-import { DashboardProvider } from '@/contexts/dashboard-context';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -18,9 +17,7 @@ function ProvidersWrapper({ children }: { children: React.ReactNode }) {
   return (
     <SessionProviderWrapper>
       <QueryProvider>
-        <DashboardProvider>
-          {children}
-        </DashboardProvider>
+        {children}
       </QueryProvider>
     </SessionProviderWrapper>
   );

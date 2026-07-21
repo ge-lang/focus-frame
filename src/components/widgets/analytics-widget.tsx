@@ -1,354 +1,92 @@
-// src/components/widgets/analytics-widget.tsx
 'use client';
-import { AnimatedWidget } from '@/components/animated-widget';
-import { useState, useEffect } from 'react';
-import { 
-  TrendingUp, 
-  Clock, 
-  CheckCircle, 
-  Target, 
-  Calendar,
-  BarChart3,
-  Settings,
-  RefreshCw,
-  Eye,
-  EyeOff
-} from 'lucide-react';
+import { useState } from 'react';
+import { BarChart3, CheckCircle, Clock, Eye, EyeOff, RefreshCw, Target, TrendingUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { AnalyticsRange, useAnalytics } from '@/hooks/use-analytics';
+import { AnimatedWidget } from '@/components/animated-widget';
 
 interface AnalyticsWidgetProps {
   widgetId: string;
   title?: string;
 }
 
-interface AnalyticsData {
-  productivity: number;
-  focusTime: number; // In minutes
-  completedTasks: number;
-  weeklyTrend: number;
-  dailyGoal: number;
-  streak: number;
-  distractionTime: number;
-  peakHours: string[];
-  taskDistribution: {
-    work: number;
-    personal: number;
-    health: number;
-    learning: number;
-  };
-}
-
-interface TimeRange {
-  label: string;
-  value: 'today' | 'week' | 'month' | 'year';
-}
-
-const timeRanges: TimeRange[] = [
+const timeRanges: Array<{ label: string; value: AnalyticsRange }> = [
   { label: 'Today', value: 'today' },
   { label: 'Week', value: 'week' },
   { label: 'Month', value: 'month' },
-  { label: 'Year', value: 'year' }
+  { label: 'Year', value: 'year' },
 ];
 
-// Generate realistic demo data
-const generateDemoData = (range: TimeRange['value']): AnalyticsData => {
-  const baseProductivity = 65 + Math.random() * 30;
-  const baseFocusTime = range === 'today' ? 384 : range === 'week' ? 2688 : range === 'month' ? 11520 : 138240;
-  const baseCompletedTasks = range === 'today' ? 8 : range === 'week' ? 45 : range === 'month' ? 180 : 2160;
-  
-  return {
-    productivity: Math.round(baseProductivity),
-    focusTime: Math.round(baseFocusTime * (0.8 + Math.random() * 0.4)),
-    completedTasks: Math.round(baseCompletedTasks * (0.9 + Math.random() * 0.2)),
-    weeklyTrend: Math.round((Math.random() - 0.3) * 30),
-    dailyGoal: 85,
-    streak: Math.floor(Math.random() * 21) + 5,
-    distractionTime: Math.round(baseFocusTime * 0.15 * (0.5 + Math.random())),
-    peakHours: ['09:00-11:00', '14:00-16:00', '19:00-21:00'],
-    taskDistribution: {
-      work: 45 + Math.random() * 20,
-      personal: 15 + Math.random() * 10,
-      health: 10 + Math.random() * 10,
-      learning: 20 + Math.random() * 15
-    }
-  };
-};
-
-// Time formatting
-const formatTime = (minutes: number): string => {
+function formatTime(minutes: number) {
   if (minutes < 60) return `${minutes}m`;
-  const hours = Math.floor(minutes / 60);
-  const mins = minutes % 60;
-  return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
-};
+  return `${Math.floor(minutes / 60)}h${minutes % 60 ? ` ${minutes % 60}m` : ''}`;
+}
 
-// Indicator colors
-const getTrendColor = (trend: number): string => {
-  if (trend > 0) return 'text-green-600';
-  if (trend < 0) return 'text-red-600';
-  return 'text-gray-600';
-};
+function progress(value: number, goal: number) {
+  return Math.min(100, Math.round((value / goal) * 100));
+}
 
-const getTrendIcon = (trend: number): string => {
-  if (trend > 0) return '↗️';
-  if (trend < 0) return '↘️';
-  return '→';
-};
+function MetricCard({ icon, value, label, color, valueProgress }: { icon: React.ReactNode; value: string | number; label: string; color: string; valueProgress: number }) {
+  return (
+    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="bg-white/80 rounded-xl p-4 shadow-sm border border-white/50">
+      <div className="flex items-center justify-between mb-2">{icon}<span className="text-xs text-gray-500">{valueProgress}%</span></div>
+      <div className="text-2xl font-bold text-gray-800">{value}</div>
+      <div className="text-xs text-gray-600">{label}</div>
+      <div className="mt-2 w-full bg-gray-200 rounded-full h-1"><div className={`${color} h-1 rounded-full transition-all duration-500`} style={{ width: `${valueProgress}%` }} /></div>
+    </motion.div>
+  );
+}
 
-export default function AnalyticsWidget({ widgetId, title }: AnalyticsWidgetProps) {
-  const [timeRange, setTimeRange] = useState<TimeRange['value']>('week');
-  const [data, setData] = useState<AnalyticsData>(generateDemoData('week'));
-  const [isLoading, setIsLoading] = useState(false);
+export default function AnalyticsWidget({ title }: AnalyticsWidgetProps) {
+  const [timeRange, setTimeRange] = useState<AnalyticsRange>('week');
   const [showDetails, setShowDetails] = useState(false);
-  const [viewMode, setViewMode] = useState<'overview' | 'detailed'>('overview');
+  const { data, isLoading, refetch, isFetching } = useAnalytics(timeRange);
 
-  useEffect(() => {
-    setIsLoading(true);
-    // Simulate data loading
-    const timer = setTimeout(() => {
-      setData(generateDemoData(timeRange));
-      setIsLoading(false);
-    }, 500);
-    
-    return () => clearTimeout(timer);
-  }, [timeRange]);
-
-  const refreshData = () => {
-    setIsLoading(true);
-    setTimeout(() => {
-      setData(generateDemoData(timeRange));
-      setIsLoading(false);
-    }, 800);
-  };
-
-  const calculateProgress = (current: number, goal: number): number => {
-    return Math.min((current / goal) * 100, 100);
-  };
-
-  const productivityProgress = calculateProgress(data.productivity, data.dailyGoal);
-  const focusProgress = calculateProgress(data.focusTime, 8 * 60); // 8-hour target
-  const tasksProgress = calculateProgress(data.completedTasks, 10); // 10-task target
+  const focusGoal = (timeRange === 'today' ? 1 : timeRange === 'week' ? 7 : timeRange === 'month' ? 30 : 365) * 100;
 
   return (
     <AnimatedWidget className="bg-gradient-to-br from-purple-50 via-blue-50 to-pink-50">
       <div className="h-full flex flex-col">
-        {/* Header and controls */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-6 gap-3">
           <div>
-            <h3 className="font-semibold text-lg text-gray-800 flex items-center">
-              <BarChart3 size={20} className="mr-2 text-purple-600" />
-              {title || 'Productivity Analytics'}
-            </h3>
-            <p className="text-sm text-gray-600 mt-1">
-              {timeRanges.find(r => r.value === timeRange)?.label} • {data.streak} day streak
-            </p>
+            <h3 className="font-semibold text-lg text-gray-800 flex items-center"><BarChart3 size={20} className="mr-2 text-purple-600" />{title || 'Productivity Analytics'}</h3>
+            <p className="text-sm text-gray-600 mt-1">{timeRanges.find((range) => range.value === timeRange)?.label} • {data?.streak ?? 0} day streak</p>
           </div>
-          
           <div className="flex items-center gap-2">
-            <button
-              onClick={() => setShowDetails(!showDetails)}
-              className="p-2 text-gray-600 hover:text-gray-800 transition-colors"
-              title={showDetails ? 'Hide details' : 'Show details'}
-            >
-              {showDetails ? <EyeOff size={16} /> : <Eye size={16} />}
-            </button>
-            <button
-              onClick={refreshData}
-              disabled={isLoading}
-              className="p-2 text-gray-600 hover:text-gray-800 transition-colors"
-              title="Refresh data"
-            >
-              <RefreshCw size={16} className={isLoading ? 'animate-spin' : ''} />
-            </button>
+            <button onClick={() => setShowDetails(!showDetails)} className="p-2 text-gray-600 hover:text-gray-800" title={showDetails ? 'Hide details' : 'Show details'}>{showDetails ? <EyeOff size={16} /> : <Eye size={16} />}</button>
+            <button onClick={() => refetch()} disabled={isFetching} className="p-2 text-gray-600 hover:text-gray-800 disabled:opacity-50" title="Refresh data"><RefreshCw size={16} className={isFetching ? 'animate-spin' : ''} /></button>
           </div>
         </div>
 
-        {/* Period switcher */}
         <div className="flex gap-1 mb-6">
-          {timeRanges.map((range) => (
-            <button
-              key={range.value}
-              onClick={() => setTimeRange(range.value)}
-              className={`flex-1 px-3 py-2 text-sm font-medium rounded-lg transition-all ${
-                timeRange === range.value
-                  ? 'bg-purple-500 text-white shadow-lg'
-                  : 'bg-white text-gray-600 hover:bg-gray-100 shadow'
-              }`}
-            >
-              {range.label}
-            </button>
-          ))}
+          {timeRanges.map((range) => <button key={range.value} onClick={() => setTimeRange(range.value)} className={`flex-1 px-3 py-2 text-sm font-medium rounded-lg transition-all ${timeRange === range.value ? 'bg-purple-500 text-white shadow-lg' : 'bg-white text-gray-600 hover:bg-gray-100 shadow'}`}>{range.label}</button>)}
         </div>
 
-        {/* Key metrics */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          {/* Productivity */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-white/80 rounded-xl p-4 shadow-sm border border-white/50"
-          >
-            <div className="flex items-center justify-between mb-2">
-              <TrendingUp size={20} className="text-purple-500" />
-              <span className={`text-xs font-medium ${getTrendColor(data.weeklyTrend)}`}>
-                {getTrendIcon(data.weeklyTrend)} {Math.abs(data.weeklyTrend)}%
-              </span>
-            </div>
-            <div className="text-2xl font-bold text-gray-800">{data.productivity}%</div>
-            <div className="text-xs text-gray-600">Productivity</div>
-            <div className="mt-2 w-full bg-gray-200 rounded-full h-1">
-              <div 
-                className="bg-purple-500 h-1 rounded-full transition-all duration-500"
-                style={{ width: `${productivityProgress}%` }}
-              />
-            </div>
-          </motion.div>
+        {isLoading || !data ? <div className="flex-1 grid place-items-center text-sm text-gray-500">Loading analytics…</div> : <>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <MetricCard icon={<TrendingUp size={20} className="text-purple-500" />} value={`${data.productivity}%`} label="Productivity" color="bg-purple-500" valueProgress={data.productivity} />
+            <MetricCard icon={<Clock size={20} className="text-blue-500" />} value={formatTime(data.focusMinutes)} label="Focus time" color="bg-blue-500" valueProgress={progress(data.focusMinutes, focusGoal)} />
+            <MetricCard icon={<CheckCircle size={20} className="text-green-500" />} value={data.completedTasks} label="Completed tasks" color="bg-green-500" valueProgress={progress(data.completedTasks, timeRange === 'today' ? 3 : 21)} />
+            <MetricCard icon={<Target size={20} className="text-orange-500" />} value={data.completedGoals} label="Completed goals" color="bg-orange-500" valueProgress={progress(data.completedGoals, 3)} />
+          </div>
 
-          {/* Focus time */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="bg-white/80 rounded-xl p-4 shadow-sm border border-white/50"
-          >
-            <div className="flex items-center justify-between mb-2">
-              <Clock size={20} className="text-blue-500" />
-              <span className="text-xs text-gray-500">⏱️</span>
-            </div>
-            <div className="text-2xl font-bold text-gray-800">{formatTime(data.focusTime)}</div>
-            <div className="text-xs text-gray-600">Focus Time</div>
-            <div className="mt-2 w-full bg-gray-200 rounded-full h-1">
-              <div 
-                className="bg-blue-500 h-1 rounded-full transition-all duration-500"
-                style={{ width: `${focusProgress}%` }}
-              />
-            </div>
-          </motion.div>
+          <div className="flex items-center text-sm mb-4 text-gray-600"><TrendingUp size={16} className={data.trend >= 0 ? 'text-green-600 mr-1' : 'text-red-600 mr-1'} />{data.trend >= 0 ? '+' : ''}{data.trend}% focus time compared with the previous period</div>
 
-          {/* Completed tasks */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="bg-white/80 rounded-xl p-4 shadow-sm border border-white/50"
-          >
-            <div className="flex items-center justify-between mb-2">
-              <CheckCircle size={20} className="text-green-500" />
-              <span className="text-xs text-gray-500">✅</span>
-            </div>
-            <div className="text-2xl font-bold text-gray-800">{data.completedTasks}</div>
-            <div className="text-xs text-gray-600">Completed</div>
-            <div className="mt-2 w-full bg-gray-200 rounded-full h-1">
-              <div 
-                className="bg-green-500 h-1 rounded-full transition-all duration-500"
-                style={{ width: `${tasksProgress}%` }}
-              />
-            </div>
-          </motion.div>
-
-          {/* Distractions */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="bg-white/80 rounded-xl p-4 shadow-sm border border-white/50"
-          >
-            <div className="flex items-center justify-between mb-2">
-              <Target size={20} className="text-orange-500" />
-              <span className="text-xs text-gray-500">🎯</span>
-            </div>
-            <div className="text-2xl font-bold text-gray-800">{formatTime(data.distractionTime)}</div>
-            <div className="text-xs text-gray-600">Distraction</div>
-            <div className="mt-2 w-full bg-gray-200 rounded-full h-1">
-              <div 
-                className="bg-orange-500 h-1 rounded-full transition-all duration-500"
-                style={{ width: `${Math.min((data.distractionTime / 120) * 100, 100)}%` }}
-              />
-            </div>
-          </motion.div>
-        </div>
-
-        {/* Detailed analytics */}
-        <AnimatePresence>
-          {showDetails && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="space-y-4 overflow-hidden"
-            >
-              {/* Task distribution */}
+          <AnimatePresence>
+            {showDetails && <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="space-y-4 overflow-hidden">
               <div className="bg-white/80 rounded-xl p-4 shadow-sm border border-white/50">
-                <h4 className="font-medium text-gray-800 mb-3">Task Distribution</h4>
-                <div className="space-y-2">
-                  {Object.entries(data.taskDistribution).map(([category, percentage]) => (
-                    <div key={category} className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600 capitalize">{category}</span>
-                      <div className="flex items-center gap-2">
-                        <div className="w-20 bg-gray-200 rounded-full h-2">
-                          <div 
-                            className={`h-2 rounded-full ${
-                              category === 'work' ? 'bg-purple-500' :
-                              category === 'personal' ? 'bg-blue-500' :
-                              category === 'health' ? 'bg-green-500' : 'bg-orange-500'
-                            }`}
-                            style={{ width: `${percentage}%` }}
-                          />
-                        </div>
-                        <span className="text-xs font-medium w-8 text-right">{percentage}%</span>
-                      </div>
-                    </div>
-                  ))}
+                <h4 className="font-medium text-gray-800 mb-3">Focus over the last 7 days</h4>
+                <div className="flex gap-2 items-end h-24">
+                  {data.dailyFocus.map((day) => <div key={day.label} className="flex-1 flex flex-col items-center h-full justify-end"><span className="text-xs text-gray-600 mb-1">{day.minutes}m</span><div className="w-full bg-gradient-to-t from-purple-500 to-purple-300 rounded-t" style={{ height: `${Math.max(4, progress(day.minutes, 100))}%` }} /><span className="text-xs text-gray-600 mt-1">{day.label}</span></div>)}
                 </div>
               </div>
-
-              {/* Peak hours */}
               <div className="bg-white/80 rounded-xl p-4 shadow-sm border border-white/50">
-                <h4 className="font-medium text-gray-800 mb-3">Peak Productivity Hours</h4>
-                <div className="flex gap-2">
-                  {data.peakHours.map((hour, index) => (
-                    <span key={index} className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm">
-                      {hour}
-                    </span>
-                  ))}
-                </div>
+                <h4 className="font-medium text-gray-800 mb-3">Peak focus hours</h4>
+                {data.peakHours.length ? <div className="flex flex-wrap gap-2">{data.peakHours.map((hour) => <span key={hour} className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm">{hour}</span>)}</div> : <p className="text-sm text-gray-500">Complete a focus session to see your peak hours.</p>}
               </div>
-
-              {/* Weekly progress */}
-              <div className="bg-white/80 rounded-xl p-4 shadow-sm border border-white/50">
-                <h4 className="font-medium text-gray-800 mb-3">Weekly Progress</h4>
-                <div className="flex gap-1">
-                  {Array.from({ length: 7 }).map((_, index) => (
-                    <div key={index} className="flex-1 flex flex-col items-center">
-                      <div className="w-full bg-gray-200 rounded-full h-16 relative">
-                        <div 
-                          className="absolute bottom-0 w-full bg-gradient-to-t from-purple-500 to-purple-300 rounded-full transition-all duration-500"
-                          style={{ height: `${20 + Math.random() * 80}%` }}
-                        />
-                      </div>
-                      <span className="text-xs text-gray-600 mt-1">
-                        {['M', 'T', 'W', 'T', 'F', 'S', 'S'][index]}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Footer */}
-        <div className="mt-auto pt-4 border-t border-gray-200/50">
-          <p className="text-xs text-gray-500 text-center">
-            📊 Analytics updated just now • 
-            <button 
-              onClick={refreshData}
-              className="ml-1 text-purple-500 hover:text-purple-700"
-            >
-              Refresh data
-            </button>
-          </p>
-        </div>
+            </motion.div>}
+          </AnimatePresence>
+        </>}
       </div>
     </AnimatedWidget>
   );
