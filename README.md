@@ -1,137 +1,103 @@
-# 🚀 FocusFrame - Personal Productivity Dashboard
+# 🚀 FocusFrame — Personal Productivity Dashboard
 
 [![Vercel Deployment](https://img.shields.io/badge/Deployed_on-Vercel-black)](https://focus-frame.vercel.app)
-[![Next.js](https://img.shields.io/badge/Next.js-15.5-black)](https://nextjs.org)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org)
+[![Next.js](https://img.shields.io/badge/Next.js-16.2-black)](https://nextjs.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.5-blue)](https://www.typescriptlang.org)
 
-> Modern personal dashboard with drag-and-drop widgets, real-time data, and PostgreSQL database.
+FocusFrame is a personal productivity dashboard with secure, user-specific data. Organise tasks, track focus sessions, keep notes and goals, and build a better daily workflow from one customizable dashboard.
 
-## ✨ Live Demo
+## ✨ Features
 
-🔗 **[View Live Application](https://focus-frame-7ilpxjv5q-evvas-projects-6b48ca01.vercel.app)**
+- **Custom dashboard** — drag, reorder, add and remove widgets; each user’s layout is saved.
+- **Task management** — authenticated CRUD, kanban status, priorities, due dates, search and deadline filters.
+- **Pomodoro and focus tracking** — saved work, break and long-break sessions; optionally link work sessions to a task.
+- **Real analytics** — focus time, completed tasks and goals, productivity trend, streaks, peak hours and a seven-day chart.
+- **Personal widgets** — notes, goals and bookmarks persist per user.
+- **Calendar** — task deadlines appear in the calendar and in a next-seven-days list.
+- **Weather and news** — weather data plus GNews headlines fetched through a server-side route, so the GNews key stays private.
+- **Browser notifications** — optional alerts when a Pomodoro work or break session finishes.
+- **Authentication** — Google sign-in through NextAuth with Prisma and PostgreSQL.
 
-## 🎯 Features
+## 🛠 Tech stack
 
-- 🖱️ **Drag & Drop Interface** - Customizable widget layout
-- ✅ **Task Management** - Full CRUD operations with PostgreSQL
-- 🌤️ **Weather Widget** - Real weather data integration  
-- 📰 **News Feed** - Latest news updates
-- 🎨 **Modern UI** - Tailwind CSS with responsive design
-- 🚀 **Full-Stack** - Next.js API Routes + TypeScript
-- 🔒 **Authentication-Ready** - NextAuth.js configured
+- Next.js 16 (App Router), React 19 and TypeScript
+- PostgreSQL with Prisma ORM
+- NextAuth.js with the Prisma adapter
+- TanStack React Query, dnd-kit, Framer Motion and Tailwind CSS
+- Neon for PostgreSQL and Vercel for deployment
 
-## 🛠 Tech Stack
+## 📸 Screenshot
 
-- **Framework:** Next.js 15 with App Router
-- **Language:** TypeScript
-- **Database:** PostgreSQL with Prisma ORM
-- **Hosting:** Neon.tech (Database), Vercel (Deployment)
-- **Styling:** Tailwind CSS
-- **Drag & Drop:** @dnd-kit
-- **State Management:** React Query
-- **Authentication:** NextAuth.js (Ready for integration)
+![Dashboard preview](/public/images/dashboard-preview.png)
 
-## 📸 Screenshots
-
-![Dashboard Preview](/public/images/dashboard-preview.png)
-
-## 🚀 Getting Started
+## 🚀 Getting started
 
 ### Prerequisites
 
-- Node.js 18+ 
-- PostgreSQL database (or Neon.tech account)
+- Node.js 20 or newer
+- A PostgreSQL database (for example, Neon)
+- A Google OAuth application for sign-in
+- Optional: a [GNews](https://gnews.io) API key for live news
 
 ### Installation
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/ge-lang/focus-frame.git
-   cd focus-frame
+```bash
+git clone https://github.com/ge-lang/focus-frame.git
+cd focus-frame
+npm install
+cp .env.example .env
 ```
 
-1. Install dependencies
-   ```bash
-   npm install
-   ```
-2. Setup environment variables
-   ```bash
-   cp .env.example .env
-   # Fill in your variables:
-   # DATABASE_URL="your_postgresql_connection_string"
-   # AUTH_SECRET="your_random_secret"
-   # NEXTAUTH_URL="http://localhost:3000"
-   # GNEWS_API_KEY="your_gnews_api_key_here"
-   ```
-3. Setup database
-   ```bash
-   npx prisma generate
-   npx prisma db push
-   ```
-4. Run development server
-   ```bash
-   npm run dev
-   ```
-5. Open your browser Navigate to http://localhost:3000
-
-📁 Project Structure
-
-```
-src/
-├── app/                 # Next.js App Router
-│   ├── api/            # API routes (Tasks, Weather, News)
-│   ├── dashboard/      # Dashboard pages
-│   ├── auth/           # Authentication pages
-│   └── layout.tsx      # Root layout
-├── components/         # React components
-│   ├── widgets/        # Widget components
-│   └── contexts/       # State management
-├── lib/               # Utilities and configurations
-└── types/             # TypeScript definitions
-```
-
-🔌 API Routes
-
-· GET /api/tasks - Fetch all tasks
-· POST /api/tasks - Create new task
-· PUT /api/tasks/[id] - Update task
-· GET /api/weather - Weather data
-· GET /api/news - News feed
-
-🌐 Deployment
-
-Vercel Deployment
-
-1. Push to GitHub
-2. Import project in Vercel
-3. Add environment variables in Vercel Dashboard
-4. Deploy! 🚀
-
-Environment Variables
+Fill in `.env`:
 
 ```env
-DATABASE_URL="postgresql://username:password@host/dbname?sslmode=require"
-AUTH_SECRET="your_random_secret_string"
-NEXTAUTH_URL="https://your-app.vercel.app"
-GNEWS_API_KEY="your_gnews_api_key_here"
+DATABASE_URL="postgresql://username:password@host/database?sslmode=require"
+AUTH_SECRET="a_long_random_secret"
+NEXTAUTH_URL="http://localhost:3000"
+GOOGLE_CLIENT_ID="your_google_client_id"
+GOOGLE_CLIENT_SECRET="your_google_client_secret"
+GNEWS_API_KEY="your_gnews_api_key"
 ```
 
-🤝 Contributing
+Run the database migrations and start the app:
 
-This is a portfolio project. Feel free to fork and adapt for your own needs!
+```bash
+npx prisma migrate dev
+npm run dev
+```
 
-📄 License
+Open [http://localhost:3000](http://localhost:3000).
 
-MIT License - feel free to use this project for your portfolio.
+## 🔌 Main API routes
 
-🎓 Learning Resources
+| Route | Purpose |
+| --- | --- |
+| `/api/tasks` | User-scoped task list and task creation |
+| `/api/tasks/[id]` | Update or delete an owned task |
+| `/api/dashboard` | Persist the dashboard layout |
+| `/api/notes/[widgetId]` | Persist widget notes |
+| `/api/goals` | Create, update and delete goals |
+| `/api/bookmarks` | Create and delete bookmarks |
+| `/api/focus-sessions` | Record completed focus sessions |
+| `/api/analytics` | Productivity metrics for a selected period |
+| `/api/settings` | Focus goals and notification preferences |
+| `/api/news` | Secure server-side GNews proxy |
 
-· Next.js Documentation
-· Prisma Documentation
-· Tailwind CSS Documentation
+## 🌐 Deployment
 
----
+1. Push the project to GitHub and import it into Vercel.
+2. Add the variables from `.env.example` in **Vercel → Settings → Environment Variables**.
+3. Set `GNEWS_API_KEY` only as a server environment variable — never use `NEXT_PUBLIC_GNEWS_API_KEY`.
+4. Vercel runs `npm run build`, which generates Prisma Client and applies committed migrations with `prisma migrate deploy`.
 
-Built with ❤️ using Next.js, TypeScript, and Tailwind CSS
+## ✅ Quality checks
 
+```bash
+npx tsc --noEmit
+npm run lint
+npx next build
+```
 
+## 📄 License
+
+MIT

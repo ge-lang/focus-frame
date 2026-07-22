@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { AnimatedWidget } from '@/components/animated-widget';
 import { AnimatedButton } from '@/components/animated-button';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
+import { useTasks } from '@/hooks/use-tasks';
 
 
 
@@ -15,6 +16,7 @@ interface CalendarWidgetProps {
 
 export default function CalendarWidget({ widgetId, title }: CalendarWidgetProps)  {
   const [currentDate, setCurrentDate] = useState(new Date());
+  const { data: tasks = [] } = useTasks();
 
   const today = new Date();
   const year = currentDate.getFullYear();
@@ -47,6 +49,22 @@ export default function CalendarWidget({ widgetId, title }: CalendarWidgetProps)
   };
 
   const isCurrentMonth = month === today.getMonth() && year === today.getFullYear();
+  const taskDueOn = (day: number) => tasks.filter((task) => {
+    if (!task.dueDate) return false;
+    const dueDate = new Date(`${task.dueDate.slice(0, 10)}T00:00:00`);
+    return dueDate.getFullYear() === year && dueDate.getMonth() === month && dueDate.getDate() === day;
+  });
+  const upcomingTasks = tasks
+    .filter((task) => {
+      if (!task.dueDate || task.isCompleted) return false;
+      const dueDate = new Date(`${task.dueDate.slice(0, 10)}T00:00:00`);
+      const end = new Date(today);
+      end.setHours(23, 59, 59, 999);
+      end.setDate(end.getDate() + 7);
+      return dueDate >= new Date(today.getFullYear(), today.getMonth(), today.getDate()) && dueDate <= end;
+    })
+    .sort((a, b) => (a.dueDate || '').localeCompare(b.dueDate || ''))
+    .slice(0, 4);
 
   // Generate calendar days
   const calendarDays = [];
@@ -64,7 +82,7 @@ export default function CalendarWidget({ widgetId, title }: CalendarWidgetProps)
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center">
             <CalendarIcon size={20} className="mr-2" />
-            <h3 className="font-semibold text-lg">Calendar</h3>
+            <h3 className="font-semibold text-lg">{title || 'Calendar'}</h3>
           </div>
           
           {!isCurrentMonth && (
@@ -109,10 +127,13 @@ export default function CalendarWidget({ widgetId, title }: CalendarWidgetProps)
 
         {/* Calendar grid */}
         <div className="grid grid-cols-7 gap-1">
-          {calendarDays.map((day, index) => (
+          {calendarDays.map((day, index) => {
+            const dueTasks = day === null ? [] : taskDueOn(day);
+            return (
             <div
               key={index}
-              className={`h-8 flex items-center justify-center text-sm rounded ${
+              title={dueTasks.map((task) => task.title).join(', ')}
+              className={`h-8 flex flex-col items-center justify-center text-sm rounded ${
                 day === null
                   ? 'text-gray-300'
                   : isToday(day)
@@ -121,16 +142,17 @@ export default function CalendarWidget({ widgetId, title }: CalendarWidgetProps)
               }`}
             >
               {day}
+              {dueTasks.length > 0 && <span className="w-1.5 h-1.5 rounded-full bg-red-500 mt-0.5" />}
             </div>
-          ))}
+          )})}
         </div>
 
-        {/* Upcoming events placeholder */}
+        {/* Upcoming task deadlines */}
         <div className="mt-4 pt-4 border-t">
-          <h4 className="font-medium text-sm mb-2">Upcoming Events</h4>
-          <div className="text-xs text-gray-500 text-center">
-            No events scheduled
-          </div>
+          <h4 className="font-medium text-sm mb-2">Next 7 days</h4>
+          {upcomingTasks.length ? <div className="space-y-1">
+            {upcomingTasks.map((task) => <div key={task.id} className="text-xs flex justify-between gap-2 text-gray-600"><span className="truncate">{task.title}</span><span className="shrink-0 text-blue-600">{new Date(`${task.dueDate?.slice(0, 10)}T00:00:00`).toLocaleDateString()}</span></div>)}
+          </div> : <div className="text-xs text-gray-500 text-center">No task deadlines this week</div>}
         </div>
       </div>
     </AnimatedWidget>
