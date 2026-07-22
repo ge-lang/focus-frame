@@ -61,7 +61,7 @@ export default function NewsWidget({ widgetId, title }: NewsWidgetProps) {
     <AnimatedWidget className="bg-gradient-to-br from-blue-50 to-cyan-100">
       <div className="h-full flex flex-col">
         {/* Header and status */}
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-4 gap-2">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 gap-2">
           <div className="flex items-center gap-2">
             <Newspaper size={20} className="text-blue-600" />
             <div>
@@ -97,15 +97,15 @@ export default function NewsWidget({ widgetId, title }: NewsWidgetProps) {
         </div>
 
         {/* Categories */}
-        <div className="flex flex-wrap gap-1 mb-4">
+        <div className="-mx-1 mb-3 flex gap-1 overflow-x-auto px-1 pb-1">
           {categories.map(category => (
             <button
               key={category}
               onClick={() => handleCategoryChange(category)}
               className={`flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium transition-all ${
                 selectedCategory === category
-                  ? 'bg-blue-500 text-white shadow-lg'
-                  : 'bg-white text-gray-600 hover:bg-gray-100 shadow'
+                  ? 'bg-blue-500 text-white shadow-sm'
+                  : 'bg-white text-gray-600 hover:bg-gray-100 shadow-sm'
               }`}
               disabled={loading}
             >
@@ -137,7 +137,7 @@ export default function NewsWidget({ widgetId, title }: NewsWidgetProps) {
         {/* News list */}
         {!loading && !error && (
           <div className="flex-1 overflow-y-auto space-y-3 pr-1">
-            {articles.map((article, index) => (
+            {articles.slice(0, 4).map((article, index) => (
               <motion.div
                 key={`${article.title}-${index}`}
                 initial={{ opacity: 0, y: 20 }}
@@ -148,9 +148,9 @@ export default function NewsWidget({ widgetId, title }: NewsWidgetProps) {
                   href={article.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block p-4 bg-white/70 rounded-lg hover:bg-white hover:shadow-md transition-all duration-200 group border border-white/50"
+                  className="block p-3 bg-white/70 rounded-lg hover:bg-white hover:shadow-md transition-all duration-200 group border border-white/50"
                 >
-                  <div className="flex justify-between items-start mb-3">
+                  <div className="flex justify-between items-start mb-2">
                     <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
                       <span>{categoryEmojis[article.category] || '📰'}</span>
                       <span className="capitalize">{categoryLabels[article.category] || article.category}</span>
@@ -165,7 +165,7 @@ export default function NewsWidget({ widgetId, title }: NewsWidgetProps) {
                     {article.title}
                   </h4>
                   
-                  <p className="text-sm text-gray-600 mb-3 line-clamp-2 leading-relaxed">
+                  <p className="text-sm text-gray-600 mb-2 line-clamp-2 leading-relaxed">
                     {article.description}
                   </p>
                   
@@ -185,7 +185,7 @@ export default function NewsWidget({ widgetId, title }: NewsWidgetProps) {
         )}
 
         {/* Footer with API instructions */}
-        <div className="mt-4 pt-3 border-t border-gray-200/50">
+        <div className="mt-3 pt-2 border-t border-gray-200/50">
           <div className="text-center">
             {isDemo ? (
               <div className="space-y-1">
@@ -201,13 +201,7 @@ export default function NewsWidget({ widgetId, title }: NewsWidgetProps) {
                     Get free API key
                   </a>
                 </p>
-                <div className="text-[10px] text-gray-500 bg-gray-100 p-2 rounded">
-                  <strong>To enable real news:</strong><br />
-                  1. Visit <a href="https://gnews.io" className="text-blue-400 underline">gnews.io</a><br />
-                  2. Get free API key<br />
-                  3. Add to <code>.env.local</code>:<br />
-                  <code>GNEWS_API_KEY=your_key_here</code>
-                </div>
+                <p className="text-[10px] text-gray-500">Set <code>GNEWS_API_KEY</code> in Vercel to enable live headlines.</p>
               </div>
             ) : (
               <p className="text-xs text-green-600">

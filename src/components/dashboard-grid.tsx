@@ -80,7 +80,7 @@ export function DashboardGrid() {
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="grid grid-cols-1 lg:grid-cols-3 gap-6"
+        className="grid grid-cols-1 gap-5 lg:grid-cols-3"
       >
         {layout.map((item) => {
           const widget = getWidgetById(item.i);
@@ -110,7 +110,7 @@ export function DashboardGrid() {
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="grid grid-cols-1 lg:grid-cols-3 gap-6"
+          className="grid grid-cols-1 gap-5 rounded-2xl border-2 border-dashed border-indigo-200 bg-indigo-50/40 p-3 lg:grid-cols-3"
         >
           {layout.map((item) => {
             const widget = getWidgetById(item.i);
