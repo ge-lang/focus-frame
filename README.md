@@ -178,7 +178,11 @@ The project currently has two non-blocking lint warnings related to an image ele
 5. Configure the same deployed domain as an authorized redirect URI in Google Cloud OAuth.
 6. Deploy.
 
-The build script runs `prisma generate`, `prisma migrate deploy` and `next build`. This applies all committed database migrations during deployment.
+The build script runs `prisma generate` and `next build`. Apply migrations separately before deploying, so parallel Vercel builds never compete for the PostgreSQL migration lock:
+
+```bash
+npm run db:migrate
+```
 
 ### GNews shows Demo Data
 
