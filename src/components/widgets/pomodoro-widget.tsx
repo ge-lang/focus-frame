@@ -43,6 +43,7 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
   const [showSettings, setShowSettings] = useState(false);
   const [settings, setSettings] = useState<PomodoroSettings>(defaultSettings);
   const audioContextRef = useRef<AudioContext | null>(null);
+  const handleTimerCompleteRef = useRef<() => void>(() => {});
   const { mutate: createFocusSession } = useCreateFocusSession();
   const { data: tasks = [] } = useTasks();
   const [selectedTaskId, setSelectedTaskId] = useState('');
@@ -85,7 +86,7 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
       }, 1000);
     } else if (isRunning && timeLeft === 0) {
       // Timer completed
-      handleTimerComplete();
+      handleTimerCompleteRef.current();
     }
     
     return () => clearInterval(interval);
@@ -167,6 +168,8 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
       }
     }
   };
+
+  handleTimerCompleteRef.current = handleTimerComplete;
 
   const startTimer = () => setIsRunning(true);
   const pauseTimer = () => setIsRunning(false);

@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { showToast } from '@/lib/toast';
 
 export interface UserSettings {
   dailyFocusGoal: number;
@@ -25,5 +26,6 @@ export function useUpdateUserSettings() {
       body: JSON.stringify(settings),
     }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['settings'] }),
+    onError: () => showToast('Could not save settings', 'error'),
   });
 }

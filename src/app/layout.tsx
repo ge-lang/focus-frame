@@ -5,6 +5,7 @@ import './globals.css';
 import { SessionProviderWrapper } from '@/components/session-provider-wrapper';
 import QueryProvider from '@/providers/query-provider';
 import { DashboardProvider } from '@/contexts/dashboard-context';
+import { ToastProvider } from '@/components/toast-provider';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -16,11 +17,7 @@ export const metadata: Metadata = {
 // Create a client-side wrapper component
 function ProvidersWrapper({ children }: { children: React.ReactNode }) {
   return (
-    <SessionProviderWrapper>
-      <QueryProvider>
-        <DashboardProvider>{children}</DashboardProvider>
-      </QueryProvider>
-    </SessionProviderWrapper>
+    <SessionProviderWrapper><QueryProvider><ToastProvider><DashboardProvider>{children}</DashboardProvider></ToastProvider></QueryProvider></SessionProviderWrapper>
   );
 }
 

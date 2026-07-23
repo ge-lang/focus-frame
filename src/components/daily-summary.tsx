@@ -12,11 +12,17 @@ function ProgressCard({ icon, label, value, progress, color }: { icon: React.Rea
 }
 
 export function DailySummary() {
-  const { data: analytics } = useAnalytics('today');
-  const { data: tasks = [] } = useTasks();
+  const { data: analytics, isLoading: isAnalyticsLoading } = useAnalytics('today');
+  const { data: tasks = [], isLoading: isTasksLoading } = useTasks();
   const completedTasks = tasks.filter((task) => task.isCompleted).length;
   const focusMinutes = analytics?.focusMinutes ?? 0;
   const focusGoal = analytics?.dailyFocusGoal ?? 100;
+
+  if (isAnalyticsLoading || isTasksLoading) {
+    return <section aria-label="Loading daily progress" className="mb-8 grid gap-3 sm:grid-cols-3">
+      {[0, 1, 2].map((item) => <div key={item} className="h-[118px] animate-pulse rounded-2xl border border-slate-200 bg-white p-4"><div className="h-3 w-24 rounded bg-slate-200" /><div className="mt-4 h-7 w-32 rounded bg-slate-200" /><div className="mt-5 h-1.5 w-full rounded bg-slate-100" /></div>)}
+    </section>;
+  }
 
   return <section aria-label="Daily progress" className="mb-8 grid gap-3 sm:grid-cols-3">
     <ProgressCard icon={<Clock3 size={18} />} label="Focus today" value={`${focusMinutes} / ${focusGoal} min`} progress={(focusMinutes / focusGoal) * 100} color="bg-indigo-500" />

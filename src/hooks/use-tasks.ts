@@ -1,6 +1,7 @@
 // src/hooks/use-tasks.ts
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import type { Task, TaskStatus } from '@/types/task';
+import { showToast } from '@/lib/toast';
 
 type TaskInput = {
   title: string;
@@ -34,7 +35,9 @@ export function useCreateTask() {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      showToast('Task created', 'success');
     },
+    onError: () => showToast('Could not create task', 'error'),
   });
 }
 
@@ -53,7 +56,9 @@ export function useUpdateTask() {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      showToast('Task saved', 'success');
     },
+    onError: () => showToast('Could not save task', 'error'),
   });
 }
 
@@ -69,6 +74,8 @@ export function useDeleteTask() {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      showToast('Task deleted', 'success');
     },
+    onError: () => showToast('Could not delete task', 'error'),
   });
 }

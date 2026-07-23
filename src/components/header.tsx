@@ -1,6 +1,9 @@
 // src/components/header.tsx
 'use client';
 import { useSession, signOut } from 'next-auth/react';
+import Image from 'next/image';
+
+const avatarLoader = ({ src }: { src: string }) => src;
 
 export default function Header() {
   const { data: session } = useSession();
@@ -19,9 +22,13 @@ export default function Header() {
                 <span className="text-gray-600">
                   Hello, {session.user.name}
                 </span>
-                <img
+                <Image
+                  loader={avatarLoader}
+                  unoptimized
                   src={session.user.image || '/default-avatar.png'}
                   alt="User avatar"
+                  width={32}
+                  height={32}
                   className="w-8 h-8 rounded-full"
                 />
                 <button
