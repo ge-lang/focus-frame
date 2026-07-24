@@ -25,30 +25,21 @@ interface WeatherWidgetProps {
   title?: string;
 }
 
-const popularCities = [
-  'Amsterdam', 'London', 'Paris', 'Berlin', 'Moscow',
-  'New York', 'Tokyo', 'Sydney', 'Rome', 'Krasnoyarsk', 
-  'Achinsk', 'Brussel', 'Bredene', 'Ostende', 'Lichtervelde', 
-  'Antwerpen', 'Yalta', 'Sevastopol', 'Madrid', 'Istanbul'
+const locationsByCountry = [
+  { code: 'NL', name: 'Netherlands', cities: ['Amsterdam', 'Rotterdam', 'The Hague', 'Utrecht'] },
+  { code: 'BE', name: 'Belgium', cities: ['Brussels', 'Antwerp', 'Ghent', 'Ostend', 'Bredene', 'Lichtervelde'] },
+  { code: 'GB', name: 'United Kingdom', cities: ['London', 'Manchester', 'Edinburgh'] },
+  { code: 'FR', name: 'France', cities: ['Paris', 'Lyon', 'Marseille'] },
+  { code: 'DE', name: 'Germany', cities: ['Berlin', 'Hamburg', 'Munich'] },
+  { code: 'IT', name: 'Italy', cities: ['Rome', 'Milan', 'Naples'] },
+  { code: 'ES', name: 'Spain', cities: ['Madrid', 'Barcelona', 'Valencia'] },
+  { code: 'US', name: 'United States', cities: ['New York', 'Los Angeles', 'Chicago'] },
+  { code: 'JP', name: 'Japan', cities: ['Tokyo', 'Osaka', 'Kyoto'] },
+  { code: 'AU', name: 'Australia', cities: ['Sydney', 'Melbourne', 'Brisbane'] },
 ];
 
-// Extend useWeather to retrieve additional data
-// Update useWeather so it returns more data
-interface ExtendedWeatherData {
-  temp: number;
-  feelsLike: number;
-  description: string;
-  icon: string;
-  city: string;
-  humidity: number;
-  windSpeed: number;
-  windDirection: number;
-  pressure: number;
-  visibility: number;
-  sunrise?: number;
-  sunset?: number;
-  loading: boolean;
-  error: string | null;
+function countryForCity(city: string) {
+  return locationsByCountry.find((country) => country.cities.some((knownCity) => knownCity.toLowerCase() === city.toLowerCase()))?.code;
 }
 
 export default function WeatherWidget({ 
@@ -56,9 +47,10 @@ export default function WeatherWidget({
   initialCity = 'Amsterdam',
   title 
 }: WeatherWidgetProps) {
-  const { weather, setCity, city: currentCity } = useWeather(initialCity);
+  const { weather, setLocation, refresh } = useWeather(initialCity);
   const [isEditing, setIsEditing] = useState(false);
-  const [inputCity, setInputCity] = useState(currentCity);
+  const [inputCity, setInputCity] = useState(initialCity);
+  const [countryCode, setCountryCode] = useState(countryForCity(initialCity) ?? 'NL');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [unit, setUnit] = useState<'celsius' | 'fahrenheit'>('celsius');
@@ -69,8 +61,8 @@ export default function WeatherWidget({
 
   const gradient = weather.temp ? getTemperatureGradient(weather.temp) : 'from-blue-50 to-cyan-100';
 
-  const handleCityChange = (newCity: string) => {
-    setCity(newCity);
+  const handleCityChange = (newCity: string, selectedCountry = countryCode) => {
+    setLocation(newCity, selectedCountry || undefined);
     setIsEditing(false);
     setInputCity(newCity);
   };
@@ -84,8 +76,16 @@ export default function WeatherWidget({
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    // A forced data refresh can be added here
-    setTimeout(() => setIsRefreshing(false), 1000);
+    refresh();
+    window.setTimeout(() => setIsRefreshing(false), 400);
+  };
+
+  const selectedCountry = locationsByCountry.find((country) => country.code === countryCode);
+  const suggestedCities = selectedCountry?.cities ?? locationsByCountry.flatMap((country) => country.cities);
+  const resetLocationForm = () => {
+    setInputCity(weather.city || initialCity);
+    setCountryCode(countryForCity(weather.city) ?? countryCode);
+    setIsEditing(false);
   };
 
   const toggleUnit = () => {
@@ -164,15 +164,39 @@ export default function WeatherWidget({
               exit={{ opacity: 0, height: 0 }}
               className="mb-4 overflow-hidden"
             >
-              <form onSubmit={handleSubmit} className="space-y-3 p-3 bg-white/30 rounded-lg">
-                <input
-                  type="text"
-                  value={inputCity}
-                  onChange={(e) => setInputCity(e.target.value)}
-                  placeholder="Enter city name..."
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  autoFocus
-                />
+              <form onSubmit={handleSubmit} className="space-y-3 rounded-lg bg-white/30 p-3">
+                <label className="block text-xs font-medium text-gray-700">
+                  Country
+                  <select
+                    value={countryCode}
+                    onChange={(event) => {
+                      const nextCountryCode = event.target.value;
+                      setCountryCode(nextCountryCode);
+                      const firstCity = locationsByCountry.find((country) => country.code === nextCountryCode)?.cities[0];
+                      if (firstCity) setInputCity(firstCity);
+                    }}
+                    className="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Any country</option>
+                    {locationsByCountry.map((country) => <option key={country.code} value={country.code}>{country.name}</option>)}
+                  </select>
+                </label>
+
+                <label className="block text-xs font-medium text-gray-700">
+                  City
+                  <input
+                    type="text"
+                    list={`${widgetId}-cities`}
+                    value={inputCity}
+                    onChange={(e) => setInputCity(e.target.value)}
+                    placeholder="Choose or enter a city"
+                    className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    autoFocus
+                  />
+                  <datalist id={`${widgetId}-cities`}>
+                    {suggestedCities.map((city) => <option key={city} value={city} />)}
+                  </datalist>
+                </label>
                 
                 <div className="grid grid-cols-2 gap-2">
                   <button
@@ -183,28 +207,13 @@ export default function WeatherWidget({
                   </button>
                   <button
                     type="button"
-                    onClick={() => setIsEditing(false)}
+                    onClick={resetLocationForm}
                     className="px-3 py-2 bg-gray-500 text-white text-sm rounded-lg hover:bg-gray-600 transition-colors"
                   >
                     Cancel
                   </button>
                 </div>
 
-                <div>
-                  <p className="text-xs text-gray-600 mb-2">Popular cities:</p>
-                  <div className="flex flex-wrap gap-1">
-                    {popularCities.map((city) => (
-                      <button
-                        key={city}
-                        type="button"
-                        onClick={() => handleCityChange(city)}
-                        className="px-2 py-1 text-xs bg-white/50 text-gray-700 rounded hover:bg-white transition-colors"
-                      >
-                        {city}
-                      </button>
-                    ))}
-                  </div>
-                </div>
               </form>
             </motion.div>
           )}
@@ -221,7 +230,7 @@ export default function WeatherWidget({
               >
                 <MapPin size={14} className="text-gray-600 mr-1" />
                 <span className="text-sm text-gray-700 group-hover:text-gray-900 transition-colors">
-                  {weather.city}
+                  {weather.city}{weather.country && weather.country !== 'Demo' ? `, ${weather.country}` : ''}
                 </span>
               </div>
               

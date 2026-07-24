@@ -220,7 +220,7 @@ function TaskColumn({
 }) {
   return (
     <div
-      className="flex flex-col h-full min-h-[300px]"
+      className="flex h-full min-h-0 flex-col"
       onDragOver={(e) => onDragOver(e, status)}
       onDrop={(e) => onDrop(e, status)}
     >
@@ -233,7 +233,7 @@ function TaskColumn({
         <div className="text-xs opacity-75">{tasks.length} tasks</div>
       </div>
       
-      <div className={`flex-1 overflow-y-auto p-3 space-y-3 ${
+      <div className={`min-h-0 flex-1 overflow-y-auto p-3 space-y-3 ${
         status === 'todo' ? 'bg-blue-50' :
         status === 'in_progress' ? 'bg-yellow-50' :
         'bg-green-50'
@@ -380,8 +380,8 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
   const completionPercentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
   return (
-    <AnimatedWidget className="bg-gradient-to-br from-purple-50 to-indigo-100 w-full">
-      <div className="h-full flex flex-col">
+    <AnimatedWidget className="w-full bg-gradient-to-br from-purple-50 to-indigo-100 lg:h-[680px]">
+      <div className="flex h-full min-h-0 flex-col">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-2">
           <div>
@@ -496,11 +496,11 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
         </div>
 
         {/* Responsive column grid */}
-        <div className="flex-1">
+        <div className="min-h-0 flex-1">
           {isLoading && <p className="text-sm text-gray-500">Loading tasks…</p>}
 
           {/* Desktop: 3 columns */}
-          <div className="hidden lg:grid grid-cols-3 gap-4 h-full">
+          <div className="hidden h-full min-h-0 grid-cols-3 gap-4 lg:grid">
             {(Object.entries(visibleTasksByStatus) as [TaskStatus, Task[]][]).map(([status, statusTasks]) => (
               <TaskColumn
                 key={status}
@@ -519,7 +519,7 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
           </div>
 
           {/* Tablet: 2 columns */}
-          <div className="hidden md:grid lg:hidden grid-cols-2 gap-4 h-full">
+          <div className="hidden h-full min-h-0 grid-cols-2 gap-4 md:grid lg:hidden">
             {(Object.entries(visibleTasksByStatus).slice(0, 2) as [TaskStatus, Task[]][]).map(([status, statusTasks]) => (
               <TaskColumn
                 key={status}

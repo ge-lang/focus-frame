@@ -36,6 +36,7 @@ interface UseWeatherReturn {
   weather: WeatherData;
   forecast: ForecastItem[];
   setCity: (city: string) => void;
+  setLocation: (city: string, countryCode?: string) => void;
   city: string;
   refresh: () => void;
   isLoading: boolean;
@@ -261,6 +262,12 @@ export function useWeather(initialCity: string = 'Amsterdam'): UseWeatherReturn 
     setCity: (newCity: string) => {
       if (newCity.trim()) {
         setCity(newCity.trim());
+      }
+    },
+    setLocation: (newCity: string, countryCode?: string) => {
+      const cityName = newCity.trim();
+      if (cityName) {
+        setCity(countryCode ? `${cityName},${countryCode}` : cityName);
       }
     },
     city,
