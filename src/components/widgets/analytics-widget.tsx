@@ -1,6 +1,6 @@
 'use client';
-import { useState } from 'react';
-import { BarChart3, CheckCircle, Clock, Eye, EyeOff, RefreshCw, Target, TrendingUp } from 'lucide-react';
+import { memo, useMemo, useState } from 'react';
+import { BarChart3, CheckCircle, Clock, Eye, EyeOff, RefreshCw, Target, TrendingUp, type LucideIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AnalyticsRange, useAnalytics } from '@/hooks/use-analytics';
 import { AnimatedWidget } from '@/components/animated-widget';
@@ -26,23 +26,34 @@ function progress(value: number, goal: number) {
   return Math.min(100, Math.round((value / goal) * 100));
 }
 
-function MetricCard({ icon, value, label, color, valueProgress }: { icon: React.ReactNode; value: string | number; label: string; color: string; valueProgress: number }) {
+const rangeDays: Record<AnalyticsRange, number> = { today: 1, week: 7, month: 30, year: 365 };
+
+const MetricCard = memo(function MetricCard({ Icon, value, label, color, valueProgress, iconClassName }: { Icon: LucideIcon; value: string | number; label: string; color: string; valueProgress: number; iconClassName: string }) {
   return (
-    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="bg-white/80 rounded-xl p-4 shadow-sm border border-white/50">
-      <div className="flex items-center justify-between mb-2">{icon}<span className="text-xs text-gray-500">{valueProgress}%</span></div>
+    <div className="bg-white/80 rounded-xl p-4 shadow-sm border border-white/50">
+      <div className="flex items-center justify-between mb-2"><Icon size={20} className={iconClassName} /><span className="text-xs text-gray-500">{valueProgress}%</span></div>
       <div className="text-2xl font-bold text-gray-800">{value}</div>
       <div className="text-xs text-gray-600">{label}</div>
-      <div className="mt-2 w-full bg-gray-200 rounded-full h-1"><div className={`${color} h-1 rounded-full transition-all duration-500`} style={{ width: `${valueProgress}%` }} /></div>
-    </motion.div>
+      <div className="mt-2 w-full bg-gray-200 rounded-full h-1"><div className={`${color} h-1 rounded-full transition-[width] duration-300`} style={{ width: `${valueProgress}%` }} /></div>
+    </div>
   );
-}
+});
 
 export default function AnalyticsWidget({ title }: AnalyticsWidgetProps) {
   const [timeRange, setTimeRange] = useState<AnalyticsRange>('week');
   const [showDetails, setShowDetails] = useState(false);
   const { data, isLoading, refetch, isFetching } = useAnalytics(timeRange);
 
-  const focusGoal = (timeRange === 'today' ? 1 : timeRange === 'week' ? 7 : timeRange === 'month' ? 30 : 365) * (data?.dailyFocusGoal ?? 100);
+  const metrics = useMemo(() => {
+    if (!data) return [];
+    const focusGoal = rangeDays[timeRange] * data.dailyFocusGoal;
+    return [
+      { Icon: TrendingUp, value: `${data.productivity}%`, label: 'Productivity', color: 'bg-purple-500', valueProgress: data.productivity, iconClassName: 'text-purple-500' },
+      { Icon: Clock, value: formatTime(data.focusMinutes), label: 'Focus time', color: 'bg-blue-500', valueProgress: progress(data.focusMinutes, focusGoal), iconClassName: 'text-blue-500' },
+      { Icon: CheckCircle, value: data.completedTasks, label: 'Completed tasks', color: 'bg-green-500', valueProgress: progress(data.completedTasks, timeRange === 'today' ? 3 : 21), iconClassName: 'text-green-500' },
+      { Icon: Target, value: data.completedGoals, label: 'Completed goals', color: 'bg-orange-500', valueProgress: progress(data.completedGoals, 3), iconClassName: 'text-orange-500' },
+    ];
+  }, [data, timeRange]);
 
   return (
     <AnimatedWidget className="bg-gradient-to-br from-purple-50 via-blue-50 to-pink-50">
@@ -64,10 +75,7 @@ export default function AnalyticsWidget({ title }: AnalyticsWidgetProps) {
 
         {isLoading || !data ? <div className="flex-1 grid place-items-center text-sm text-gray-500">Loading analytics…</div> : <>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <MetricCard icon={<TrendingUp size={20} className="text-purple-500" />} value={`${data.productivity}%`} label="Productivity" color="bg-purple-500" valueProgress={data.productivity} />
-            <MetricCard icon={<Clock size={20} className="text-blue-500" />} value={formatTime(data.focusMinutes)} label="Focus time" color="bg-blue-500" valueProgress={progress(data.focusMinutes, focusGoal)} />
-            <MetricCard icon={<CheckCircle size={20} className="text-green-500" />} value={data.completedTasks} label="Completed tasks" color="bg-green-500" valueProgress={progress(data.completedTasks, timeRange === 'today' ? 3 : 21)} />
-            <MetricCard icon={<Target size={20} className="text-orange-500" />} value={data.completedGoals} label="Completed goals" color="bg-orange-500" valueProgress={progress(data.completedGoals, 3)} />
+            {metrics.map((metric) => <MetricCard key={metric.label} {...metric} />)}
           </div>
 
           <div className="flex items-center text-sm mb-4 text-gray-600"><TrendingUp size={16} className={data.trend >= 0 ? 'text-green-600 mr-1' : 'text-red-600 mr-1'} />{data.trend >= 0 ? '+' : ''}{data.trend}% focus time compared with the previous period</div>

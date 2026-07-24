@@ -24,6 +24,8 @@ export function useAnalytics(range: AnalyticsRange) {
   return useQuery<AnalyticsData>({
     queryKey: ['analytics', range],
     queryFn: () => request(`/api/analytics?range=${range}`),
+    staleTime: 30_000,
+    refetchOnWindowFocus: false,
   });
 }
 
