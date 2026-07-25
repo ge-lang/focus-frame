@@ -2,7 +2,8 @@
 'use client';
 import { AnimatedWidget } from '@/components/animated-widget';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useWeather } from '@/hooks/useWeather';
+import { useWeather, useWeatherSearch } from '@/hooks/useWeather';
+import { countries } from '@/lib/countries';
 import { WeatherIcon } from '@/components/weather-icon';
 import { useState } from 'react';
 import { 
@@ -25,35 +26,18 @@ interface WeatherWidgetProps {
   title?: string;
 }
 
-const locationsByCountry = [
-  { code: 'NL', name: 'Netherlands', cities: ['Amsterdam', 'Rotterdam', 'The Hague', 'Utrecht'] },
-  { code: 'BE', name: 'Belgium', cities: ['Brussels', 'Antwerp', 'Ghent', 'Ostend', 'Bredene', 'Lichtervelde'] },
-  { code: 'GB', name: 'United Kingdom', cities: ['London', 'Manchester', 'Edinburgh'] },
-  { code: 'FR', name: 'France', cities: ['Paris', 'Lyon', 'Marseille'] },
-  { code: 'DE', name: 'Germany', cities: ['Berlin', 'Hamburg', 'Munich'] },
-  { code: 'IT', name: 'Italy', cities: ['Rome', 'Milan', 'Naples'] },
-  { code: 'ES', name: 'Spain', cities: ['Madrid', 'Barcelona', 'Valencia'] },
-  { code: 'US', name: 'United States', cities: ['New York', 'Los Angeles', 'Chicago'] },
-  { code: 'JP', name: 'Japan', cities: ['Tokyo', 'Osaka', 'Kyoto'] },
-  { code: 'AU', name: 'Australia', cities: ['Sydney', 'Melbourne', 'Brisbane'] },
-];
-
-function countryForCity(city: string) {
-  return locationsByCountry.find((country) => country.cities.some((knownCity) => knownCity.toLowerCase() === city.toLowerCase()))?.code;
-}
-
 export default function WeatherWidget({ 
-  widgetId, 
   initialCity = 'Amsterdam',
   title 
 }: WeatherWidgetProps) {
   const { weather, setLocation, refresh } = useWeather(initialCity);
   const [isEditing, setIsEditing] = useState(false);
   const [inputCity, setInputCity] = useState(initialCity);
-  const [countryCode, setCountryCode] = useState(countryForCity(initialCity) ?? 'NL');
+  const [countryCode, setCountryCode] = useState(initialCity.toLowerCase() === 'amsterdam' ? 'NL' : '');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [unit, setUnit] = useState<'celsius' | 'fahrenheit'>('celsius');
+  const { suggestions, isSearching } = useWeatherSearch(isEditing ? inputCity : '', countryCode || undefined);
 
   // Temperature conversion
   const displayTemp = unit === 'celsius' ? weather.temp : Math.round((weather.temp * 9/5) + 32);
@@ -63,6 +47,7 @@ export default function WeatherWidget({
 
   const handleCityChange = (newCity: string, selectedCountry = countryCode) => {
     setLocation(newCity, selectedCountry || undefined);
+    setCountryCode(selectedCountry);
     setIsEditing(false);
     setInputCity(newCity);
   };
@@ -80,11 +65,9 @@ export default function WeatherWidget({
     window.setTimeout(() => setIsRefreshing(false), 400);
   };
 
-  const selectedCountry = locationsByCountry.find((country) => country.code === countryCode);
-  const suggestedCities = selectedCountry?.cities ?? locationsByCountry.flatMap((country) => country.cities);
   const resetLocationForm = () => {
     setInputCity(weather.city || initialCity);
-    setCountryCode(countryForCity(weather.city) ?? countryCode);
+    if (countries.some((country) => country.code === weather.country)) setCountryCode(weather.country);
     setIsEditing(false);
   };
 
@@ -169,16 +152,11 @@ export default function WeatherWidget({
                   Country
                   <select
                     value={countryCode}
-                    onChange={(event) => {
-                      const nextCountryCode = event.target.value;
-                      setCountryCode(nextCountryCode);
-                      const firstCity = locationsByCountry.find((country) => country.code === nextCountryCode)?.cities[0];
-                      if (firstCity) setInputCity(firstCity);
-                    }}
+                    onChange={(event) => setCountryCode(event.target.value)}
                     className="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="">Any country</option>
-                    {locationsByCountry.map((country) => <option key={country.code} value={country.code}>{country.name}</option>)}
+                    {countries.map((country) => <option key={country.code} value={country.code}>{country.name}</option>)}
                   </select>
                 </label>
 
@@ -186,17 +164,29 @@ export default function WeatherWidget({
                   City
                   <input
                     type="text"
-                    list={`${widgetId}-cities`}
                     value={inputCity}
                     onChange={(e) => setInputCity(e.target.value)}
                     placeholder="Choose or enter a city"
                     className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     autoFocus
                   />
-                  <datalist id={`${widgetId}-cities`}>
-                    {suggestedCities.map((city) => <option key={city} value={city} />)}
-                  </datalist>
                 </label>
+                {isSearching && <p className="text-xs text-gray-500">Searching cities…</p>}
+                {suggestions.length > 0 && (
+                  <div className="max-h-40 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-sm">
+                    {suggestions.map((location) => (
+                      <button
+                        key={`${location.name}-${location.state}-${location.country}-${location.lat}`}
+                        type="button"
+                        onClick={() => handleCityChange(location.name, location.country)}
+                        className="flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-blue-50"
+                      >
+                        <span>{location.name}{location.state ? `, ${location.state}` : ''}</span>
+                        <span className="ml-3 text-xs text-gray-500">{location.country}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
                 
                 <div className="grid grid-cols-2 gap-2">
                   <button
@@ -230,7 +220,7 @@ export default function WeatherWidget({
               >
                 <MapPin size={14} className="text-gray-600 mr-1" />
                 <span className="text-sm text-gray-700 group-hover:text-gray-900 transition-colors">
-                  {weather.city}{weather.country && weather.country !== 'Demo' ? `, ${weather.country}` : ''}
+                  {weather.city}{weather.country && weather.country !== 'Demo' ? `, ${countries.find((country) => country.code === weather.country)?.name ?? weather.country}` : ''}
                 </span>
               </div>
               

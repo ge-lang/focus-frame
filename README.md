@@ -91,7 +91,7 @@ Update `.env` with your own values.
 | `GOOGLE_CLIENT_ID` | Yes | Google OAuth client ID |
 | `GOOGLE_CLIENT_SECRET` | Yes | Google OAuth client secret |
 | `GNEWS_API_KEY` | No | Server-only GNews API key for live headlines |
-| `NEXT_PUBLIC_OPENWEATHER_API_KEY` | No | Public weather API key used by the weather widget |
+| `OPENWEATHER_API_KEY` | No | Server-only OpenWeather API key for weather and global city search |
 
 Example:
 
@@ -102,10 +102,10 @@ NEXTAUTH_URL="http://localhost:3000"
 GOOGLE_CLIENT_ID="your_google_client_id"
 GOOGLE_CLIENT_SECRET="your_google_client_secret"
 GNEWS_API_KEY="your_gnews_api_key"
-NEXT_PUBLIC_OPENWEATHER_API_KEY="your_openweather_api_key"
+OPENWEATHER_API_KEY="your_openweather_api_key"
 ```
 
-> Never prefix the GNews key with `NEXT_PUBLIC_` and never commit `.env` files. GNews requests are made server-side by `/api/news`.
+> Never prefix API keys with `NEXT_PUBLIC_` and never commit `.env` files. News and weather requests are made server-side by `/api/news` and `/api/weather`.
 
 ### Prepare the database and start the app
 

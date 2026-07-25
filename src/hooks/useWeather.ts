@@ -1,7 +1,5 @@
-// src/hooks/useWeather.ts
 'use client';
-import { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import { useCallback, useEffect, useState } from 'react';
 
 interface WeatherData {
   temp: number;
@@ -32,6 +30,14 @@ interface ForecastItem {
   description: string;
 }
 
+export interface LocationSuggestion {
+  name: string;
+  state: string | null;
+  country: string;
+  lat: number;
+  lon: number;
+}
+
 interface UseWeatherReturn {
   weather: WeatherData;
   forecast: ForecastItem[];
@@ -43,268 +49,110 @@ interface UseWeatherReturn {
   isDemo: boolean;
 }
 
-// Cache for weather data
-const weatherCache = new Map();
+const weatherCache = new Map<string, { weather: WeatherData; forecast: ForecastItem[]; timestamp: number; isDemo: boolean }>();
 
-export function useWeather(initialCity: string = 'Amsterdam'): UseWeatherReturn {
+function generateDemoData(city: string, countryCode?: string): WeatherData {
+  const now = Date.now();
+  const baseTemp = 15 + Math.sin(now / 10_000_000) * 10;
+  const hour = new Date().getHours();
+  return {
+    temp: Math.round(baseTemp), feelsLike: Math.round(baseTemp - 1), description: 'demo weather', icon: hour > 6 && hour < 20 ? '01d' : '01n',
+    city, country: countryCode || 'Demo', humidity: 58, windSpeed: 3.2, windDirection: 180, pressure: 1015, visibility: 10_000,
+    sunrise: Math.floor((now - 3_600_000) / 1000), sunset: Math.floor((now + 3_600_000) / 1000), cloudiness: 20, uvIndex: 3,
+    dewPoint: Math.round(baseTemp - 5), loading: false, error: null, lastUpdated: now,
+  };
+}
+
+function generateDemoForecast(): ForecastItem[] {
+  return Array.from({ length: 5 }, (_, index) => ({
+    dt: Math.floor(Date.now() / 1000) + index * 10_800,
+    temp: Math.round(15 + Math.sin(index) * 5), icon: index % 2 === 0 ? '01d' : '02d', description: index % 3 === 0 ? 'clear sky' : 'few clouds',
+  }));
+}
+
+export function useWeather(initialCity = 'Amsterdam'): UseWeatherReturn {
   const [city, setCity] = useState(initialCity);
-  const [weather, setWeather] = useState<WeatherData>({
-    temp: 0,
-    feelsLike: 0,
-    description: '',
-    icon: '',
-    city: '',
-    country: '',
-    humidity: 0,
-    windSpeed: 0,
-    windDirection: 0,
-    pressure: 0,
-    visibility: 0,
-    sunrise: 0,
-    sunset: 0,
-    cloudiness: 0,
-    uvIndex: 0,
-    dewPoint: 0,
-    loading: true,
-    error: null,
-    lastUpdated: 0,
-  });
-  
+  const [countryCode, setCountryCode] = useState<string | undefined>();
+  const [weather, setWeather] = useState<WeatherData>({ ...generateDemoData(initialCity), loading: true });
   const [forecast, setForecast] = useState<ForecastItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDemo, setIsDemo] = useState(true);
 
-  // Generate demo data with realistic values
-  const generateDemoData = useCallback((currentCity: string) => {
-    const now = Date.now();
-    const baseTemp = 15 + Math.sin(now / 10000000) * 10; // Temperature fluctuations
-    const hour = new Date().getHours();
-    const isDay = hour > 6 && hour < 20;
-    
-    return {
-      temp: Math.round(baseTemp),
-      feelsLike: Math.round(baseTemp - 1),
-      description: ['clear sky', 'few clouds', 'scattered clouds', 'broken clouds', 'shower rain', 'rain', 'thunderstorm', 'snow', 'mist'][Math.floor(Math.random() * 9)],
-      icon: isDay ? '01d' : '01n',
-      city: currentCity,
-      country: 'Demo',
-      humidity: 40 + Math.floor(Math.random() * 40),
-      windSpeed: Math.round((Math.random() * 10 + 1) * 10) / 10,
-      windDirection: Math.floor(Math.random() * 360),
-      pressure: 1000 + Math.floor(Math.random() * 30),
-      visibility: 10000,
-      sunrise: Math.floor((now - 3600000) / 1000), // 1 hour ago
-      sunset: Math.floor((now + 3600000) / 1000),  // In 1 hour
-      cloudiness: Math.floor(Math.random() * 100),
-      uvIndex: Math.floor(Math.random() * 11),
-      dewPoint: Math.round(baseTemp - 5 - Math.random() * 5),
-      loading: false,
-      error: null,
-      lastUpdated: now,
-    };
-  }, []);
-
-  // Generate a demo forecast
-  const generateDemoForecast = useCallback(() => {
-    const forecastItems: ForecastItem[] = [];
-    const baseTemp = 15;
-    
-    for (let i = 0; i < 5; i++) {
-      forecastItems.push({
-        dt: Date.now() / 1000 + i * 3 * 3600, // Every 3 hours
-        temp: Math.round(baseTemp + Math.sin(i) * 5),
-        icon: i % 2 === 0 ? '01d' : '02d',
-        description: i % 3 === 0 ? 'clear sky' : 'few clouds',
-      });
-    }
-    
-    return forecastItems;
-  }, []);
-
-  const fetchWeatherData = useCallback(async (cityName: string, forceRefresh: boolean = false) => {
-    const cacheKey = `weather_${cityName.toLowerCase()}`;
-    const now = Date.now();
-    
-    // Check the cache (valid for 10 minutes)
-    if (!forceRefresh && weatherCache.has(cacheKey)) {
-      const cached = weatherCache.get(cacheKey);
-      if (now - cached.timestamp < 10 * 60 * 1000) {
-        setWeather(cached.weather);
-        setForecast(cached.forecast || []);
-        setIsDemo(cached.isDemo);
-        setIsLoading(false);
-        return;
-      }
+  const fetchWeatherData = useCallback(async (forceRefresh = false) => {
+    const cacheKey = `${city.toLowerCase()}_${countryCode ?? ''}`;
+    const cached = weatherCache.get(cacheKey);
+    if (!forceRefresh && cached && Date.now() - cached.timestamp < 10 * 60 * 1000) {
+      setWeather(cached.weather);
+      setForecast(cached.forecast);
+      setIsDemo(cached.isDemo);
+      setIsLoading(false);
+      return;
     }
 
+    setIsLoading(true);
+    setWeather((previous) => ({ ...previous, loading: true, error: null }));
     try {
-      setIsLoading(true);
-      setWeather(prev => ({ ...prev, loading: true, error: null }));
-
-      const API_KEY = process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY;
-
-      // Check the API key
-      if (!API_KEY || API_KEY === 'your_api_key_here') {
-        const demoWeather = generateDemoData(cityName);
-        const demoForecast = generateDemoForecast();
-        
-        const demoData = {
-          weather: demoWeather,
-          forecast: demoForecast,
-          isDemo: true,
-          timestamp: now,
-        };
-        
-        weatherCache.set(cacheKey, demoData);
-        setWeather(demoWeather);
-        setForecast(demoForecast);
-        setIsDemo(true);
-        setIsLoading(false);
-        return;
-      }
-
+      const params = new URLSearchParams({ city });
+      if (countryCode) params.set('country', countryCode);
+      const response = await fetch(`/api/weather?${params}`);
+      if (!response.ok) throw new Error('Weather service is unavailable');
+      const data = await response.json() as { weather: WeatherData; forecast: ForecastItem[] };
+      weatherCache.set(cacheKey, { weather: data.weather, forecast: data.forecast, timestamp: Date.now(), isDemo: false });
+      setWeather(data.weather);
+      setForecast(data.forecast);
       setIsDemo(false);
-
-      // Fetch current weather and the forecast in parallel
-      const [currentResponse, forecastResponse] = await Promise.all([
-        axios.get(`https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=${API_KEY}&units=metric&lang=en`),
-        axios.get(`https://api.openweathermap.org/data/2.5/forecast?q=${cityName}&appid=${API_KEY}&units=metric&cnt=5`)
-      ]);
-
-      const currentData = currentResponse.data;
-      const forecastData = forecastResponse.data;
-
-      // Calculate the UV index and dew point (simplified)
-      const uvIndex = Math.min(Math.floor(currentData.main.temp / 5), 11);
-      const dewPoint = currentData.main.temp - ((100 - currentData.main.humidity) / 5);
-
-      const newWeather: WeatherData = {
-        temp: Math.round(currentData.main.temp),
-        feelsLike: Math.round(currentData.main.feels_like),
-        description: currentData.weather[0].description,
-        icon: currentData.weather[0].icon,
-        city: currentData.name,
-        country: currentData.sys.country,
-        humidity: currentData.main.humidity,
-        windSpeed: Math.round(currentData.wind.speed * 10) / 10,
-        windDirection: currentData.wind.deg || 0,
-        pressure: currentData.main.pressure,
-        visibility: currentData.visibility,
-        sunrise: currentData.sys.sunrise,
-        sunset: currentData.sys.sunset,
-        cloudiness: currentData.clouds.all,
-        uvIndex,
-        dewPoint: Math.round(dewPoint * 10) / 10,
-        loading: false,
-        error: null,
-        lastUpdated: now,
-      };
-
-      const newForecast: ForecastItem[] = forecastData.list.map((item: any) => ({
-        dt: item.dt,
-        temp: Math.round(item.main.temp),
-        icon: item.weather[0].icon,
-        description: item.weather[0].description,
-      }));
-
-      // Save to cache
-      weatherCache.set(cacheKey, {
-        weather: newWeather,
-        forecast: newForecast,
-        isDemo: false,
-        timestamp: now,
-      });
-
-      setWeather(newWeather);
-      setForecast(newForecast);
-
-    } catch (error: any) {
-      console.error('Weather fetch error:', error);
-      
-      // Use demo data if an error occurs
-      const demoWeather = generateDemoData(cityName);
-      const demoForecast = generateDemoForecast();
-      
-      setWeather({
-        ...demoWeather,
-        error: error.response?.data?.message || 'Failed to load weather data',
-      });
-      setForecast(demoForecast);
+    } catch {
+      setWeather({ ...generateDemoData(city, countryCode), error: 'Showing demo data until the weather service is available.' });
+      setForecast(generateDemoForecast());
       setIsDemo(true);
     } finally {
       setIsLoading(false);
     }
-  }, [generateDemoData, generateDemoForecast]);
+  }, [city, countryCode]);
 
-  const refresh = useCallback(() => {
-    fetchWeatherData(city, true);
-  }, [city, fetchWeatherData]);
-
-  // Main effect for loading data
+  useEffect(() => { void fetchWeatherData(); }, [fetchWeatherData]);
   useEffect(() => {
-    if (city) {
-      fetchWeatherData(city);
-    }
-  }, [city, fetchWeatherData]);
-
-  // Automatically refresh every 15 minutes
-  useEffect(() => {
-    const interval = setInterval(() => {
-      fetchWeatherData(city);
-    }, 15 * 60 * 1000);
-
-    return () => clearInterval(interval);
-  }, [city, fetchWeatherData]);
+    const interval = window.setInterval(() => void fetchWeatherData(), 15 * 60 * 1000);
+    return () => window.clearInterval(interval);
+  }, [fetchWeatherData]);
 
   return {
     weather,
     forecast,
-    setCity: (newCity: string) => {
-      if (newCity.trim()) {
-        setCity(newCity.trim());
-      }
-    },
-    setLocation: (newCity: string, countryCode?: string) => {
-      const cityName = newCity.trim();
-      if (cityName) {
-        setCity(countryCode ? `${cityName},${countryCode}` : cityName);
-      }
-    },
+    setCity: (newCity) => { if (newCity.trim()) { setCity(newCity.trim()); setCountryCode(undefined); } },
+    setLocation: (newCity, newCountryCode) => { if (newCity.trim()) { setCity(newCity.trim()); setCountryCode(newCountryCode); } },
     city,
-    refresh,
+    refresh: () => { void fetchWeatherData(true); },
     isLoading,
     isDemo,
   };
 }
 
-// Helper functions
-export const getWindDirection = (degrees: number): string => {
-  const directions = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
-  return directions[Math.round(degrees / 22.5) % 16];
-};
+export function useWeatherSearch(query: string, countryCode?: string) {
+  const [suggestions, setSuggestions] = useState<LocationSuggestion[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
 
-export const getUVIndexLevel = (uvIndex: number): string => {
-  if (uvIndex <= 2) return 'Low';
-  if (uvIndex <= 5) return 'Moderate';
-  if (uvIndex <= 7) return 'High';
-  if (uvIndex <= 10) return 'Very High';
-  return 'Extreme';
-};
+  useEffect(() => {
+    const search = query.trim();
+    if (search.length < 2) { setSuggestions([]); return; }
+    const controller = new AbortController();
+    const timer = window.setTimeout(async () => {
+      setIsSearching(true);
+      try {
+        const params = new URLSearchParams({ search });
+        if (countryCode) params.set('country', countryCode);
+        const response = await fetch(`/api/weather?${params}`, { signal: controller.signal });
+        setSuggestions(response.ok ? await response.json() as LocationSuggestion[] : []);
+      } catch (error) {
+        if ((error as Error).name !== 'AbortError') setSuggestions([]);
+      } finally {
+        if (!controller.signal.aborted) setIsSearching(false);
+      }
+    }, 250);
+    return () => { window.clearTimeout(timer); controller.abort(); };
+  }, [query, countryCode]);
 
-export const formatTime = (timestamp: number): string => {
-  return new Date(timestamp * 1000).toLocaleTimeString('en-US', {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-  });
-};
+  return { suggestions, isSearching };
+}
 
-export const getMoonPhase = (): string => {
-  const phases = ['🌑 New', '🌒 Waxing Crescent', '🌓 First Quarter', '🌔 Waxing Gibbous', 
-                 '🌕 Full', '🌖 Waning Gibbous', '🌗 Last Quarter', '🌘 Waning Crescent'];
-  const cycle = 29.53; // Lunar cycle in days
-  const knownNewMoon = new Date('2024-01-11').getTime();
-  const daysSinceNewMoon = (Date.now() - knownNewMoon) / (1000 * 60 * 60 * 24);
-  const phaseIndex = Math.floor((daysSinceNewMoon % cycle) / (cycle / 8));
-  return phases[phaseIndex % phases.length];
-};
+export const getWindDirection = (degrees: number) => ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'][Math.round(degrees / 22.5) % 16];
