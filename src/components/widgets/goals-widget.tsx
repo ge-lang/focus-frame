@@ -1,6 +1,8 @@
 'use client';
 import { useState } from 'react';
 import { AnimatedWidget } from '@/components/animated-widget';
+import { EmptyState } from '@/components/empty-state';
+import { Target } from 'lucide-react';
 import { Priority, useCreateGoal, useDeleteGoal, useGoals, useUpdateGoal } from '@/hooks/use-personal-widgets';
 
 interface GoalsWidgetProps {
@@ -77,7 +79,13 @@ export default function GoalsWidget({ title }: GoalsWidgetProps) {
           ))}
         </div>
 
-        {!isLoading && goals.length === 0 && !isAdding && <div className="text-center text-gray-500 py-4">No goals set. Click + to add your first goal!</div>}
+        {!isLoading && goals.length === 0 && !isAdding && (
+          <EmptyState
+            icon={Target}
+            title="No goals yet"
+            action={<button onClick={() => setIsAdding(true)} className="text-sm font-medium text-indigo-700 hover:text-indigo-900">Add goal</button>}
+          />
+        )}
       </div>
     </AnimatedWidget>
   );

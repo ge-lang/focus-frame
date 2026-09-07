@@ -61,7 +61,9 @@ export function WidgetPicker() {
       {/* Add button — use motion.button instead of AnimatedButton for animations */}
       <motion.button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center space-x-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg transition-colors"
+        aria-expanded={isOpen}
+        aria-haspopup="menu"
+        className="flex items-center space-x-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-700"
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
       >
@@ -95,6 +97,7 @@ export function WidgetPicker() {
                 <h3 className="font-semibold text-gray-900">Add Widget</h3>
                 <button
                   onClick={() => setIsOpen(false)}
+                  aria-label="Close add widget menu"
                   className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
                 >
                   <X size={16} />

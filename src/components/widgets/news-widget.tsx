@@ -37,6 +37,7 @@ const categoryLabels: Record<string, string> = {
 
 export default function NewsWidget({ widgetId, title }: NewsWidgetProps) {
   const [selectedCategory, setSelectedCategory] = useState('general');
+  const [showAll, setShowAll] = useState(false);
   const { articles, loading, error, isDemo } = useNews(selectedCategory);
 
   const formatTime = (dateString: string) => {
@@ -136,8 +137,8 @@ export default function NewsWidget({ widgetId, title }: NewsWidgetProps) {
 
         {/* News list */}
         {!loading && !error && (
-          <div className="flex-1 overflow-y-auto space-y-3 pr-1">
-            {articles.slice(0, 4).map((article, index) => (
+          <div className="max-h-[28rem] flex-1 space-y-3 overflow-y-auto pr-1">
+            {articles.slice(0, showAll ? articles.length : 3).map((article, index) => (
               <motion.div
                 key={`${article.title}-${index}`}
                 initial={{ opacity: 0, y: 20 }}
@@ -182,6 +183,16 @@ export default function NewsWidget({ widgetId, title }: NewsWidgetProps) {
               </motion.div>
             ))}
           </div>
+        )}
+
+        {!loading && !error && articles.length > 3 && (
+          <button
+            type="button"
+            onClick={() => setShowAll((current) => !current)}
+            className="mt-2 self-center rounded-lg px-3 py-1.5 text-xs font-medium text-blue-700 transition-colors hover:bg-white/70"
+          >
+            {showAll ? 'Show less' : `Show more (${articles.length - 3})`}
+          </button>
         )}
 
         {/* Footer with API instructions */}

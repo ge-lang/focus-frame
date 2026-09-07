@@ -20,6 +20,7 @@ import { SortableWidget } from './sortable-widget';
 import { WidgetRenderer } from './widget-renderer';
 import { motion } from 'framer-motion';
 import { easeOut } from 'framer-motion';
+import { getGridSpanClass, GRID_ROW_HEIGHT, withWidgetSizing } from '@/lib/dashboard-layout';
 
 // Animations for the container and its items
 const containerVariants = {
@@ -62,7 +63,7 @@ export function DashboardGrid() {
       const newIndex = layout.findIndex((item) => item.i === over.id);
 
       if (oldIndex !== -1 && newIndex !== -1) {
-        const newLayout = arrayMove(layout, oldIndex, newIndex);
+        const newLayout = arrayMove(layout, oldIndex, newIndex).map(withWidgetSizing);
         updateLayout(newLayout);
       }
     }
@@ -80,7 +81,7 @@ export function DashboardGrid() {
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="grid grid-cols-1 items-start gap-5 lg:grid-cols-3"
+        className="grid auto-rows-[minmax(180px,auto)] grid-cols-1 items-start gap-5 lg:grid-cols-3"
       >
         {layout.map((item) => {
           const widget = getWidgetById(item.i);
@@ -88,7 +89,8 @@ export function DashboardGrid() {
             <motion.div
               key={item.i}
               variants={itemVariants}
-              className={`${item.w > 1 ? 'lg:col-span-2' : ''} self-start`}
+              className={`${getGridSpanClass(item.w)} self-start`}
+              style={{ gridRow: `span ${item.h}`, minHeight: `${item.h * GRID_ROW_HEIGHT}px` }}
             >
               <WidgetRenderer widget={widget} />
             </motion.div>
@@ -110,7 +112,7 @@ export function DashboardGrid() {
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="grid grid-cols-1 items-start gap-5 rounded-2xl border-2 border-dashed border-indigo-200 bg-indigo-50/40 p-3 lg:grid-cols-3"
+          className="grid auto-rows-[minmax(180px,auto)] grid-cols-1 items-start gap-5 rounded-2xl border-2 border-dashed border-indigo-200 bg-indigo-50/40 p-3 lg:grid-cols-3"
         >
           {layout.map((item) => {
             const widget = getWidgetById(item.i);
@@ -118,7 +120,8 @@ export function DashboardGrid() {
               <motion.div
                 key={item.i}
                 variants={itemVariants}
-                className={`${item.w > 1 ? 'lg:col-span-2' : ''} self-start`}
+                className={`${getGridSpanClass(item.w)} self-start`}
+                style={{ gridRow: `span ${item.h}`, minHeight: `${item.h * GRID_ROW_HEIGHT}px` }}
               >
                 <SortableWidget id={item.i} type={item.type} />
               </motion.div>

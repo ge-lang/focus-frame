@@ -5,6 +5,7 @@ import { AnimatedWidget } from '@/components/animated-widget';
 import { AnimatedButton } from '@/components/animated-button';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
 import { useTasks } from '@/hooks/use-tasks';
+import { EmptyState } from '@/components/empty-state';
 
 
 
@@ -77,7 +78,7 @@ export default function CalendarWidget({ widgetId, title }: CalendarWidgetProps)
 
   return (
     <AnimatedWidget>
-      <div className="p-4">
+      <div className="p-1">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center">
@@ -155,7 +156,7 @@ export default function CalendarWidget({ widgetId, title }: CalendarWidgetProps)
           <h4 className="font-medium text-sm mb-2">Next 7 days</h4>
           {upcomingTasks.length ? <div className="space-y-1">
             {upcomingTasks.map((task) => <div key={task.id} className="text-xs flex justify-between gap-2 text-gray-600"><span className="truncate">{task.title}</span><span className="shrink-0 text-blue-600">{new Date(`${task.dueDate?.slice(0, 10)}T00:00:00`).toLocaleDateString()}</span></div>)}
-          </div> : <div className="text-xs text-gray-500 text-center">No task deadlines this week</div>}
+          </div> : <EmptyState icon={CalendarIcon} title="No deadlines this week" />}
         </div>
       </div>
     </AnimatedWidget>

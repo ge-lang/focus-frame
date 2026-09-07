@@ -2,6 +2,7 @@
 'use client';
 import React, { createContext, useContext, useEffect, useReducer, useRef, ReactNode } from 'react';
 import { WidgetType } from '@/types/dashboard';
+import { withWidgetSizing } from '@/lib/dashboard-layout';
 
 // Types
 export interface Widget {
@@ -131,7 +132,11 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
         if (isMounted && data?.state) {
           dispatch({
             type: 'LOAD_STATE',
-            payload: { ...data.state, isEditing: false },
+            payload: {
+              ...data.state,
+              layout: data.state.layout.map(withWidgetSizing),
+              isEditing: false,
+            },
           });
         }
       })
@@ -204,26 +209,25 @@ const addWidget = (type: WidgetType, config?: { title?: string; colSpan?: number
     w: newWidget.colSpan,    // Use the widget's colSpan
     h: newWidget.rowSpan || 1, // Use the widget's rowSpan
     type: newWidget.type,
-    minW: 1,
-    minH: 1,
   };
+  const sizedLayoutItem = withWidgetSizing(newLayoutItem);
 
   // Find the maximum Y position to place the widget at the bottom
   const maxY = state.layout.reduce((max, item) => Math.max(max, item.y + item.h), 0);
-  newLayoutItem.y = maxY;
+  sizedLayoutItem.y = maxY;
 
   // Find a free X position
   const gridColumns = 3; // Assume three columns
   let placed = false;
   
-  for (let x = 0; x <= gridColumns - newLayoutItem.w; x++) {
+  for (let x = 0; x <= gridColumns - sizedLayoutItem.w; x++) {
     const isOccupied = state.layout.some(item => 
-      item.y <= newLayoutItem.y && newLayoutItem.y < item.y + item.h &&
+      item.y <= sizedLayoutItem.y && sizedLayoutItem.y < item.y + item.h &&
       item.x <= x && x < item.x + item.w
     );
-    
+
     if (!isOccupied) {
-      newLayoutItem.x = x;
+      sizedLayoutItem.x = x;
       placed = true;
       break;
     }
@@ -231,8 +235,8 @@ const addWidget = (type: WidgetType, config?: { title?: string; colSpan?: number
 
   // If there is no space in the current row, place it in a new one
   if (!placed) {
-    newLayoutItem.x = 0;
-    newLayoutItem.y = maxY + 1;
+    sizedLayoutItem.x = 0;
+    sizedLayoutItem.y = maxY + 1;
   }
 
   // Dispatch the updates
@@ -243,7 +247,7 @@ const addWidget = (type: WidgetType, config?: { title?: string; colSpan?: number
   
   dispatch({ 
     type: 'UPDATE_LAYOUT', 
-    payload: [...state.layout, newLayoutItem]
+    payload: [...state.layout, sizedLayoutItem]
   });
 };
     

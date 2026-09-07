@@ -9,12 +9,14 @@ import {
   Edit, 
   Calendar,
   Flag,
-  GripVertical
+  GripVertical,
+  ClipboardList
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Task, TaskStatus } from '@/types/task';
 import { useCreateTask, useDeleteTask, useTasks, useUpdateTask } from '@/hooks/use-tasks';
 import { filterTasks, getDueDateMeta, type DueDateFilter } from '@/lib/task-utils';
+import { EmptyState } from '@/components/empty-state';
 
 interface TaskWidgetProps {
   widgetId: string;
@@ -241,9 +243,7 @@ function TaskColumn({
         </AnimatePresence>
 
         {tasks.length === 0 && (
-          <div className="text-center text-gray-400 text-sm py-8">
-            No tasks
-          </div>
+          <EmptyState icon={ClipboardList} title="No tasks in this column" />
         )}
       </div>
     </div>
@@ -354,7 +354,7 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
   const completionPercentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
   return (
-    <AnimatedWidget className="w-full bg-gradient-to-br from-purple-50 to-indigo-100 lg:h-[680px]">
+    <AnimatedWidget className="w-full bg-gradient-to-br from-purple-50 to-indigo-100 min-h-0">
       <div className="flex h-full min-h-0 flex-col">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-2">

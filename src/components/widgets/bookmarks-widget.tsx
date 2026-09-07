@@ -1,6 +1,8 @@
 'use client';
 import { useState } from 'react';
 import { AnimatedWidget } from '@/components/animated-widget';
+import { EmptyState } from '@/components/empty-state';
+import { Bookmark } from 'lucide-react';
 import { useBookmarks, useCreateBookmark, useDeleteBookmark } from '@/hooks/use-personal-widgets';
 
 interface BookmarksWidgetProps {
@@ -55,7 +57,13 @@ export default function BookmarksWidget({ title }: BookmarksWidgetProps) {
             </div>
           ))}
         </div>
-        {!isLoading && bookmarks.length === 0 && !isAdding && <div className="text-center text-gray-500 py-4">No bookmarks yet. Click + to add one.</div>}
+        {!isLoading && bookmarks.length === 0 && !isAdding && (
+          <EmptyState
+            icon={Bookmark}
+            title="No bookmarks yet"
+            action={<button onClick={() => setIsAdding(true)} className="text-sm font-medium text-green-700 hover:text-green-900">Add bookmark</button>}
+          />
+        )}
       </div>
     </AnimatedWidget>
   );

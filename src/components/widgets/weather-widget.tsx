@@ -333,8 +333,8 @@ export default function WeatherWidget({
 
         {/* Error status */}
         {weather.error && (
-          <div className="mt-2 p-2 bg-red-100 text-red-700 rounded text-xs text-center">
-            ⚠️ {weather.error}
+          <div className="mt-2 rounded-lg border border-sky-200 bg-sky-50 p-2 text-center text-xs text-sky-700">
+            ℹ️ {weather.error}
           </div>
         )}
       </div>
