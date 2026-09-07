@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(response.data.map((location: { name: string; state?: string; country: string; lat: number; lon: number }) => ({
         name: location.name,
         state: location.state ?? null,
-        country: location.country,
+        country: location.country.toUpperCase(),
         lat: location.lat,
         lon: location.lon,
       })));
@@ -68,6 +68,9 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     const status = axios.isAxiosError(error) ? error.response?.status : undefined;
-    return NextResponse.json({ error: 'Unable to fetch weather data' }, { status: status && status < 500 ? status : 502 });
+    if (status === 404) return NextResponse.json({ error: 'City not found' }, { status: 404 });
+    if (status === 429) return NextResponse.json({ error: 'Weather service rate limit reached' }, { status: 429 });
+    if (status === 401 || status === 403) return NextResponse.json({ error: 'Weather service is not configured' }, { status: 503 });
+    return NextResponse.json({ error: 'Weather service is temporarily unavailable' }, { status: 502 });
   }
 }
