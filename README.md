@@ -1,6 +1,6 @@
 # FocusFrame
 
-FocusFrame is a personal productivity dashboard built as a junior full-stack portfolio project. It brings tasks, Pomodoro focus sessions, notes, goals, bookmarks, analytics, weather and news into one customizable workspace.
+FocusFrame is a personal productivity dashboard built as a learning and portfolio project. It brings tasks, Pomodoro focus sessions, notes, goals, bookmarks, analytics, weather and news into one customizable workspace.
 
 ## Core features
 
@@ -20,17 +20,17 @@ FocusFrame is a personal productivity dashboard built as a junior full-stack por
 - NextAuth.js with Google OAuth and the Prisma adapter
 - Prisma ORM with PostgreSQL
 - Vitest for automated tests
-- Vercel and a PostgreSQL provider such as Neon for deployment
+- Vercel and a PostgreSQL provider for deployment
 
 ## Architecture overview
 
-The browser renders React components and widgets. Hooks use React Query or small browser-side state helpers to call Next.js API routes. Server routes obtain the authenticated session, validate input, enforce ownership, and use Prisma to read or write PostgreSQL data. News and weather are server-side proxy routes so their API keys are not sent to the browser.
+The browser renders React components and widgets. Hooks use React Query or small browser-side state helpers to call Next.js API routes. Server routes obtain the authenticated session, validate input, apply user-ownership scoping, and use Prisma to read or write PostgreSQL data. News and weather are server-side proxy routes so their API keys are not sent to the browser.
 
 More detail is in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). The interview-oriented explanation is in [docs/PROJECT-WALKTHROUGH.md](docs/PROJECT-WALKTHROUGH.md), with short study answers in [docs/INTERVIEW-CHEATSHEET.md](docs/INTERVIEW-CHEATSHEET.md).
 
 ## Authentication and user-data isolation
 
-NextAuth.js creates the server session after Google sign-in. Personal API routes derive the current user ID from that session; they do not trust a user ID from a request body, query string or route parameter. Queries and object mutations are scoped to both the resource ID and authenticated user ID where applicable. This prevents a signed-in user from accessing another user’s resource by guessing an ID.
+NextAuth.js creates the server session after Google sign-in. Personal API routes derive the current user ID from that session; they do not trust a user ID from a request body, query string or route parameter. Queries and object mutations apply both the resource ID and authenticated user ID where applicable, providing an application-level safeguard against cross-user access by guessed IDs.
 
 ## Database models
 
@@ -121,15 +121,14 @@ The intended deployment target is Vercel with PostgreSQL. Configure all required
 
 ## Roadmap
 
-- Audit and safely resolve nullable task ownership data.
-- Add a repeatable CI database/test environment.
-- Add deadline reminders.
-- Consider Google Calendar integration as a separate future feature.
-- Expand widget templates and dashboard presets.
+- Safely resolve nullable task ownership data after a data audit.
+- Add database/API integration tests.
+- Add browser E2E coverage for core flows.
+- Add deadline reminders and calendar integration.
 
 ## AI-assisted development
 
-Development was AI-assisted. AI was used for implementation suggestions, debugging, explaining code, comparing alternatives and speeding up learning. The project owner remains responsible for defining the requirements, understanding the architecture, evaluating generated code, testing behavior, debugging failures, and deciding what to keep or reject.
+I used AI to support implementation, debugging, explanations and evaluating alternatives. I reviewed the suggested solutions, tested the application and used the project to deepen my understanding of its architecture. I remain responsible for deciding what to keep and how the application should work.
 
 ## License
 
