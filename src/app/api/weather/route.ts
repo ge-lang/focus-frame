@@ -6,7 +6,7 @@ const WEATHER_API_URL = 'https://api.openweathermap.org/data/2.5';
 const GEO_API_URL = 'https://api.openweathermap.org/geo/1.0/direct';
 
 export async function GET(request: NextRequest) {
-  const apiKey = process.env.OPENWEATHER_API_KEY || process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY;
+  const apiKey = process.env.OPENWEATHER_API_KEY;
   const { searchParams } = request.nextUrl;
   const city = searchParams.get('city')?.trim();
   const country = searchParams.get('country')?.trim().toUpperCase();

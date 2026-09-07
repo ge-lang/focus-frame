@@ -5,7 +5,6 @@ export type WidgetType =
   | 'news' 
   | 'pomodoro'
   | 'calendar'
-  | 'stocks'       // New: stocks
   | 'notes'        // New: notes
   | 'analytics'    // New: analytics
   | 'bookmarks'    // New: bookmarks

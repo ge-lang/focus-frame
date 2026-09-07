@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { isIntegerBetween } from '@/lib/api-validation';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUserId } from '@/lib/api-auth';
+import { InvalidRequestError, readJsonObject } from '@/lib/api-validation';
 
 const defaults = {
   dailyFocusGoal: 100,
@@ -21,9 +23,10 @@ export async function PUT(request: NextRequest) {
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   try {
-    const { dailyFocusGoal, dailyPomodoroGoal, notificationsEnabled } = await request.json();
-    if ((dailyFocusGoal !== undefined && (!Number.isInteger(dailyFocusGoal) || dailyFocusGoal < 15 || dailyFocusGoal > 960)) ||
-        (dailyPomodoroGoal !== undefined && (!Number.isInteger(dailyPomodoroGoal) || dailyPomodoroGoal < 1 || dailyPomodoroGoal > 20)) ||
+    const body = await readJsonObject(request);
+    const { dailyFocusGoal, dailyPomodoroGoal, notificationsEnabled } = body;
+    if ((dailyFocusGoal !== undefined && !isIntegerBetween(dailyFocusGoal, 15, 960)) ||
+        (dailyPomodoroGoal !== undefined && !isIntegerBetween(dailyPomodoroGoal, 1, 20)) ||
         (notificationsEnabled !== undefined && typeof notificationsEnabled !== 'boolean')) {
       return NextResponse.json({ error: 'Invalid settings' }, { status: 400 });
     }
@@ -39,7 +42,10 @@ export async function PUT(request: NextRequest) {
       update: data,
     });
     return NextResponse.json(settings);
-  } catch {
+  } catch (error) {
+    if (error instanceof InvalidRequestError) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
     return NextResponse.json({ error: 'Failed to save settings' }, { status: 500 });
   }
 }

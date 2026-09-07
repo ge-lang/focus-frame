@@ -19,7 +19,6 @@ const WIDGET_TYPES: {
   { type: 'news', label: 'News', icon: '📰', description: 'Latest news feed', colSpan: 2 },
   { type: 'pomodoro', label: 'Pomodoro', icon: '⏱️', description: 'Focus timer', colSpan: 1 },
   { type: 'calendar', label: 'Calendar', icon: '📅', description: 'Upcoming events', colSpan: 1 },
-  { type: 'stocks', label: 'Stocks', icon: '📈', description: 'Stock market data', colSpan: 1 },
   { type: 'notes', label: 'Notes', icon: '📝', description: 'Quick notes', colSpan: 1 },
   { type: 'analytics', label: 'Analytics', icon: '📊', description: 'Productivity stats', colSpan: 2 },
   { type: 'bookmarks', label: 'Bookmarks', icon: '🔖', description: 'Website links', colSpan: 1 },

@@ -49,7 +49,6 @@ const initialState: DashboardState = {
     { id: 'news-1', type: 'news', colSpan: 2, rowSpan: 1 },
     { id: 'pomodoro-1', type: 'pomodoro', colSpan: 1, rowSpan: 1 },
     { id: 'calendar-1', type: 'calendar', colSpan: 1, rowSpan: 2 },
-    { id: 'stocks-1', type: 'stocks', colSpan: 1, rowSpan: 1 },
     { id: 'notes-1', type: 'notes', colSpan: 1, rowSpan: 1 },
     { id: 'analytics-1', type: 'analytics', colSpan: 2, rowSpan: 2 },
     { id: 'bookmarks-1', type: 'bookmarks', colSpan: 1, rowSpan: 1 },
@@ -61,7 +60,6 @@ const initialState: DashboardState = {
     { i: 'news-1', x: 0, y: 2, w: 2, h: 1, type: 'news', minW: 2, minH: 1 },
     { i: 'pomodoro-1', x: 2, y: 1, w: 1, h: 1, type: 'pomodoro', minW: 1, minH: 1 },
     { i: 'calendar-1', x: 3, y: 0, w: 1, h: 2, type: 'calendar', minW: 1, minH: 2 },
-    { i: 'stocks-1', x: 2, y: 2, w: 1, h: 1, type: 'stocks', minW: 1, minH: 1 },
     { i: 'notes-1', x: 3, y: 2, w: 1, h: 1, type: 'notes', minW: 1, minH: 1 },
     { i: 'analytics-1', x: 0, y: 3, w: 2, h: 2, type: 'analytics', minW: 2, minH: 2 },
     { i: 'bookmarks-1', x: 2, y: 3, w: 1, h: 1, type: 'bookmarks', minW: 1, minH: 1 },
@@ -179,7 +177,6 @@ const addWidget = (type: WidgetType, config?: { title?: string; colSpan?: number
     news: { colSpan: 2, rowSpan: 1 },        // Wide widget (2 columns)
     pomodoro: { colSpan: 1, rowSpan: 1 },    // Narrow widget
     calendar: { colSpan: 1, rowSpan: 2 },    // Narrow but tall
-    stocks: { colSpan: 1, rowSpan: 1 },      // Narrow widget
     notes: { colSpan: 1, rowSpan: 1 },       // Narrow widget
     analytics: { colSpan: 2, rowSpan: 2 },   // Large widget (2x2)
     bookmarks: { colSpan: 1, rowSpan: 1 },   // Narrow widget

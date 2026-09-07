@@ -5,7 +5,6 @@ import WeatherWidget from './widgets/weather-widget';
 import NewsWidget from './widgets/news-widget'; // ← this import
 import PomodoroWidget from './widgets/pomodoro-widget';
 import CalendarWidget from './widgets/calendar-widget';
-import StocksWidget from './widgets/stocks-widget';
 import NotesWidget from './widgets/notes-widget';
 import AnalyticsWidget from './widgets/analytics-widget';
 import BookmarksWidget from './widgets/bookmarks-widget';
@@ -37,8 +36,6 @@ export function WidgetRenderer({ widget }: WidgetRendererProps) {
         return <PomodoroWidget widgetId={widget.id} title={widget.title} />;
       case 'calendar':
         return <CalendarWidget widgetId={widget.id} title={widget.title} />;
-      case 'stocks':
-        return <StocksWidget widgetId={widget.id} title={widget.title} />;
       case 'notes':
         return <NotesWidget widgetId={widget.id} title={widget.title} />;
       case 'analytics':

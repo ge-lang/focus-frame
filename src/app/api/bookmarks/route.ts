@@ -1,11 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUserId } from '@/lib/api-auth';
-
-function normalizeUrl(url: string) {
-  const value = url.startsWith('http://') || url.startsWith('https://') ? url : `https://${url}`;
-  return new URL(value).toString();
-}
+import { InvalidRequestError, isAllowedWebUrl, normalizeWebUrl, parseOptionalString, readJsonObject } from '@/lib/api-validation';
 
 export async function GET() {
   const userId = await getCurrentUserId();
@@ -23,10 +19,11 @@ export async function POST(request: NextRequest) {
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   try {
-    const { title, url, category } = await request.json();
-    if (typeof title !== 'string' || !title.trim() || title.length > 200 ||
-        typeof url !== 'string' || !url.trim() ||
-        (category !== undefined && (typeof category !== 'string' || category.length > 100))) {
+    const body = await readJsonObject(request);
+    const title = parseOptionalString(body.title, 200, 'bookmark title');
+    const url = parseOptionalString(body.url, 2_000, 'bookmark URL');
+    const category = parseOptionalString(body.category, 100, 'bookmark category');
+    if (!title || !url || !isAllowedWebUrl(url)) {
       return NextResponse.json({ error: 'Invalid bookmark data' }, { status: 400 });
     }
 
@@ -34,12 +31,15 @@ export async function POST(request: NextRequest) {
       data: {
         userId,
         title: title.trim(),
-        url: normalizeUrl(url.trim()),
-        category: category?.trim() || null,
+        url: normalizeWebUrl(url),
+        category: category || null,
       },
     });
     return NextResponse.json(bookmark, { status: 201 });
-  } catch {
+  } catch (error) {
+    if (error instanceof InvalidRequestError) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
     return NextResponse.json({ error: 'A valid URL is required' }, { status: 400 });
   }
 }

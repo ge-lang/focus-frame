@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUserId } from '@/lib/api-auth';
+import { InvalidRequestError, parseOptionalString, readJsonObject } from '@/lib/api-validation';
 
 function getWidgetId(request: NextRequest) {
   return new URL(request.url).pathname.split('/').pop();
@@ -25,10 +26,9 @@ export async function PUT(request: NextRequest) {
   if (!widgetId) return NextResponse.json({ error: 'Widget ID is required' }, { status: 400 });
 
   try {
-    const { content } = await request.json();
-    if (typeof content !== 'string' || content.length > 20_000) {
-      return NextResponse.json({ error: 'Invalid note content' }, { status: 400 });
-    }
+    const body = await readJsonObject(request);
+    const content = parseOptionalString(body.content, 20_000, 'note content');
+    if (content === undefined) return NextResponse.json({ error: 'Invalid note content' }, { status: 400 });
 
     const note = await prisma.note.upsert({
       where: { userId_widgetId: { userId, widgetId } },
@@ -36,7 +36,10 @@ export async function PUT(request: NextRequest) {
       update: { content },
     });
     return NextResponse.json(note);
-  } catch {
+  } catch (error) {
+    if (error instanceof InvalidRequestError) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
     return NextResponse.json({ error: 'Failed to save note' }, { status: 500 });
   }
 }

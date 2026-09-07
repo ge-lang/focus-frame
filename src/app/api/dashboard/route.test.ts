@@ -52,4 +52,30 @@ describe('/api/dashboard ownership', () => {
       update: { layout: JSON.stringify(state) },
     });
   });
+
+  it('rejects malformed dashboard state', async () => {
+    mocks.getServerSession.mockResolvedValue({ user: { id: 'user-a' } });
+
+    const response = await PUT(new Request('http://localhost/api/dashboard', {
+      method: 'PUT',
+      body: JSON.stringify({ state: { widgets: [{ id: 'w1', type: 'unsupported', colSpan: 1 }], layout: [] } }),
+      headers: { 'Content-Type': 'application/json' },
+    }) as NextRequest);
+
+    expect(response.status).toBe(400);
+    expect(mocks.upsert).not.toHaveBeenCalled();
+  });
+
+  it('returns 400 for invalid JSON', async () => {
+    mocks.getServerSession.mockResolvedValue({ user: { id: 'user-a' } });
+
+    const response = await PUT(new Request('http://localhost/api/dashboard', {
+      method: 'PUT',
+      body: '{not-json',
+      headers: { 'Content-Type': 'application/json' },
+    }) as NextRequest);
+
+    expect(response.status).toBe(400);
+    expect(mocks.upsert).not.toHaveBeenCalled();
+  });
 });

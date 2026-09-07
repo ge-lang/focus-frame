@@ -21,7 +21,6 @@ const widgetOptions: WidgetOption[] = [
   { type: 'news', name: 'News', description: 'Latest news feed', icon: '📰', defaultColSpan: 2 },
   { type: 'pomodoro', name: 'Pomodoro', description: 'Focus timer', icon: '⏱️', defaultColSpan: 1 },
   { type: 'calendar', name: 'Calendar', description: 'Upcoming events', icon: '📅', defaultColSpan: 1 },
-  { type: 'stocks', name: 'Stocks', description: 'Stock market data', icon: '📈', defaultColSpan: 1 },
   { type: 'notes', name: 'Notes', description: 'Quick notes', icon: '📝', defaultColSpan: 1 },
   { type: 'analytics', name: 'Analytics', description: 'Productivity stats', icon: '📊', defaultColSpan: 2 },
   { type: 'bookmarks', name: 'Bookmarks', description: 'Website links', icon: '🔖', defaultColSpan: 1 },

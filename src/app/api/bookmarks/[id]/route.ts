@@ -12,7 +12,11 @@ export async function DELETE(request: NextRequest) {
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   if (!id) return NextResponse.json({ error: 'Bookmark ID is required' }, { status: 400 });
 
-  const result = await prisma.bookmark.deleteMany({ where: { id, userId } });
-  if (!result.count) return NextResponse.json({ error: 'Bookmark not found' }, { status: 404 });
-  return NextResponse.json({ success: true });
+  try {
+    const result = await prisma.bookmark.deleteMany({ where: { id, userId } });
+    if (!result.count) return NextResponse.json({ error: 'Bookmark not found' }, { status: 404 });
+    return NextResponse.json({ success: true });
+  } catch {
+    return NextResponse.json({ error: 'Failed to delete bookmark' }, { status: 500 });
+  }
 }
