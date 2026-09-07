@@ -1,36 +1,63 @@
 import { describe, expect, it } from 'vitest';
-import { addWidgetToLayout, clampWidgetSize, getWidgetSizing, removeWidgetFromLayout, withWidgetSizing } from './dashboard-layout';
+import {
+  addWidgetToLayout,
+  getWidgetSizing,
+  hasLayoutCollision,
+  normalizeLayout,
+  removeWidgetFromLayout,
+} from './dashboard-layout';
 
-describe('dashboard layout sizing', () => {
-  it('defines practical constraints for each widget type', () => {
-    expect(getWidgetSizing('todo')).toEqual({ minW: 2, maxW: 3, minH: 2, maxH: 4 });
-    expect(getWidgetSizing('news')).toEqual({ minW: 2, maxW: 3, minH: 1, maxH: 2 });
-    expect(getWidgetSizing('weather')).toEqual({ minW: 1, maxW: 2, minH: 1, maxH: 2 });
+describe('dashboard layout normalization', () => {
+  it('defines fixed desktop dimensions for each widget type', () => {
+    expect(getWidgetSizing('todo')).toEqual({ w: 6, h: 3 });
+    expect(getWidgetSizing('analytics')).toEqual({ w: 8, h: 3 });
+    expect(getWidgetSizing('weather')).toEqual({ w: 4, h: 3 });
   });
 
-  it('clamps resized dimensions to the widget rules', () => {
-    expect(clampWidgetSize('analytics', 1, 8)).toEqual({ w: 3, h: 3 });
-    expect(clampWidgetSize('bookmarks', 4, 0)).toEqual({ w: 2, h: 1 });
+  it('converts legacy three-column positions to the twelve-column grid', () => {
+    const layout = normalizeLayout([
+      { i: 'weather-1', x: 2, y: 0, w: 1, h: 1, type: 'weather' },
+      { i: 'pomodoro-1', x: 0, y: 1, w: 1, h: 1, type: 'pomodoro' },
+    ]);
+
+    expect(layout[0]).toMatchObject({ i: 'weather-1', x: 8, y: 0, w: 4, h: 3 });
+    expect(layout[1]).toMatchObject({ i: 'pomodoro-1', x: 0, y: 1, w: 4, h: 3 });
   });
 
-  it('normalizes persisted layout dimensions without changing identity', () => {
-    expect(withWidgetSizing({ i: 'news-1', x: 0, y: 0, w: 1, h: 4, type: 'news' })).toEqual({
-      i: 'news-1', x: 0, y: 0, w: 2, h: 2, type: 'news', minW: 2, maxW: 3, minH: 1, maxH: 2,
-    });
+  it('preserves valid twelve-column positions and applies fixed dimensions', () => {
+    const layout = normalizeLayout([
+      { i: 'notes-1', x: 7, y: 5, w: 4, h: 1, type: 'notes' },
+    ]);
+
+    expect(layout[0]).toMatchObject({ i: 'notes-1', x: 7, y: 5, w: 4, h: 3 });
   });
 
-  it('removes a widget from the layout without affecting other widgets', () => {
+  it('clamps positions and resolves overlaps deterministically', () => {
+    const layout = normalizeLayout([
+      { i: 'goals-1', x: 20, y: 0, w: 1, h: 1, type: 'goals' },
+      { i: 'bookmarks-1', x: 20, y: 0, w: 1, h: 1, type: 'bookmarks' },
+    ]);
+
+    expect(layout[0]).toMatchObject({ x: 8, y: 0, w: 4, h: 3 });
+    expect(layout[1]).toMatchObject({ x: 0, y: 0, w: 4, h: 3 });
+    expect(hasLayoutCollision(layout[0], [layout[1]])).toBe(false);
+  });
+
+  it('adds widgets to a free position without moving existing widgets', () => {
+    const existing = [{ i: 'todo-1', x: 0, y: 0, w: 6, h: 3, type: 'todo' as const }];
+    const next = addWidgetToLayout(existing, { i: 'weather-1', x: 0, y: 0, w: 1, h: 1, type: 'weather' });
+
+    expect(next[0]).toEqual(existing[0]);
+    expect(next[1]).toMatchObject({ i: 'weather-1', x: 6, y: 0, w: 4, h: 3 });
+    expect(hasLayoutCollision(next[1], [next[0]])).toBe(false);
+  });
+
+  it('removes a widget without affecting the rest of the layout', () => {
     const layout = [
-      { i: 'weather-1', x: 0, y: 0, w: 1, h: 1, type: 'weather' as const },
-      { i: 'notes-1', x: 1, y: 0, w: 1, h: 1, type: 'notes' as const },
+      { i: 'weather-1', x: 0, y: 0, w: 4, h: 3, type: 'weather' as const },
+      { i: 'notes-1', x: 4, y: 0, w: 4, h: 3, type: 'notes' as const },
     ];
 
     expect(removeWidgetFromLayout(layout, 'weather-1')).toEqual([layout[1]]);
-  });
-
-  it('adds a widget back with its constrained dimensions', () => {
-    const layout = addWidgetToLayout([], { i: 'news-2', x: 0, y: 0, w: 1, h: 4, type: 'news' });
-
-    expect(layout[0]).toMatchObject({ i: 'news-2', w: 2, h: 2, minW: 2, maxW: 3 });
   });
 });

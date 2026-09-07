@@ -1,42 +1,82 @@
 import type { LayoutItem, WidgetType } from '@/types/dashboard';
 
-export const GRID_ROW_HEIGHT = 140;
+export const DESKTOP_GRID_COLUMNS = 12;
 
 export interface WidgetSizing {
-  minW: number;
-  maxW: number;
-  minH: number;
-  maxH: number;
+  w: number;
+  h: number;
 }
 
 const widgetSizing: Record<WidgetType, WidgetSizing> = {
-  todo: { minW: 2, maxW: 3, minH: 2, maxH: 4 },
-  weather: { minW: 1, maxW: 2, minH: 1, maxH: 2 },
-  news: { minW: 2, maxW: 3, minH: 1, maxH: 2 },
-  pomodoro: { minW: 1, maxW: 2, minH: 1, maxH: 2 },
-  calendar: { minW: 1, maxW: 2, minH: 2, maxH: 3 },
-  notes: { minW: 1, maxW: 2, minH: 1, maxH: 3 },
-  analytics: { minW: 3, maxW: 3, minH: 2, maxH: 3 },
-  bookmarks: { minW: 1, maxW: 2, minH: 1, maxH: 2 },
-  goals: { minW: 1, maxW: 2, minH: 1, maxH: 2 },
+  todo: { w: 6, h: 3 },
+  weather: { w: 4, h: 3 },
+  news: { w: 6, h: 3 },
+  pomodoro: { w: 4, h: 3 },
+  calendar: { w: 4, h: 4 },
+  notes: { w: 4, h: 3 },
+  analytics: { w: 8, h: 3 },
+  bookmarks: { w: 4, h: 3 },
+  goals: { w: 4, h: 3 },
 };
 
 export function getWidgetSizing(type: WidgetType): WidgetSizing {
   return widgetSizing[type];
 }
 
-export function clampWidgetSize(type: WidgetType, width: number, height: number) {
-  const sizing = getWidgetSizing(type);
-  return {
-    w: Math.min(sizing.maxW, Math.max(sizing.minW, Math.round(width))),
-    h: Math.min(sizing.maxH, Math.max(sizing.minH, Math.round(height))),
-  };
+function overlaps(first: LayoutItem, second: LayoutItem): boolean {
+  return first.x < second.x + second.w &&
+    first.x + first.w > second.x &&
+    first.y < second.y + second.h &&
+    first.y + first.h > second.y;
+}
+
+export function hasLayoutCollision(item: LayoutItem, layout: LayoutItem[]): boolean {
+  return layout.some((other) => other.i !== item.i && overlaps(item, other));
+}
+
+function clampX(x: number, width: number, columns: number): number {
+  return Math.min(Math.max(Math.round(x), 0), Math.max(columns - width, 0));
+}
+
+function findFreePosition(item: LayoutItem, occupied: LayoutItem[], columns: number): LayoutItem {
+  const preferredX = clampX(item.x, item.w, columns);
+  const preferredY = Math.max(0, Math.round(item.y));
+
+  for (let y = preferredY; y <= preferredY + occupied.length + 20; y += 1) {
+    const candidates = [preferredX, ...Array.from({ length: columns }, (_, x) => x).filter((x) => x !== preferredX)];
+    for (const x of candidates) {
+      const candidate = { ...item, x, y };
+      if (!hasLayoutCollision(candidate, occupied)) return candidate;
+    }
+  }
+
+  return { ...item, x: 0, y: preferredY + occupied.length + 1 };
 }
 
 export function withWidgetSizing(item: LayoutItem): LayoutItem {
   const sizing = getWidgetSizing(item.type);
-  const size = clampWidgetSize(item.type, item.w, item.h);
-  return { ...item, ...sizing, ...size };
+  return { ...item, w: sizing.w, h: sizing.h };
+}
+
+function isLegacyThreeColumnLayout(layout: LayoutItem[]): boolean {
+  return layout.length > 0 && layout.every((item) => item.w <= 3 && item.x <= 3);
+}
+
+export function normalizeLayout(layout: LayoutItem[], columns = DESKTOP_GRID_COLUMNS): LayoutItem[] {
+  const legacy = columns === DESKTOP_GRID_COLUMNS && isLegacyThreeColumnLayout(layout);
+  const normalized: LayoutItem[] = [];
+
+  for (const item of layout) {
+    const sized = withWidgetSizing(item);
+    const candidate = {
+      ...sized,
+      x: legacy ? item.x * 4 : item.x,
+      y: item.y,
+    };
+    normalized.push(findFreePosition(candidate, normalized, columns));
+  }
+
+  return normalized;
 }
 
 export function removeWidgetFromLayout(layout: LayoutItem[], widgetId: string): LayoutItem[] {
@@ -44,9 +84,6 @@ export function removeWidgetFromLayout(layout: LayoutItem[], widgetId: string): 
 }
 
 export function addWidgetToLayout(layout: LayoutItem[], item: LayoutItem): LayoutItem[] {
-  return [...layout, withWidgetSizing(item)];
-}
-
-export function getGridSpanClass(width: number): string {
-  return width >= 3 ? 'lg:col-span-3' : width === 2 ? 'lg:col-span-2' : 'lg:col-span-1';
+  const sized = withWidgetSizing(item);
+  return [...layout, findFreePosition(sized, layout, DESKTOP_GRID_COLUMNS)];
 }

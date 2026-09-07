@@ -13,6 +13,7 @@ const widgetTypes = new Set(['todo', 'weather', 'news', 'pomodoro', 'calendar', 
 const MAX_WIDGETS = 20;
 const MAX_LAYOUT_ITEMS = 20;
 const MAX_GRID_SIZE = 12;
+const MAX_GRID_Y = 1000;
 const MAX_BODY_BYTES = 100_000;
 
 function isDashboardState(value: unknown): value is PersistedDashboardState {
@@ -41,9 +42,9 @@ function isDashboardState(value: unknown): value is PersistedDashboardState {
     if (typeof item.i !== 'string' || !widgetIds.has(item.i) || layoutIds.has(item.i) ||
         typeof item.type !== 'string' || !widgetTypes.has(item.type) ||
         !isIntegerBetween(item.x, 0, MAX_GRID_SIZE) ||
-        !isIntegerBetween(item.y, 0, MAX_GRID_SIZE) ||
-        !isIntegerBetween(item.w, 1, 4) ||
-        !isIntegerBetween(item.h, 1, 4)) {
+        !isIntegerBetween(item.y, 0, MAX_GRID_Y) ||
+        !isIntegerBetween(item.w, 1, MAX_GRID_SIZE) ||
+        !isIntegerBetween(item.h, 1, 8)) {
       return false;
     }
     layoutIds.add(item.i);

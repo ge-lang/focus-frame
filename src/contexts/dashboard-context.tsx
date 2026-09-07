@@ -1,17 +1,16 @@
-// src/contexts/dashboard-context.tsx
 'use client';
+
 import React, { createContext, useContext, useEffect, useReducer, useRef, ReactNode } from 'react';
 import { WidgetType } from '@/types/dashboard';
-import { addWidgetToLayout, removeWidgetFromLayout, withWidgetSizing } from '@/lib/dashboard-layout';
+import { addWidgetToLayout, getWidgetSizing, normalizeLayout, removeWidgetFromLayout } from '@/lib/dashboard-layout';
 
-// Types
 export interface Widget {
   id: string;
   type: WidgetType;
   colSpan: number;
   rowSpan?: number;
   title?: string;
-  config?: Record<string, any>;
+  config?: Record<string, unknown>;
 }
 
 export interface LayoutItem {
@@ -21,10 +20,6 @@ export interface LayoutItem {
   w: number;
   h: number;
   type: WidgetType;
-  minW?: number;
-  minH?: number;
-  maxW?: number;
-  maxH?: number;
 }
 
 export interface DashboardState {
@@ -33,7 +28,6 @@ export interface DashboardState {
   isEditing: boolean;
 }
 
-// Action types
 type DashboardAction =
   | { type: 'ADD_WIDGET'; payload: Widget }
   | { type: 'REMOVE_WIDGET'; payload: string }
@@ -41,71 +35,53 @@ type DashboardAction =
   | { type: 'LOAD_STATE'; payload: DashboardState }
   | { type: 'TOGGLE_EDIT' };
 
-// Initial state
-// src/contexts/dashboard-context.tsx
 const initialState: DashboardState = {
   widgets: [
-    { id: 'todo-1', type: 'todo', colSpan: 2, rowSpan: 2 }, // ← set colSpan to 2
-    { id: 'weather-1', type: 'weather', colSpan: 1, rowSpan: 1 },
-    { id: 'news-1', type: 'news', colSpan: 2, rowSpan: 1 },
-    { id: 'pomodoro-1', type: 'pomodoro', colSpan: 1, rowSpan: 1 },
-    { id: 'calendar-1', type: 'calendar', colSpan: 1, rowSpan: 2 },
-    { id: 'notes-1', type: 'notes', colSpan: 1, rowSpan: 1 },
-    { id: 'analytics-1', type: 'analytics', colSpan: 2, rowSpan: 2 },
-    { id: 'bookmarks-1', type: 'bookmarks', colSpan: 1, rowSpan: 1 },
-    { id: 'goals-1', type: 'goals', colSpan: 1, rowSpan: 1 },
+    { id: 'todo-1', type: 'todo', colSpan: 6, rowSpan: 3 },
+    { id: 'weather-1', type: 'weather', colSpan: 4, rowSpan: 3 },
+    { id: 'news-1', type: 'news', colSpan: 6, rowSpan: 3 },
+    { id: 'pomodoro-1', type: 'pomodoro', colSpan: 4, rowSpan: 3 },
+    { id: 'calendar-1', type: 'calendar', colSpan: 4, rowSpan: 4 },
+    { id: 'notes-1', type: 'notes', colSpan: 4, rowSpan: 3 },
+    { id: 'analytics-1', type: 'analytics', colSpan: 8, rowSpan: 3 },
+    { id: 'bookmarks-1', type: 'bookmarks', colSpan: 4, rowSpan: 3 },
+    { id: 'goals-1', type: 'goals', colSpan: 4, rowSpan: 3 },
   ],
-  layout: [
-    { i: 'todo-1', x: 0, y: 0, w: 2, h: 2, type: 'todo', minW: 1, minH: 1 }, // ← w: 2
-    { i: 'weather-1', x: 2, y: 0, w: 1, h: 1, type: 'weather', minW: 1, minH: 1 },
-    { i: 'news-1', x: 0, y: 2, w: 2, h: 1, type: 'news', minW: 2, minH: 1 },
-    { i: 'pomodoro-1', x: 2, y: 1, w: 1, h: 1, type: 'pomodoro', minW: 1, minH: 1 },
-    { i: 'calendar-1', x: 3, y: 0, w: 1, h: 2, type: 'calendar', minW: 1, minH: 2 },
-    { i: 'notes-1', x: 3, y: 2, w: 1, h: 1, type: 'notes', minW: 1, minH: 1 },
-    { i: 'analytics-1', x: 0, y: 3, w: 2, h: 2, type: 'analytics', minW: 2, minH: 2 },
-    { i: 'bookmarks-1', x: 2, y: 3, w: 1, h: 1, type: 'bookmarks', minW: 1, minH: 1 },
-    { i: 'goals-1', x: 3, y: 3, w: 1, h: 1, type: 'goals', minW: 1, minH: 1 },
-  ],
+  layout: normalizeLayout([
+    { i: 'todo-1', x: 0, y: 0, w: 2, h: 2, type: 'todo' },
+    { i: 'weather-1', x: 2, y: 0, w: 1, h: 1, type: 'weather' },
+    { i: 'news-1', x: 0, y: 2, w: 2, h: 1, type: 'news' },
+    { i: 'pomodoro-1', x: 2, y: 1, w: 1, h: 1, type: 'pomodoro' },
+    { i: 'calendar-1', x: 3, y: 0, w: 1, h: 2, type: 'calendar' },
+    { i: 'notes-1', x: 3, y: 2, w: 1, h: 1, type: 'notes' },
+    { i: 'analytics-1', x: 0, y: 3, w: 2, h: 2, type: 'analytics' },
+    { i: 'bookmarks-1', x: 2, y: 3, w: 1, h: 1, type: 'bookmarks' },
+    { i: 'goals-1', x: 3, y: 3, w: 1, h: 1, type: 'goals' },
+  ]),
   isEditing: false,
 };
 
-// Reducer
 function dashboardReducer(state: DashboardState, action: DashboardAction): DashboardState {
   switch (action.type) {
     case 'ADD_WIDGET':
-      return {
-        ...state,
-        widgets: [...state.widgets, action.payload],
-      };
-
+      return { ...state, widgets: [...state.widgets, action.payload] };
     case 'REMOVE_WIDGET':
       return {
         ...state,
-        widgets: state.widgets.filter(w => w.id !== action.payload),
+        widgets: state.widgets.filter((widget) => widget.id !== action.payload),
         layout: removeWidgetFromLayout(state.layout, action.payload),
       };
-
     case 'UPDATE_LAYOUT':
-      return {
-        ...state,
-        layout: action.payload,
-      };
-
+      return { ...state, layout: action.payload };
     case 'LOAD_STATE':
       return action.payload;
-
     case 'TOGGLE_EDIT':
-      return {
-        ...state,
-        isEditing: !state.isEditing,
-      };
-
+      return { ...state, isEditing: !state.isEditing };
     default:
       return state;
   }
 }
 
-// Context type
 interface DashboardContextType {
   state: DashboardState;
   dispatch: React.Dispatch<DashboardAction>;
@@ -115,10 +91,8 @@ interface DashboardContextType {
   toggleEdit: () => void;
 }
 
-// Create the context
 const DashboardContext = createContext<DashboardContextType | null>(null);
 
-// Provider
 export function DashboardProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(dashboardReducer, initialState);
   const hasLoaded = useRef(false);
@@ -134,7 +108,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
             type: 'LOAD_STATE',
             payload: {
               ...data.state,
-              layout: data.state.layout.map(withWidgetSizing),
+              layout: normalizeLayout(data.state.layout),
               isEditing: false,
             },
           });
@@ -157,136 +131,49 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       fetch('/api/dashboard', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          state: {
-            widgets: state.widgets,
-            layout: state.layout,
-          },
-        }),
+        body: JSON.stringify({ state: { widgets: state.widgets, layout: state.layout } }),
       }).catch((error) => console.error('Failed to save dashboard:', error));
     }, 500);
 
     return () => window.clearTimeout(timeoutId);
   }, [state.widgets, state.layout]);
 
-  
- 
- // Updated addWidget function for dashboard-context.tsx
+  const addWidget = (type: WidgetType, config?: { title?: string; colSpan?: number; rowSpan?: number }) => {
+    const sizing = getWidgetSizing(type);
+    const newWidget: Widget = {
+      id: `${type}-${Date.now()}`,
+      type,
+      colSpan: sizing.w,
+      rowSpan: sizing.h,
+      title: config?.title,
+      config,
+    };
+    const newLayoutItem: LayoutItem = {
+      i: newWidget.id,
+      x: 0,
+      y: 0,
+      w: sizing.w,
+      h: sizing.h,
+      type,
+    };
 
-// addWidget function in dashboard-context.tsx
-const addWidget = (type: WidgetType, config?: { title?: string; colSpan?: number; rowSpan?: number }) => {
-  // Define default settings for each widget type
-  const defaultConfigs: Record<WidgetType, { colSpan: number; rowSpan: number }> = {
-    todo: { colSpan: 2, rowSpan: 2 },        // Wide widget (2 columns)
-    weather: { colSpan: 1, rowSpan: 1 },     // Narrow widget (1 column)
-    news: { colSpan: 2, rowSpan: 1 },        // Wide widget (2 columns)
-    pomodoro: { colSpan: 1, rowSpan: 1 },    // Narrow widget
-    calendar: { colSpan: 1, rowSpan: 2 },    // Narrow but tall
-    notes: { colSpan: 1, rowSpan: 1 },       // Narrow widget
-    analytics: { colSpan: 2, rowSpan: 2 },   // Large widget (2x2)
-    bookmarks: { colSpan: 1, rowSpan: 1 },   // Narrow widget
-    goals: { colSpan: 1, rowSpan: 1 },       // Narrow widget
+    dispatch({ type: 'ADD_WIDGET', payload: newWidget });
+    dispatch({ type: 'UPDATE_LAYOUT', payload: addWidgetToLayout(state.layout, newLayoutItem) });
   };
 
-  // Get the default settings for this widget type
-  const defaultConfig = defaultConfigs[type];
-  
-  // Create a widget using the supplied settings or the defaults
-  const newWidget: Widget = {
-    id: `${type}-${Date.now()}`,
-    type,
-    colSpan: config?.colSpan || defaultConfig.colSpan,      // Use config or defaultConfig
-    rowSpan: config?.rowSpan || defaultConfig.rowSpan,      // Use config or defaultConfig
-    title: config?.title,
-    config: config,
-  };
-  
-  // Create a new layout item
-  const newLayoutItem: LayoutItem = {
-    i: newWidget.id,
-    x: 0, // Temporary position
-    y: 0, // Temporary position
-    w: newWidget.colSpan,    // Use the widget's colSpan
-    h: newWidget.rowSpan || 1, // Use the widget's rowSpan
-    type: newWidget.type,
-  };
-  const sizedLayoutItem = withWidgetSizing(newLayoutItem);
-
-  // Find the maximum Y position to place the widget at the bottom
-  const maxY = state.layout.reduce((max, item) => Math.max(max, item.y + item.h), 0);
-  sizedLayoutItem.y = maxY;
-
-  // Find a free X position
-  const gridColumns = 3; // Assume three columns
-  let placed = false;
-  
-  for (let x = 0; x <= gridColumns - sizedLayoutItem.w; x++) {
-    const isOccupied = state.layout.some(item => 
-      item.y <= sizedLayoutItem.y && sizedLayoutItem.y < item.y + item.h &&
-      item.x <= x && x < item.x + item.w
-    );
-
-    if (!isOccupied) {
-      sizedLayoutItem.x = x;
-      placed = true;
-      break;
-    }
-  }
-
-  // If there is no space in the current row, place it in a new one
-  if (!placed) {
-    sizedLayoutItem.x = 0;
-    sizedLayoutItem.y = maxY + 1;
-  }
-
-  // Dispatch the updates
-  dispatch({ 
-    type: 'ADD_WIDGET', 
-    payload: newWidget 
-  });
-  
-  dispatch({ 
-    type: 'UPDATE_LAYOUT', 
-    payload: addWidgetToLayout(state.layout, sizedLayoutItem)
-  });
-};
-    
-   /* dispatch({ type: 'ADD_WIDGET', payload: newWidget });
-  };*/
-
-  const removeWidget = (id: string) => {
-    dispatch({ type: 'REMOVE_WIDGET', payload: id });
-  };
-
-  const updateLayout = (items: LayoutItem[]) => {
-    dispatch({ type: 'UPDATE_LAYOUT', payload: items });
-  };
-
-  const toggleEdit = () => {
-    dispatch({ type: 'TOGGLE_EDIT' });
-  };
+  const removeWidget = (id: string) => dispatch({ type: 'REMOVE_WIDGET', payload: id });
+  const updateLayout = (items: LayoutItem[]) => dispatch({ type: 'UPDATE_LAYOUT', payload: items });
+  const toggleEdit = () => dispatch({ type: 'TOGGLE_EDIT' });
 
   return (
-    <DashboardContext.Provider
-      value={{
-        state,
-        dispatch,
-        addWidget,
-        removeWidget,
-        updateLayout,
-        toggleEdit,
-      }}
-    >
+    <DashboardContext.Provider value={{ state, dispatch, addWidget, removeWidget, updateLayout, toggleEdit }}>
       {children}
     </DashboardContext.Provider>
   );
 }
 
-// Hook for using the context
 export function useDashboard() {
   const context = useContext(DashboardContext);
-  if (!context) {
-    throw new Error('useDashboard must be used within a DashboardProvider');
-  }
+  if (!context) throw new Error('useDashboard must be used within a DashboardProvider');
   return context;
 }

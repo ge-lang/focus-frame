@@ -1,134 +1,87 @@
-// src/components/dashboard-grid.tsx
 'use client';
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  DragEndEvent,
-} from '@dnd-kit/core';
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  rectSortingStrategy,
-} from '@dnd-kit/sortable';
+import { useMemo, useRef } from 'react';
+import { Responsive, useContainerWidth, type Layout as GridLayout, type LayoutItem as GridLayoutItem } from 'react-grid-layout';
+import { noCompactor } from 'react-grid-layout/core';
+import 'react-grid-layout/css/styles.css';
 import { useDashboard } from '@/contexts/dashboard-context';
 import { SortableWidget } from './sortable-widget';
-import { WidgetRenderer } from './widget-renderer';
-import { motion } from 'framer-motion';
-import { easeOut } from 'framer-motion';
-import { getGridSpanClass, GRID_ROW_HEIGHT, withWidgetSizing } from '@/lib/dashboard-layout';
+import type { LayoutItem } from '@/types/dashboard';
 
-// Animations for the container and its items
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.2,
-    }
-  }
-};
+const BREAKPOINTS = { lg: 1024, md: 768, sm: 640, xs: 480, xxs: 0 } as const;
+const COLUMNS = { lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 } as const;
+const fixedGridCompactor = { ...noCompactor, preventCollision: true };
 
-const itemVariants = { 
-  hidden: { opacity: 0, y: 20, scale: 0.95 },
-  visible: { 
-    opacity: 1, 
-    y: 0, 
-    scale: 1, 
-    transition: { duration: 0.4, ease: easeOut },
-  }, 
-};
+function stackLayout(layout: LayoutItem[], columns: number): LayoutItem[] {
+  let y = 0;
+  return layout.map((item) => {
+    const stacked = { ...item, x: 0, y, w: columns };
+    y += item.h;
+    return stacked;
+  });
+}
 
 export function DashboardGrid() {
   const { state, updateLayout } = useDashboard();
   const { layout, isEditing, widgets } = state;
+  const { width, containerRef, mounted } = useContainerWidth({ measureBeforeMount: true });
+  const breakpointRef = useRef('lg');
 
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
+  const layouts = useMemo(() => ({
+    lg: layout,
+    md: stackLayout(layout, COLUMNS.md),
+    sm: stackLayout(layout, COLUMNS.sm),
+    xs: stackLayout(layout, COLUMNS.xs),
+    xxs: stackLayout(layout, COLUMNS.xxs),
+  }), [layout]);
 
-  function handleDragEnd(event: DragEndEvent) {
-    const { active, over } = event;
+  const getWidgetById = (id: string) => widgets.find((widget) => widget.id === id);
 
-    if (over && active.id !== over.id) {
-      const oldIndex = layout.findIndex((item) => item.i === active.id);
-      const newIndex = layout.findIndex((item) => item.i === over.id);
+  const handleLayoutChange = (nextLayout: GridLayout) => {
+    if (!isEditing || breakpointRef.current !== 'lg') return;
 
-      if (oldIndex !== -1 && newIndex !== -1) {
-        const newLayout = arrayMove(layout, oldIndex, newIndex).map(withWidgetSizing);
-        updateLayout(newLayout);
-      }
-    }
-  }
-
-  // Get a widget by ID
-  const getWidgetById = (id: string) => {
-    return widgets.find(widget => widget.id === id);
+    const types = new Map(layout.map((item) => [item.i, item.type]));
+    const persistedLayout: LayoutItem[] = nextLayout.map((item: GridLayoutItem) => ({
+      i: item.i,
+      x: item.x,
+      y: item.y,
+      w: item.w,
+      h: item.h,
+      type: types.get(item.i) ?? 'notes',
+    }));
+    updateLayout(persistedLayout);
   };
 
-  // View mode (without drag and drop)
-  if (!isEditing) {
-    return (
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="grid auto-rows-[minmax(140px,auto)] grid-cols-1 items-start gap-5 lg:grid-cols-3"
-      >
-        {layout.map((item) => {
-          const widget = getWidgetById(item.i);
-          return widget ? (
-            <motion.div
-              key={item.i}
-              variants={itemVariants}
-              className={`${getGridSpanClass(item.w)} self-start`}
-              style={{ gridRow: `span ${item.h}`, minHeight: `${item.h * GRID_ROW_HEIGHT}px` }}
-            >
-              <WidgetRenderer widget={widget} />
-            </motion.div>
-          ) : null;
-        })}
-      </motion.div>
-    );
-  }
-
-  // Edit mode (with drag and drop)
   return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCenter}
-      onDragEnd={handleDragEnd}
-    >
-      <SortableContext items={layout.map(item => item.i)} strategy={rectSortingStrategy}>
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="grid auto-rows-[minmax(140px,auto)] grid-cols-1 items-start gap-5 lg:grid-cols-3"
+    <div ref={containerRef} className="min-w-0">
+      {mounted && (
+        <Responsive
+          width={width}
+          layouts={layouts}
+          breakpoints={BREAKPOINTS}
+          cols={COLUMNS}
+          rowHeight={96}
+          margin={[20, 20]}
+          containerPadding={[0, 0]}
+          compactor={fixedGridCompactor}
+          dragConfig={{
+            enabled: isEditing,
+            handle: '.widget-drag-handle',
+            cancel: 'button:not(.widget-drag-handle), input, textarea, select, a, [data-no-drag]',
+          }}
+          resizeConfig={{ enabled: false }}
+          onBreakpointChange={(nextBreakpoint) => { breakpointRef.current = nextBreakpoint; }}
+          onLayoutChange={handleLayoutChange}
         >
           {layout.map((item) => {
             const widget = getWidgetById(item.i);
             return widget ? (
-              <motion.div
-                key={item.i}
-                variants={itemVariants}
-                className={`${getGridSpanClass(item.w)} self-start`}
-                style={{ gridRow: `span ${item.h}`, minHeight: `${item.h * GRID_ROW_HEIGHT}px` }}
-              >
+              <div key={item.i}>
                 <SortableWidget id={item.i} type={item.type} />
-              </motion.div>
+              </div>
             ) : null;
           })}
-        </motion.div>
-      </SortableContext>
-    </DndContext>
+        </Responsive>
+      )}
+    </div>
   );
 }
