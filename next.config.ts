@@ -1,6 +1,5 @@
-// next.config.js
-module.exports = {
-  experimental: {
-    optimizeCss: false // Disable CSS optimization
-  }
-}
+import type { NextConfig } from 'next';
+
+const nextConfig: NextConfig = {};
+
+export default nextConfig;
