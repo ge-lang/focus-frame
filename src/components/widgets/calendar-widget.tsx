@@ -77,12 +77,12 @@ export default function CalendarWidget({ widgetId, title }: CalendarWidgetProps)
   }
 
   return (
-    <AnimatedWidget>
+    <AnimatedWidget className="text-slate-800">
       <div className="p-1">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center">
-            <CalendarIcon size={20} className="mr-2" />
+            <CalendarIcon size={20} className="mr-2 text-indigo-600" />
             <h3 className="font-semibold text-lg">{title || 'Calendar'}</h3>
           </div>
           
@@ -90,7 +90,7 @@ export default function CalendarWidget({ widgetId, title }: CalendarWidgetProps)
             <AnimatedButton
               ariaLabel="Go to today"
               onClick={goToToday}
-              className="text-xs px-2 py-1 bg-blue-500 text-white rounded"
+              className="rounded-lg bg-indigo-600 px-2 py-1 text-xs text-white hover:bg-indigo-700"
             >
               Today
             </AnimatedButton>
@@ -107,7 +107,7 @@ export default function CalendarWidget({ widgetId, title }: CalendarWidgetProps)
             <ChevronLeft size={16} />
           </AnimatedButton>
 
-          <span className="font-semibold">
+          <span className="font-semibold text-gray-700">
             {monthNames[month]} {year}
           </span>
 
@@ -123,7 +123,7 @@ export default function CalendarWidget({ widgetId, title }: CalendarWidgetProps)
         {/* Week days */}
         <div className="grid grid-cols-7 gap-1 mb-2">
           {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
-            <div key={day} className="text-center text-xs font-medium text-gray-500 py-1">
+            <div key={day} className="py-1 text-center text-xs font-medium text-indigo-700/70">
               {day}
             </div>
           ))}
@@ -141,18 +141,18 @@ export default function CalendarWidget({ widgetId, title }: CalendarWidgetProps)
                 day === null
                   ? 'text-gray-300'
                   : isToday(day)
-                  ? 'bg-blue-500 text-white font-bold'
-                  : 'hover:bg-gray-100 cursor-pointer'
+                  ? 'bg-indigo-600 text-white font-bold'
+                  : 'text-slate-700 hover:bg-slate-50 cursor-pointer'
               }`}
             >
               {day}
-              {dueTasks.length > 0 && <span className="w-1.5 h-1.5 rounded-full bg-red-500 mt-0.5" />}
+              {dueTasks.length > 0 && <span className="mt-0.5 h-1.5 w-1.5 rounded-full bg-indigo-500" />}
             </div>
           )})}
         </div>
 
         {/* Upcoming task deadlines */}
-        <div className="mt-4 pt-4 border-t">
+        <div className="mt-4 border-t border-slate-200 pt-4">
           <h4 className="font-medium text-sm mb-2">Next 7 days</h4>
           {upcomingTasks.length ? <div className="space-y-1">
             {upcomingTasks.map((task) => <div key={task.id} className="text-xs flex justify-between gap-2 text-gray-600"><span className="truncate">{task.title}</span><span className="shrink-0 text-blue-600">{new Date(`${task.dueDate?.slice(0, 10)}T00:00:00`).toLocaleDateString()}</span></div>)}

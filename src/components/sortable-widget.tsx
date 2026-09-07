@@ -6,7 +6,7 @@ import { WidgetRenderer } from './widget-renderer';
 import { useDashboard } from '@/contexts/dashboard-context';
 import { motion } from 'framer-motion';
 import { GripVertical, Maximize2 } from 'lucide-react';
-import { clampWidgetSize } from '@/lib/dashboard-layout';
+import { clampWidgetSize, GRID_ROW_HEIGHT } from '@/lib/dashboard-layout';
 
 interface SortableWidgetProps {
   id: string;
@@ -59,7 +59,7 @@ export function SortableWidget({ id, type }: SortableWidgetProps) {
     const startHeight = layoutItem.h;
     const widgetWidth = event.currentTarget.parentElement?.getBoundingClientRect().width ?? 240;
     const columnWidth = Math.max(widgetWidth / startWidth, 120);
-    const rowHeight = 180;
+    const rowHeight = GRID_ROW_HEIGHT;
 
     const handlePointerMove = (moveEvent: PointerEvent) => {
       resize(
@@ -91,14 +91,14 @@ export function SortableWidget({ id, type }: SortableWidgetProps) {
     <motion.div
       ref={setNodeRef}
       style={style}
-      className={`relative group ${isDragging ? 'opacity-50' : ''}`}
+      className={`relative group rounded-2xl ring-1 ring-indigo-200/70 ring-inset ${isDragging ? 'opacity-50' : ''}`}
       whileHover={{ scale: 1.01 }}
     >
       {/* Drag handle */}
       <div
         {...attributes}
         {...listeners}
-        className="absolute -top-2 -left-2 z-10 bg-gray-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-grab shadow-lg"
+        className="absolute -top-2 -left-2 z-10 rounded-full bg-indigo-500 p-1 text-white opacity-0 shadow-sm transition-opacity group-hover:opacity-100 cursor-grab"
         title="Drag to rearrange"
       >
         <GripVertical size={14} />

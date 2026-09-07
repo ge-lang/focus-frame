@@ -116,7 +116,7 @@ export function WidgetPicker() {
                       disabled={!canAddWidget(widget.type)}
                       className={`w-full flex items-start p-3 rounded-lg mb-1 transition-all ${
                         canAddWidget(widget.type)
-                          ? 'hover:bg-blue-50 hover:border-blue-200 cursor-pointer'
+                          ? 'cursor-pointer hover:border-indigo-200 hover:bg-indigo-50'
                           : 'opacity-50 cursor-not-allowed'
                       }`}
                     >

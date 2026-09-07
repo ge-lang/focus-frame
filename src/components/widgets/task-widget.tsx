@@ -87,7 +87,7 @@ function TaskCard({
       transition={{ duration: 0.2 }}
       draggable
       onDragStart={() => onDragStart(task, status)}
-      className="bg-white rounded-lg p-3 shadow-sm border cursor-move group relative"
+      className="group relative cursor-move rounded-xl border border-slate-200 bg-white p-3 shadow-sm"
     >
       {/* Drag handle */}
       <div className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab">
@@ -114,13 +114,13 @@ function TaskCard({
           <div className="flex space-x-1">
             <button
               onClick={onSaveEdit}
-              className="px-2 py-1 bg-green-500 text-white text-xs rounded hover:bg-green-600"
+              className="rounded-md bg-indigo-600 px-2 py-1 text-xs text-white hover:bg-indigo-700"
             >
               Save
             </button>
             <button
               onClick={onCancelEdit}
-              className="px-2 py-1 bg-gray-500 text-white text-xs rounded hover:bg-gray-600"
+              className="rounded-md border border-slate-200 bg-white px-2 py-1 text-xs text-slate-700 hover:bg-slate-50"
             >
               Cancel
             </button>
@@ -158,9 +158,9 @@ function TaskCard({
           
           <div className="flex items-center justify-between mt-2">
             <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs ${
-              getPriorityColor(task.priority) === 'red' ? 'bg-red-100 text-red-800' :
-              getPriorityColor(task.priority) === 'yellow' ? 'bg-yellow-100 text-yellow-800' :
-              'bg-green-100 text-green-800'
+              getPriorityColor(task.priority) === 'red' ? 'bg-red-50 text-red-700' :
+              getPriorityColor(task.priority) === 'yellow' ? 'bg-amber-50 text-amber-700' :
+              'bg-emerald-50 text-emerald-700'
             }`}>
               <Flag size={10} className="mr-1" />
               {task.priority}
@@ -174,7 +174,7 @@ function TaskCard({
             )}
           </div>
           {formatFocusTime(task.focusSeconds) && (
-            <p className="text-xs text-purple-600 mt-2">⏱ {formatFocusTime(task.focusSeconds)}</p>
+            <p className="mt-2 text-xs text-indigo-600">⏱ {formatFocusTime(task.focusSeconds)}</p>
           )}
         </div>
       )}
@@ -213,18 +213,16 @@ function TaskColumn({
       onDrop={(e) => onDrop(e, status)}
     >
       <div className={`p-3 rounded-t-lg text-center font-medium ${
-        status === 'todo' ? 'bg-blue-100 text-blue-800' :
-        status === 'in_progress' ? 'bg-yellow-100 text-yellow-800' :
-        'bg-green-100 text-green-800'
+        status === 'todo' ? 'bg-slate-100 text-slate-700' :
+        status === 'in_progress' ? 'bg-indigo-50 text-indigo-700' :
+        'bg-emerald-50 text-emerald-700'
       }`}>
         <div className="font-semibold text-sm">{getStatusLabel(status)}</div>
         <div className="text-xs opacity-75">{tasks.length} tasks</div>
       </div>
       
       <div className={`min-h-0 flex-1 overflow-y-auto p-3 space-y-3 ${
-        status === 'todo' ? 'bg-blue-50' :
-        status === 'in_progress' ? 'bg-yellow-50' :
-        'bg-green-50'
+        'bg-slate-50'
       } rounded-b-lg`}>
         <AnimatePresence>
           {tasks.map((task) => (
@@ -354,7 +352,7 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
   const completionPercentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
   return (
-    <AnimatedWidget className="w-full bg-gradient-to-br from-purple-50 to-indigo-100 min-h-0">
+    <AnimatedWidget className="w-full min-h-0">
       <div className="flex h-full min-h-0 flex-col">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-2">
@@ -368,7 +366,7 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
               </div>
               <div className="w-16 bg-gray-200 rounded-full h-1">
                 <div 
-                  className="bg-green-500 h-1 rounded-full transition-all duration-300"
+                  className="h-1 rounded-full bg-emerald-600 transition-all duration-300"
                   style={{ width: `${completionPercentage}%` }}
                 />
               </div>
@@ -377,7 +375,7 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
           
           <AnimatedButton
             onClick={() => setIsAdding(true)}
-            className="bg-purple-500 hover:bg-purple-600 text-white px-3 py-2 rounded-lg text-sm w-full sm:w-auto"
+            className="w-full rounded-lg bg-indigo-600 px-3 py-2 text-sm text-white hover:bg-indigo-700 sm:w-auto"
           >
             <Plus size={16} className="mr-1" />
             Add Task
@@ -391,7 +389,7 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="mb-4 p-3 bg-white/50 rounded-lg"
+              className="mb-4 rounded-lg border border-slate-200 bg-slate-50 p-3"
             >
               <form onSubmit={handleSubmit} className="space-y-2">
                 <label className="sr-only" htmlFor="new-task-title">Task title</label>
@@ -437,14 +435,14 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
                 <div className="flex space-x-2">
                   <button
                     type="submit"
-                    className="flex-1 bg-green-500 text-white py-2 rounded text-sm hover:bg-green-600"
+                    className="flex-1 rounded-lg bg-indigo-600 py-2 text-sm text-white hover:bg-indigo-700"
                   >
                     Add Task
                   </button>
                   <button
                     type="button"
                     onClick={() => setIsAdding(false)}
-                    className="px-3 bg-gray-500 text-white py-2 rounded text-sm hover:bg-gray-600"
+                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
                   >
                     Cancel
                   </button>
@@ -454,7 +452,7 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
           )}
         </AnimatePresence>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-4">
+        <div className="mb-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
           <label className="sr-only" htmlFor="task-search">Search tasks</label>
           <input
             id="task-search"
@@ -462,7 +460,7 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Search tasks..."
-            className="sm:col-span-1 w-full p-2 border border-gray-300 rounded text-sm"
+            className="w-full rounded border border-gray-300 p-2 text-sm sm:col-span-2"
           />
           <select aria-label="Filter tasks by priority" value={priorityFilter} onChange={(event) => setPriorityFilter(event.target.value as 'all' | Task['priority'])} className="p-2 border border-gray-300 rounded text-sm">
             <option value="all">All priorities</option>

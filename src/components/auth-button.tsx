@@ -14,7 +14,7 @@ export function AuthButton() {
         </span>
         <AnimatedButton
           onClick={() => signOut()}
-          className="px-3 py-1 bg-red-500 text-white rounded text-sm"
+          className="border border-slate-200 bg-transparent px-3 py-1 text-sm text-slate-600 hover:bg-slate-50"
         >
           Sign Out
         </AnimatedButton>
@@ -25,7 +25,7 @@ export function AuthButton() {
   return (
     <AnimatedButton
       onClick={() => signIn("google")}
-      className="px-3 py-1 bg-blue-500 text-white rounded text-sm"
+      className="rounded-lg bg-indigo-600 px-3 py-1 text-sm text-white hover:bg-indigo-700"
     >
       Sign In
     </AnimatedButton>

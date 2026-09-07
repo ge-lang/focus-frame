@@ -72,7 +72,7 @@ export default function AddWidgetDialog() {
       <AnimatedButton
         onClick={() => setIsOpen(true)}
         ariaLabel="Add widget"
-        className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700"
+        className="fixed bottom-6 right-6 z-50 h-12 w-12 rounded-full bg-indigo-600 text-white shadow-sm hover:bg-indigo-700"
       >
         <Plus size={24} />
       </AnimatedButton>
@@ -123,7 +123,7 @@ export default function AddWidgetDialog() {
                     disabled={!canAddWidget(option.type)}
                     className={`p-4 text-left rounded-lg border-2 transition-all ${
                       canAddWidget(option.type)
-                        ? 'border-gray-200 hover:border-blue-300 hover:bg-blue-50 cursor-pointer'
+                        ? 'cursor-pointer border-slate-200 hover:border-indigo-300 hover:bg-indigo-50'
                         : 'border-gray-100 bg-gray-50 cursor-not-allowed opacity-50'
                     }`}
                   >

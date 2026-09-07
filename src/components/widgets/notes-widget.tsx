@@ -24,7 +24,7 @@ export default function NotesWidget({ widgetId, title }: NotesWidgetProps) {
   }, [content, isLoading, note?.content, saveNote, widgetId]);
 
   return (
-    <AnimatedWidget className="bg-gradient-to-br from-yellow-50 to-orange-100">
+    <AnimatedWidget>
       <div className="h-full flex flex-col">
         <h3 className="font-semibold text-lg mb-4 text-gray-800">{title || 'Notes'}</h3>
         <textarea
@@ -32,13 +32,13 @@ export default function NotesWidget({ widgetId, title }: NotesWidgetProps) {
           value={content}
           onChange={(event) => setContent(event.target.value)}
           placeholder="Write your notes here..."
-          className="flex-1 w-full p-3 text-sm border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white/50"
+          className="w-full flex-1 resize-none rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
           rows={5}
           disabled={isLoading}
         />
         <div className="flex justify-between items-center mt-3">
           <span className="text-xs text-gray-500">{isSaving ? 'Saving…' : `${content.length} characters`}</span>
-          <button aria-label="Clear notes" onClick={() => setContent('')} className="px-3 py-1 bg-orange-500 text-white text-sm rounded hover:bg-orange-600 transition-colors">
+          <button aria-label="Clear notes" onClick={() => setContent('')} className="rounded-lg border border-slate-200 bg-white px-3 py-1 text-sm text-slate-600 transition-colors hover:bg-slate-50">
             Clear
           </button>
         </div>

@@ -16,12 +16,8 @@ export function AnimatedWidget({ children, className = '' }: AnimatedWidgetProps
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.3 }}
       className={`
-        rounded-2xl p-5 backdrop-blur-sm
-        bg-white/80 dark:bg-gray-800/80
-        border border-white/20 dark:border-gray-700/30
-        shadow-md shadow-black/5
-        hover:shadow-lg hover:shadow-black/10
-        transition-all duration-300
+        rounded-2xl border border-slate-200 bg-white p-5 shadow-sm
+        transition-shadow duration-200 hover:shadow-md
         ${className}
       `}
     >

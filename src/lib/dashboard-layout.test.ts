@@ -9,7 +9,7 @@ describe('dashboard layout sizing', () => {
   });
 
   it('clamps resized dimensions to the widget rules', () => {
-    expect(clampWidgetSize('analytics', 1, 8)).toEqual({ w: 2, h: 3 });
+    expect(clampWidgetSize('analytics', 1, 8)).toEqual({ w: 3, h: 3 });
     expect(clampWidgetSize('bookmarks', 4, 0)).toEqual({ w: 2, h: 1 });
   });
 

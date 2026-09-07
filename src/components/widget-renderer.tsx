@@ -9,7 +9,6 @@ import NotesWidget from './widgets/notes-widget';
 import AnalyticsWidget from './widgets/analytics-widget';
 import BookmarksWidget from './widgets/bookmarks-widget';
 import GoalsWidget from './widgets/goals-widget';
-import { AnimatedWidget } from './animated-widget';
 
 interface WidgetRendererProps {
   widget: Widget;
@@ -17,11 +16,7 @@ interface WidgetRendererProps {
 
 export function WidgetRenderer({ widget }: WidgetRendererProps) {
   if (!widget) {
-    return (
-      <AnimatedWidget className="h-full">
-        <div className="p-4 text-center text-gray-500">Widget not found</div>
-      </AnimatedWidget>
-    );
+    return <div className="p-4 text-center text-gray-500">Widget not found</div>;
   }
 
   const renderWidget = () => {
@@ -53,9 +48,5 @@ export function WidgetRenderer({ widget }: WidgetRendererProps) {
     }
   };
 
-  return (
-    <AnimatedWidget className="h-full">
-      {renderWidget()}
-    </AnimatedWidget>
-  );
+  return renderWidget();
 }

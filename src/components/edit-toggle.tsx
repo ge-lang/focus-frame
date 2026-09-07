@@ -11,7 +11,7 @@ export function EditToggle() {
   return (
     <AnimatedButton
       onClick={toggleEdit}
-      className="flex items-center space-x-2 bg-blue-500"
+      className="flex items-center space-x-2 bg-indigo-600 hover:bg-indigo-700"
     >
       {isEditing ? (
         <>

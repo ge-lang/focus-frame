@@ -11,9 +11,9 @@ interface GoalsWidgetProps {
 }
 
 const priorityClassMap: Record<Priority, string> = {
-  low: 'bg-green-100 text-green-800',
-  medium: 'bg-yellow-100 text-yellow-800',
-  high: 'bg-red-100 text-red-800',
+  low: 'bg-emerald-50 text-emerald-700',
+  medium: 'bg-amber-50 text-amber-700',
+  high: 'bg-amber-50 text-amber-700',
 };
 
 export default function GoalsWidget({ title }: GoalsWidgetProps) {
@@ -35,11 +35,11 @@ export default function GoalsWidget({ title }: GoalsWidgetProps) {
   const completionPercentage = goals.length ? Math.round((completedGoals / goals.length) * 100) : 0;
 
   return (
-    <AnimatedWidget className="bg-gradient-to-br from-indigo-50 to-purple-100">
+    <AnimatedWidget>
       <div className="h-full flex flex-col">
         <div className="flex justify-between items-center mb-4">
           <h3 className="font-semibold text-lg text-gray-800">{title || 'Goals'}</h3>
-          <button aria-label={isAdding ? 'Close add goal form' : 'Add goal'} onClick={() => setIsAdding(!isAdding)} className="p-1 text-indigo-600 hover:text-indigo-800 transition-colors" title="Add goal">➕</button>
+          <button aria-label={isAdding ? 'Close add goal form' : 'Add goal'} onClick={() => setIsAdding(!isAdding)} className="p-1 text-indigo-600 transition-colors hover:text-indigo-800" title="Add goal">➕</button>
         </div>
 
         <div className="mb-4">
@@ -51,7 +51,7 @@ export default function GoalsWidget({ title }: GoalsWidgetProps) {
         </div>
 
         {isAdding && (
-          <div className="mb-4 p-3 bg-white/50 rounded-lg">
+          <div className="mb-4 rounded-lg border border-slate-200 bg-slate-50 p-3">
             <label className="sr-only" htmlFor="new-goal-title">Goal title</label>
             <input id="new-goal-title" type="text" placeholder="What do you want to achieve?" value={newGoal.title} onChange={(event) => setNewGoal({ ...newGoal, title: event.target.value })} className="w-full mb-2 p-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500" />
             <label className="sr-only" htmlFor="new-goal-priority">Goal priority</label>
@@ -59,8 +59,8 @@ export default function GoalsWidget({ title }: GoalsWidgetProps) {
               <option value="low">Low Priority</option><option value="medium">Medium Priority</option><option value="high">High Priority</option>
             </select>
             <div className="flex space-x-2">
-              <button onClick={addGoal} className="flex-1 px-3 py-1 bg-indigo-500 text-white text-sm rounded hover:bg-indigo-600">Add Goal</button>
-              <button onClick={() => setIsAdding(false)} className="px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600">Cancel</button>
+              <button onClick={addGoal} className="flex-1 rounded-lg bg-indigo-600 px-3 py-1 text-sm text-white hover:bg-indigo-700">Add Goal</button>
+              <button onClick={() => setIsAdding(false)} className="rounded-lg border border-slate-200 bg-white px-3 py-1 text-sm text-slate-700 hover:bg-slate-50">Cancel</button>
             </div>
           </div>
         )}
@@ -68,11 +68,11 @@ export default function GoalsWidget({ title }: GoalsWidgetProps) {
         <div className="flex-1 overflow-y-auto space-y-2">
           {isLoading && <p className="text-sm text-gray-500">Loading goals…</p>}
           {goals.map((goal) => (
-            <div key={goal.id} className="group relative p-3 bg-white/50 rounded-lg hover:bg-white/70 transition-colors">
+            <div key={goal.id} className="group relative rounded-lg border border-slate-200 bg-white p-3 transition-colors hover:bg-slate-50">
               <div className="flex items-center">
                 <input type="checkbox" checked={goal.completed} onChange={() => updateGoal({ id: goal.id, completed: !goal.completed })} className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500" />
                 <span className={`ml-3 flex-1 ${goal.completed ? 'line-through text-gray-500' : 'text-gray-800'}`}>{goal.title}</span>
-                <span className={`ml-2 px-2 py-1 text-xs rounded-full ${priorityClassMap[goal.priority]}`}>{goal.priority}</span>
+                <span className={`ml-2 rounded-full px-2 py-1 text-xs ${priorityClassMap[goal.priority]}`}>{goal.priority}</span>
                 <button aria-label={`Remove goal: ${goal.title}`} onClick={() => deleteGoal(goal.id)} className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity p-1 text-red-500 hover:text-red-700" title="Remove goal">✕</button>
               </div>
             </div>

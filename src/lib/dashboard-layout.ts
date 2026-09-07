@@ -1,6 +1,6 @@
 import type { LayoutItem, WidgetType } from '@/types/dashboard';
 
-export const GRID_ROW_HEIGHT = 180;
+export const GRID_ROW_HEIGHT = 140;
 
 export interface WidgetSizing {
   minW: number;
@@ -16,7 +16,7 @@ const widgetSizing: Record<WidgetType, WidgetSizing> = {
   pomodoro: { minW: 1, maxW: 2, minH: 1, maxH: 2 },
   calendar: { minW: 1, maxW: 2, minH: 2, maxH: 3 },
   notes: { minW: 1, maxW: 2, minH: 1, maxH: 3 },
-  analytics: { minW: 2, maxW: 3, minH: 2, maxH: 3 },
+  analytics: { minW: 3, maxW: 3, minH: 2, maxH: 3 },
   bookmarks: { minW: 1, maxW: 2, minH: 1, maxH: 2 },
   goals: { minW: 1, maxW: 2, minH: 1, maxH: 2 },
 };

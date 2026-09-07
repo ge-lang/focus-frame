@@ -9,17 +9,17 @@ export default function Header() {
   const { data: session } = useSession();
 
   return (
-    <header className="bg-white shadow-sm border-b">
+    <header className="border-b border-slate-200 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
-            <div className="text-2xl font-bold text-gray-900">FocusFrame</div>
+            <div className="text-xl font-semibold tracking-tight text-slate-900">FocusFrame</div>
           </div>
           
           <div className="flex items-center space-x-4">
             {session?.user && (
               <>
-                <span className="text-gray-600">
+                <span className="text-sm text-slate-500">
                   Hello, {session.user.name}
                 </span>
                 <Image
@@ -33,7 +33,7 @@ export default function Header() {
                 />
                 <button
                   onClick={() => signOut()}
-                  className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:border-gray-300 hover:bg-gray-50 hover:text-gray-800"
+                  className="rounded-lg border border-slate-200 bg-transparent px-3 py-2 text-sm font-medium text-slate-500 transition-colors hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700"
                 >
                   Sign out
                 </button>
