@@ -28,13 +28,13 @@ erDiagram
   USER ||--o| USER_LAYOUT : has
 ```
 
-The Prisma schema is the source of truth. `UserSettings` stores focus and notification preferences. `UserLayout` stores the serializable dashboard widgets and layout. `FocusSession.taskId` is optional, so a session can be general or linked to a task.
+The Prisma schema defines the application data models and relationships. `UserSettings` stores focus and notification preferences. `UserLayout` stores the serializable dashboard widgets and layout. `FocusSession.taskId` is optional, so a session can be general or linked to a task.
 
 ## Authentication and ownership
 
 Google OAuth is configured through NextAuth.js and the Prisma adapter. API routes use `getCurrentUserId()`, which reads the server session. They do not accept a caller-provided owner ID.
 
-Ownership checks are important because an object ID is not a secret. A malicious or curious user could guess an ID and try to update or delete it. Personal object queries therefore use both the object identifier and the authenticated `userId`, or first verify a related object belongs to that user. A missing or foreign object is returned as a controlled not-found response rather than revealing whether it exists.
+Ownership checks are important because an object ID is not a secret and should not be treated as proof of access. A user could guess an ID and try to update or delete it, so personal object queries verify both the object identifier and the authenticated `userId`, or first verify that a related object belongs to that user. A missing or foreign object is returned as a controlled not-found response rather than revealing whether it exists.
 
 ## Personal-data requests versus external-data requests
 
