@@ -63,3 +63,22 @@ Analytics uses a user-local calendar-date policy: local midnight defines the ran
 - `src/lib/`: Prisma, session, validation and pure business helpers.
 - `prisma/schema.prisma`: database models and relations.
 - `prisma/migrations/`: versioned database changes.
+
+## API route reference
+
+| Route | Methods | Purpose |
+| --- | --- | --- |
+| `/api/auth/[...nextauth]` | `GET`, `POST` | NextAuth authentication endpoints |
+| `/api/dashboard` | `GET`, `PUT` | Load and save the signed-in user’s dashboard layout |
+| `/api/tasks` | `GET`, `POST` | List and create tasks |
+| `/api/tasks/[id]` | `PUT`, `DELETE` | Update or delete an owned task |
+| `/api/notes/[widgetId]` | `GET`, `PUT` | Load and save a widget note |
+| `/api/goals` | `GET`, `POST` | List and create goals |
+| `/api/goals/[id]` | `PUT`, `DELETE` | Update or delete an owned goal |
+| `/api/bookmarks` | `GET`, `POST` | List and create bookmarks |
+| `/api/bookmarks/[id]` | `DELETE` | Delete an owned bookmark |
+| `/api/focus-sessions` | `POST` | Record a completed focus session |
+| `/api/analytics` | `GET` | Return analytics for a selected date range |
+| `/api/settings` | `GET`, `PUT` | Load and update user settings |
+| `/api/news` | `GET` | Server-side GNews proxy |
+| `/api/weather` | `GET` | Server-side OpenWeather proxy and city search |
