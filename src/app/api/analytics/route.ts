@@ -1,20 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUserId } from '@/lib/api-auth';
+import { calculateProductivity, calculateStreak, calculateTrend, localDayKey, startOfLocalDay, startOfLocalRange, sumDurations } from '@/lib/analytics-utils';
 
 type Range = 'today' | 'week' | 'month' | 'year';
 const ranges: Record<Range, number> = { today: 1, week: 7, month: 30, year: 365 };
-
-function startOfRange(days: number) {
-  const start = new Date();
-  start.setHours(0, 0, 0, 0);
-  start.setDate(start.getDate() - (days - 1));
-  return start;
-}
-
-function dayKey(date: Date) {
-  return date.toISOString().slice(0, 10);
-}
 
 export async function GET(request: NextRequest) {
   const userId = await getCurrentUserId();
@@ -23,7 +13,8 @@ export async function GET(request: NextRequest) {
   const value = new URL(request.url).searchParams.get('range');
   const range: Range = value && value in ranges ? value as Range : 'week';
   const days = ranges[range];
-  const start = startOfRange(days);
+  const now = new Date();
+  const start = startOfLocalRange(days, now);
   const previousStart = new Date(start);
   previousStart.setDate(previousStart.getDate() - days);
 
@@ -35,19 +26,18 @@ export async function GET(request: NextRequest) {
     prisma.userSettings.findUnique({ where: { userId } }),
   ]);
 
-  const focusSeconds = sessions.reduce((total, session) => total + session.duration, 0);
-  const previousFocusSeconds = previousSessions.reduce((total, session) => total + session.duration, 0);
+  const focusSeconds = sumDurations(sessions);
+  const previousFocusSeconds = sumDurations(previousSessions);
   const focusGoalSeconds = days * (settings?.dailyFocusGoal ?? 100) * 60;
   const taskGoal = days * 3;
-  const productivity = Math.round(Math.min(100, ((focusSeconds / focusGoalSeconds) * 70 + (completedTasks / taskGoal) * 30)));
-  const trend = previousFocusSeconds ? Math.round(((focusSeconds - previousFocusSeconds) / previousFocusSeconds) * 100) : focusSeconds ? 100 : 0;
+  const productivity = calculateProductivity(focusSeconds, focusGoalSeconds, completedTasks, taskGoal);
+  const trend = calculateTrend(focusSeconds, previousFocusSeconds);
 
   const dailyFocus = Array.from({ length: Math.min(days, 7) }, (_, index) => {
-    const date = new Date();
-    date.setHours(0, 0, 0, 0);
+    const date = startOfLocalDay(now);
     date.setDate(date.getDate() - (Math.min(days, 7) - 1 - index));
-    const key = dayKey(date);
-    const seconds = sessions.filter((session) => dayKey(session.completedAt) === key).reduce((sum, session) => sum + session.duration, 0);
+    const key = localDayKey(date);
+    const seconds = sumDurations(sessions.filter((session) => localDayKey(session.completedAt) === key));
     return { label: date.toLocaleDateString('en', { weekday: 'short' }).slice(0, 1), minutes: Math.round(seconds / 60) };
   });
 
@@ -56,14 +46,8 @@ export async function GET(request: NextRequest) {
   const peakHours = [...hourTotals.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3).map(([hour]) => `${String(hour).padStart(2, '0')}:00`);
 
   const allWorkSessions = await prisma.focusSession.findMany({ where: { userId, type: 'work' }, select: { completedAt: true } });
-  const activeDays = new Set(allWorkSessions.map((session) => dayKey(session.completedAt)));
-  let streak = 0;
-  const cursor = new Date();
-  cursor.setHours(0, 0, 0, 0);
-  while (activeDays.has(dayKey(cursor))) {
-    streak += 1;
-    cursor.setDate(cursor.getDate() - 1);
-  }
+  const activeDays = new Set(allWorkSessions.map((session) => localDayKey(session.completedAt)));
+  const streak = calculateStreak(activeDays, now);
 
   return NextResponse.json({
     productivity,

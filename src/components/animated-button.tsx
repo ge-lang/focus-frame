@@ -8,18 +8,24 @@ interface AnimatedButtonProps {
   onClick?: () => void;
   disabled?: boolean;
   className?: string;
+  ariaLabel?: string;
+  type?: 'button' | 'submit' | 'reset';
 }
 
 export function AnimatedButton({ 
   children, 
   onClick, 
-  disabled = false, 
-  className = '' 
+  disabled = false,
+  className = '',
+  ariaLabel,
+  type = 'button',
 }: AnimatedButtonProps) {
   return (
     <motion.button
       onClick={onClick}
       disabled={disabled}
+      aria-label={ariaLabel}
+      type={type}
       whileHover={{ scale: disabled ? 1 : 1.05 }}
       whileTap={{ scale: disabled ? 1 : 0.95 }}
       transition={{ duration: 0.2 }}

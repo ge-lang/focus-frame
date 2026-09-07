@@ -28,6 +28,7 @@ export default function NotesWidget({ widgetId, title }: NotesWidgetProps) {
       <div className="h-full flex flex-col">
         <h3 className="font-semibold text-lg mb-4 text-gray-800">{title || 'Notes'}</h3>
         <textarea
+          aria-label="Notes"
           value={content}
           onChange={(event) => setContent(event.target.value)}
           placeholder="Write your notes here..."
@@ -37,7 +38,7 @@ export default function NotesWidget({ widgetId, title }: NotesWidgetProps) {
         />
         <div className="flex justify-between items-center mt-3">
           <span className="text-xs text-gray-500">{isSaving ? 'Saving…' : `${content.length} characters`}</span>
-          <button onClick={() => setContent('')} className="px-3 py-1 bg-orange-500 text-white text-sm rounded hover:bg-orange-600 transition-colors">
+          <button aria-label="Clear notes" onClick={() => setContent('')} className="px-3 py-1 bg-orange-500 text-white text-sm rounded hover:bg-orange-600 transition-colors">
             Clear
           </button>
         </div>

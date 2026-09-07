@@ -14,6 +14,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { Task, TaskStatus } from '@/types/task';
 import { useCreateTask, useDeleteTask, useTasks, useUpdateTask } from '@/hooks/use-tasks';
+import { filterTasks, getDueDateMeta, type DueDateFilter } from '@/lib/task-utils';
 
 interface TaskWidgetProps {
   widgetId: string;
@@ -27,8 +28,6 @@ interface EditState {
   priority: 'low' | 'medium' | 'high';
   dueDate: string;
 }
-
-type DueDateFilter = 'all' | 'overdue' | 'today' | 'upcoming' | 'none';
 
 // Helper functions
 const getStatusLabel = (status: TaskStatus) => {
@@ -53,21 +52,6 @@ const formatFocusTime = (seconds?: number) => {
   if (!seconds) return null;
   const minutes = Math.round(seconds / 60);
   return minutes < 60 ? `${minutes}m focused` : `${Math.floor(minutes / 60)}h ${minutes % 60}m focused`;
-};
-
-const getDueDateMeta = (dueDate: string | null) => {
-  if (!dueDate) return null;
-
-  const date = new Date(`${dueDate.slice(0, 10)}T00:00:00`);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const tomorrow = new Date(today);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-
-  if (date < today) return { label: 'Overdue', className: 'text-red-600 font-medium', type: 'overdue' as const };
-  if (date.getTime() === today.getTime()) return { label: 'Due today', className: 'text-orange-600 font-medium', type: 'today' as const };
-  if (date.getTime() === tomorrow.getTime()) return { label: 'Due tomorrow', className: 'text-yellow-700 font-medium', type: 'upcoming' as const };
-  return { label: date.toLocaleDateString(), className: 'text-gray-500', type: 'upcoming' as const };
 };
 
 // Task card component
@@ -152,6 +136,7 @@ function TaskCard({
             </div>
             <div className="flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity ml-2">
               <button
+                aria-label={`Edit task: ${task.title}`}
                 onClick={() => onEdit(task, status)}
                 className="p-1 text-blue-600 hover:text-blue-800"
                 title="Edit"
@@ -159,6 +144,7 @@ function TaskCard({
                 <Edit size={12} />
               </button>
               <button
+                aria-label={`Delete task: ${task.title}`}
                 onClick={() => onDelete(task.id)}
                 className="p-1 text-red-600 hover:text-red-800"
                 title="Delete"
@@ -294,22 +280,10 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
     done: tasks.filter((task) => task.status === 'done'),
   }), [tasks]);
   const visibleTasksByStatus = useMemo<Record<TaskStatus, Task[]>>(() => {
-    const matchesFilters = (task: Task) => {
-      const matchesSearch = task.title.toLowerCase().includes(search.trim().toLowerCase()) || task.description?.toLowerCase().includes(search.trim().toLowerCase());
-      const matchesPriority = priorityFilter === 'all' || task.priority === priorityFilter;
-      const dueDate = getDueDateMeta(task.dueDate);
-      const matchesDueDate = dueDateFilter === 'all' ||
-        (dueDateFilter === 'none' && !dueDate) ||
-        (dueDateFilter === 'overdue' && dueDate?.type === 'overdue') ||
-        (dueDateFilter === 'today' && dueDate?.type === 'today') ||
-        (dueDateFilter === 'upcoming' && dueDate?.type === 'upcoming');
-      return matchesSearch && matchesPriority && matchesDueDate;
-    };
-
     return {
-      todo: tasksByStatus.todo.filter(matchesFilters),
-      in_progress: tasksByStatus.in_progress.filter(matchesFilters),
-      done: tasksByStatus.done.filter(matchesFilters),
+      todo: filterTasks(tasksByStatus.todo, search, priorityFilter, dueDateFilter),
+      in_progress: filterTasks(tasksByStatus.in_progress, search, priorityFilter, dueDateFilter),
+      done: filterTasks(tasksByStatus.done, search, priorityFilter, dueDateFilter),
     };
   }, [dueDateFilter, priorityFilter, search, tasksByStatus]);
 
@@ -420,7 +394,9 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
               className="mb-4 p-3 bg-white/50 rounded-lg"
             >
               <form onSubmit={handleSubmit} className="space-y-2">
+                <label className="sr-only" htmlFor="new-task-title">Task title</label>
                 <input
+                  id="new-task-title"
                   type="text"
                   value={newTask.title}
                   onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
@@ -428,7 +404,9 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
                   className="w-full p-2 border border-gray-300 rounded text-sm"
                   autoFocus
                 />
+                <label className="sr-only" htmlFor="new-task-description">Task description</label>
                 <textarea
+                  id="new-task-description"
                   value={newTask.description}
                   onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
                   placeholder="Description (optional)"
@@ -436,7 +414,9 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
                   rows={2}
                 />
                 <div className="grid grid-cols-2 gap-2">
+                  <label className="sr-only" htmlFor="new-task-priority">Task priority</label>
                   <select
+                    id="new-task-priority"
                     value={newTask.priority}
                     onChange={(e) => setNewTask({ ...newTask, priority: e.target.value as any })}
                     className="p-2 border border-gray-300 rounded text-sm"
@@ -445,7 +425,9 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
                     <option value="medium">Medium Priority</option>
                     <option value="high">High Priority</option>
                   </select>
+                  <label className="sr-only" htmlFor="new-task-due-date">Task due date</label>
                   <input
+                    id="new-task-due-date"
                     type="date"
                     value={newTask.dueDate}
                     onChange={(e) => setNewTask({ ...newTask, dueDate: e.target.value })}
@@ -473,20 +455,22 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
         </AnimatePresence>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-4">
+          <label className="sr-only" htmlFor="task-search">Search tasks</label>
           <input
+            id="task-search"
             type="search"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Search tasks..."
             className="sm:col-span-1 w-full p-2 border border-gray-300 rounded text-sm"
           />
-          <select value={priorityFilter} onChange={(event) => setPriorityFilter(event.target.value as 'all' | Task['priority'])} className="p-2 border border-gray-300 rounded text-sm">
+          <select aria-label="Filter tasks by priority" value={priorityFilter} onChange={(event) => setPriorityFilter(event.target.value as 'all' | Task['priority'])} className="p-2 border border-gray-300 rounded text-sm">
             <option value="all">All priorities</option>
             <option value="high">High priority</option>
             <option value="medium">Medium priority</option>
             <option value="low">Low priority</option>
           </select>
-          <select value={dueDateFilter} onChange={(event) => setDueDateFilter(event.target.value as DueDateFilter)} className="p-2 border border-gray-300 rounded text-sm">
+          <select aria-label="Filter tasks by due date" value={dueDateFilter} onChange={(event) => setDueDateFilter(event.target.value as DueDateFilter)} className="p-2 border border-gray-300 rounded text-sm">
             <option value="all">All deadlines</option>
             <option value="overdue">Overdue</option>
             <option value="today">Due today</option>
