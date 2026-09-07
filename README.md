@@ -1,232 +1,135 @@
-# 🚀 FocusFrame
+# FocusFrame
 
-[![Vercel Deployment](https://img.shields.io/badge/Deployed_on-Vercel-black)](https://focus-frame.vercel.app)
-[![Next.js](https://img.shields.io/badge/Next.js-16.2-black)](https://nextjs.org)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.5-blue)](https://www.typescriptlang.org)
+FocusFrame is a personal productivity dashboard built as a learning and portfolio project. It brings tasks, Pomodoro focus sessions, notes, goals, bookmarks, analytics, weather and news into one customizable workspace.
 
-FocusFrame is a personal productivity dashboard. It brings tasks, Pomodoro focus sessions, analytics, notes, goals, bookmarks, weather and news into one customizable workspace. All personal data is isolated by the signed-in user.
+## Core features
 
-## ✨ Highlights
+- Google OAuth sign-in.
+- User-owned tasks with statuses, priorities, deadlines, search and filters.
+- Pomodoro work and break sessions, optionally linked to a task.
+- Notes, goals and bookmarks stored per signed-in user.
+- A persistent, draggable dashboard layout.
+- Analytics for focus time, completed tasks and goals, trends, streaks and peak hours.
+- Weather and news integrations with clearly labeled demo/fallback states.
 
-### Custom workspace
+## Tech stack
 
-- Add, remove, reorder and resize dashboard widgets.
-- Persist the widget layout for each account.
-- Responsive desktop, tablet and mobile layouts.
+- Next.js 16 App Router and React 19
+- TypeScript and Tailwind CSS 3
+- TanStack React Query for client data fetching and caching
+- NextAuth.js with Google OAuth and the Prisma adapter
+- Prisma ORM with PostgreSQL
+- Vitest for automated tests
+- Vercel and a PostgreSQL provider for deployment
 
-### Tasks and deadlines
+## Architecture overview
 
-- Create, edit and delete user-owned tasks.
-- Organize tasks with **To do**, **In progress** and **Done** columns.
-- Set priorities and due dates.
-- Search by title or description.
-- Filter by priority and deadline: overdue, due today, upcoming or no deadline.
-- View task deadlines in the calendar and a next-seven-days list.
+The browser renders React components and widgets. Hooks use React Query or small browser-side state helpers to call Next.js API routes. Server routes obtain the authenticated session, validate input, apply user-ownership scoping, and use Prisma to read or write PostgreSQL data. News and weather are server-side proxy routes so their API keys are not sent to the browser.
 
-### Focus and analytics
+More detail is in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). The interview-oriented explanation is in [docs/PROJECT-WALKTHROUGH.md](docs/PROJECT-WALKTHROUGH.md), with short study answers in [docs/INTERVIEW-CHEATSHEET.md](docs/INTERVIEW-CHEATSHEET.md).
 
-- Configurable Pomodoro work, short-break and long-break durations.
-- Optional browser notification and sound on session completion.
-- Link a focus session to an open task.
-- Track focus time per task.
-- View real focus time, completed tasks and goals, productivity trend, streaks, peak focus hours and a seven-day chart.
-- Set personal daily focus and Pomodoro goals.
+## Authentication and user-data isolation
 
-### Personal data widgets
+NextAuth.js creates the server session after Google sign-in. Personal API routes derive the current user ID from that session; they do not trust a user ID from a request body, query string or route parameter. Queries and object mutations apply both the resource ID and authenticated user ID where applicable, providing an application-level safeguard against cross-user access by guessed IDs.
 
-- Auto-saving notes, scoped to the widget and signed-in user.
-- Persistent goals and bookmarks.
-- Secure, authenticated server APIs for all personal content.
+## Database models
 
-### External data
+The main Prisma relationships are:
 
-- Weather widget with live data and a demo fallback.
-- Latest News widget via the GNews API.
-- GNews is fetched through a server route, so its API key is never exposed to the browser.
+- `User` has many `Task`, `Note`, `Goal`, `Bookmark` and `FocusSession` records.
+- `Task` can have many `FocusSession` records.
+- `User` has one `UserSettings` record and one `UserLayout` record.
+- A focus session may reference a task owned by the same user.
 
-## 🛠 Tech stack
+The schema and versioned migrations are in `prisma/`. `Task.userId` is currently nullable for historical compatibility; it has not been changed in this phase.
 
-| Area | Technology |
-| --- | --- |
-| Framework | Next.js 16 with the App Router |
-| UI | React 19, TypeScript, Tailwind CSS, Framer Motion |
-| Data fetching | TanStack React Query |
-| Database | PostgreSQL with Prisma ORM |
-| Authentication | NextAuth.js, Google OAuth and Prisma Adapter |
-| Drag and drop | dnd-kit |
-| Hosting | Vercel and Neon PostgreSQL |
+## External APIs
 
-## 📸 Screenshot
+- OpenWeather provides weather and city-search data through `/api/weather`.
+- GNews provides headlines through `/api/news`.
+- `OPENWEATHER_API_KEY` and `GNEWS_API_KEY` are server-only variables. If an external service is unavailable or not configured, the UI may show clearly labeled demo/fallback content.
 
-![FocusFrame dashboard preview](/public/images/dashboard-preview.png)
-
-## 🚀 Run locally
+## Local setup
 
 ### Prerequisites
 
 - Node.js 20 or newer
-- A PostgreSQL database (for example, Neon)
+- PostgreSQL
 - A Google OAuth application
-- Optional: a [GNews](https://gnews.io) API key for live headlines
-- Optional: an OpenWeather API key for live weather
+- Optional GNews and OpenWeather API keys
 
-### Install
+### Install and configure
 
 ```bash
 git clone https://github.com/ge-lang/focus-frame.git
 cd focus-frame
-npm install
-cp .env.example .env
+npm ci
 ```
 
-### Configure environment variables
-
-Update `.env` with your own values.
-
-| Variable | Required | Purpose |
-| --- | --- | --- |
-| `DATABASE_URL` | Yes | PostgreSQL connection string |
-| `AUTH_SECRET` | Yes | Random secret used by NextAuth |
-| `NEXTAUTH_URL` | Yes | Application URL, such as `http://localhost:3000` |
-| `GOOGLE_CLIENT_ID` | Yes | Google OAuth client ID |
-| `GOOGLE_CLIENT_SECRET` | Yes | Google OAuth client secret |
-| `GNEWS_API_KEY` | No | Server-only GNews API key for live headlines |
-| `OPENWEATHER_API_KEY` | No | Server-only OpenWeather API key for weather and global city search |
-
-Example:
-
-```env
-DATABASE_URL="postgresql://username:password@host/database?sslmode=require"
-AUTH_SECRET="generate_a_long_random_value"
-NEXTAUTH_URL="http://localhost:3000"
-GOOGLE_CLIENT_ID="your_google_client_id"
-GOOGLE_CLIENT_SECRET="your_google_client_secret"
-GNEWS_API_KEY="your_gnews_api_key"
-OPENWEATHER_API_KEY="your_openweather_api_key"
-```
-
-> Never prefix API keys with `NEXT_PUBLIC_` and never commit `.env` files. News and weather requests are made server-side by `/api/news` and `/api/weather`.
-
-### Prepare the database and start the app
+Create a local `.env` file with the variables below. Do not commit it.
 
 ```bash
 npx prisma migrate dev
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Open <http://localhost:3000>.
 
-## 📁 Project structure
+## Environment variables
 
-```text
-src/
-├── app/
-│   ├── api/                    # Authenticated route handlers
-│   ├── auth/                   # Sign-in page
-│   ├── dashboard/              # Dashboard route and layout
-│   ├── layout.tsx              # App-wide providers
-│   └── page.tsx                # Main dashboard entry point
-├── components/
-│   ├── widgets/                # Dashboard widget UI
-│   └── *.tsx                   # Dashboard and auth components
-├── contexts/                   # Dashboard layout state
-├── hooks/                      # React Query and browser hooks
-├── lib/                        # Prisma and server auth helpers
-└── types/                      # Shared TypeScript types
-prisma/
-├── schema.prisma               # Database schema
-└── migrations/                 # Versioned PostgreSQL migrations
-```
-
-## 🔌 API reference
-
-All personal-data endpoints require an authenticated session and only expose data that belongs to the current user.
-
-| Route | Methods | Description |
+| Variable | Required | Purpose |
 | --- | --- | --- |
-| `/api/auth/[...nextauth]` | `GET`, `POST` | NextAuth endpoints |
-| `/api/dashboard` | `GET`, `PUT` | Load and save widget layout |
-| `/api/tasks` | `GET`, `POST` | List and create tasks; includes task focus time |
-| `/api/tasks/[id]` | `PUT`, `DELETE` | Update or delete an owned task |
-| `/api/notes/[widgetId]` | `GET`, `PUT` | Load and save a widget note |
-| `/api/goals` | `GET`, `POST` | List and create goals |
-| `/api/goals/[id]` | `PUT`, `DELETE` | Update or delete a goal |
-| `/api/bookmarks` | `GET`, `POST` | List and create bookmarks |
-| `/api/bookmarks/[id]` | `DELETE` | Delete a bookmark |
-| `/api/focus-sessions` | `POST` | Record a completed Pomodoro session |
-| `/api/analytics` | `GET` | Fetch analytics for `today`, `week`, `month` or `year` |
-| `/api/settings` | `GET`, `PUT` | Focus goals and notification preferences |
-| `/api/news` | `GET` | Server-side GNews proxy; accepts `category` |
-| `/api/weather` | `GET` | Weather data route |
+| `DATABASE_URL` | Yes | PostgreSQL connection string |
+| `AUTH_SECRET` | Yes | NextAuth session secret |
+| `NEXTAUTH_URL` | Yes | Application URL |
+| `GOOGLE_CLIENT_ID` | Yes | Google OAuth client ID |
+| `GOOGLE_CLIENT_SECRET` | Yes | Google OAuth client secret |
+| `GNEWS_API_KEY` | No | Server-only GNews key |
+| `OPENWEATHER_API_KEY` | No | Server-only OpenWeather key |
 
-## ✅ Quality checks
+Never use a `NEXT_PUBLIC_` prefix for these API keys.
+
+## Quality commands
 
 ```bash
+npm ci
+npx prisma validate
+npx prisma generate
 npx tsc --noEmit
 npm run lint
-npx next build
+npm test
+npm run build
 ```
 
-The project currently has two non-blocking lint warnings related to an image element and a Pomodoro hook dependency.
+The build also runs `prisma generate`. `next/font/google` fetches the Inter font during a production build, so a network-restricted environment can fail at that step even when the application code is valid.
 
-## 🌐 Deploy to Vercel
+## Testing
 
-1. Push the repository to GitHub.
-2. Import the repository into Vercel.
-3. Add every required variable from `.env.example` in **Settings → Environment Variables**.
-4. Set `NEXTAUTH_URL` to the deployed domain.
-5. Configure the same deployed domain as an authorized redirect URI in Google Cloud OAuth.
-6. Deploy.
+Vitest covers API authentication, ownership boundaries, validation, weather configuration behavior, analytics helpers and task deadline/filter helpers. The current suite has 31 passing tests across 13 test files. Browser end-to-end testing is not part of the current project.
 
-The build script runs `prisma generate` and `next build`. Apply migrations separately before deploying, so parallel Vercel builds never compete for the PostgreSQL migration lock:
+## Deployment
 
-```bash
-npm run db:migrate
-```
+The intended deployment target is Vercel with PostgreSQL. Configure all required environment variables in the deployment environment, configure the Google OAuth redirect URI for the deployed domain, and apply Prisma migrations separately from the application build. The repository build command is `npm run build`.
 
-### GNews shows Demo Data
+## Known limitations
 
-The widget deliberately falls back to demo data if GNews cannot return live headlines. Check the following:
+- Google OAuth is the only configured sign-in provider.
+- Weather and news depend on external services and may use demo/fallback content.
+- The build needs access to Google Fonts unless the font strategy is changed deliberately.
+- `Task.userId` remains nullable pending a separate data audit and reviewed migration plan.
+- There is no browser E2E suite or CI database fixture yet.
 
-1. `GNEWS_API_KEY` exists in the Vercel **Production** environment.
-2. The variable name is exactly `GNEWS_API_KEY`, not `NEXT_PUBLIC_GNEWS_API_KEY`.
-3. Redeploy after adding or changing the variable.
-4. Verify that the API key is active and has remaining GNews quota.
+## Roadmap
 
-## 🧭 Roadmap
+- Safely resolve nullable task ownership data after a data audit.
+- Add database/API integration tests.
+- Add browser E2E coverage for core flows.
+- Add deadline reminders and calendar integration.
 
-- Google Calendar OAuth integration.
-- Deadline reminders for tasks.
-- API and end-to-end tests with continuous integration.
-- Additional widget templates and dashboard presets.
+## AI-assisted development
 
-## 📄 License
+I used AI to support implementation, debugging, explanations and evaluating alternatives. I reviewed the suggested solutions, tested the application and used the project to deepen my understanding of its architecture. I remain responsible for deciding what to keep and how the application should work.
+
+## License
 
 MIT
-
-# 💻 SYSTEM TERMINAL
-
-```bash
-\$ npm run dev
-▲ Next.js 15.1.0
-- Local: http://localhost:3000
-- Environments: .env.production loaded
-
-[Ready] Compiled full-stack architecture in 1.4s
-[Prisma] Connected securely to Neon PostgreSQL database.
-[NextAuth] Session authentication system initialized [Google OAuth].
-
-\$ curl -I https://vercel.app
-HTTP/2 200 OK
-content-type: application/json
-x-vercel-cache: HIT
-status: Secure API Server Proxy Routing Functional
-
-\$ show-system-status --detailed
-● focus-frame.service - Full-Stack Productivity SaaS
-   Status: ACTIVE & OPERATIONAL
-   Engine: Next.js (App Router) + TypeScript
-   Database: Neon PostgreSQL (Data Isolated per User Session)
-   AI-Workflow: Integrated for Code Optimization & Debugging
-   Performance: 100/100 Core Web Vitals [Vercel Deployment]
-```

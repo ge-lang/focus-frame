@@ -42,7 +42,7 @@ const MetricCard = memo(function MetricCard({ Icon, value, label, color, valuePr
 export default function AnalyticsWidget({ title }: AnalyticsWidgetProps) {
   const [timeRange, setTimeRange] = useState<AnalyticsRange>('week');
   const [showDetails, setShowDetails] = useState(false);
-  const { data, isLoading, refetch, isFetching } = useAnalytics(timeRange);
+  const { data, isLoading, isError, refetch, isFetching } = useAnalytics(timeRange);
 
   const metrics = useMemo(() => {
     if (!data) return [];
@@ -64,8 +64,8 @@ export default function AnalyticsWidget({ title }: AnalyticsWidgetProps) {
             <p className="text-sm text-gray-600 mt-1">{timeRanges.find((range) => range.value === timeRange)?.label} • {data?.streak ?? 0} day streak</p>
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={() => setShowDetails(!showDetails)} className="p-2 text-gray-600 hover:text-gray-800" title={showDetails ? 'Hide details' : 'Show details'}>{showDetails ? <EyeOff size={16} /> : <Eye size={16} />}</button>
-            <button onClick={() => refetch()} disabled={isFetching} className="p-2 text-gray-600 hover:text-gray-800 disabled:opacity-50" title="Refresh data"><RefreshCw size={16} className={isFetching ? 'animate-spin' : ''} /></button>
+            <button aria-label={showDetails ? 'Hide analytics details' : 'Show analytics details'} onClick={() => setShowDetails(!showDetails)} className="p-2 text-gray-600 hover:text-gray-800" title={showDetails ? 'Hide details' : 'Show details'}>{showDetails ? <EyeOff size={16} /> : <Eye size={16} />}</button>
+            <button aria-label="Refresh analytics" onClick={() => refetch()} disabled={isFetching} className="p-2 text-gray-600 hover:text-gray-800 disabled:opacity-50" title="Refresh data"><RefreshCw size={16} className={isFetching ? 'animate-spin' : ''} /></button>
           </div>
         </div>
 
@@ -73,7 +73,7 @@ export default function AnalyticsWidget({ title }: AnalyticsWidgetProps) {
           {timeRanges.map((range) => <button key={range.value} onClick={() => setTimeRange(range.value)} className={`flex-1 px-3 py-2 text-sm font-medium rounded-lg transition-all ${timeRange === range.value ? 'bg-purple-500 text-white shadow-lg' : 'bg-white text-gray-600 hover:bg-gray-100 shadow'}`}>{range.label}</button>)}
         </div>
 
-        {isLoading || !data ? <div className="flex-1 grid place-items-center text-sm text-gray-500">Loading analytics…</div> : <>
+        {isLoading || !data ? <div className="flex-1 grid place-items-center text-sm text-gray-500">{isError ? <div className="text-center"><p>Unable to load analytics.</p><button onClick={() => refetch()} className="mt-2 text-purple-700 underline">Try again</button></div> : 'Loading analytics…'}</div> : <>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             {metrics.map((metric) => <MetricCard key={metric.label} {...metric} />)}
           </div>

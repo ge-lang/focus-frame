@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { TaskPriority, TaskStatus } from '@prisma/client';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/auth';
 import { prisma } from '@/lib/prisma';
+import { InvalidRequestError, isOneOf, parseOptionalDate, parseOptionalString, readJsonObject } from '@/lib/api-validation';
 
 function getTaskId(request: NextRequest) {
   return new URL(request.url).pathname.split('/').pop();
@@ -19,17 +21,21 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Task ID is required' }, { status: 400 });
     }
 
-    const { title, description, isCompleted, priority, dueDate, status } = await request.json();
-    if (title !== undefined && (typeof title !== 'string' || !title.trim())) {
-      return NextResponse.json({ error: 'Task title cannot be empty' }, { status: 400 });
-    }
+    const body = await readJsonObject(request);
+    const title = parseOptionalString(body.title, 200, 'task title');
+    const description = parseOptionalString(body.description, 2_000, 'task description');
+    const isCompleted = body.isCompleted;
+    const priority = body.priority;
+    const status = body.status;
+    const dueDate = parseOptionalDate(body.dueDate);
+    if (title !== undefined && !title) return NextResponse.json({ error: 'Task title cannot be empty' }, { status: 400 });
 
-    const validPriorities = ['low', 'medium', 'high'];
-    const validStatuses = ['todo', 'in_progress', 'done'];
-    const parsedDueDate = dueDate === undefined || dueDate === null || dueDate === '' ? null : new Date(dueDate);
-    if ((priority && !validPriorities.includes(priority)) ||
-        (status && !validStatuses.includes(status)) ||
-        (parsedDueDate && Number.isNaN(parsedDueDate.getTime()))) {
+    const validPriorities = [TaskPriority.low, TaskPriority.medium, TaskPriority.high];
+    const validStatuses = [TaskStatus.todo, TaskStatus.in_progress, TaskStatus.done];
+    const parsedPriority = priority === undefined ? undefined : isOneOf(priority, validPriorities) ? priority : null;
+    const parsedStatus = status === undefined ? undefined : isOneOf(status, validStatuses) ? status : null;
+    if (parsedPriority === null || parsedStatus === null ||
+        (isCompleted !== undefined && typeof isCompleted !== 'boolean')) {
       return NextResponse.json({ error: 'Invalid task data' }, { status: 400 });
     }
 
@@ -44,16 +50,19 @@ export async function PUT(request: NextRequest) {
       where: { id },
       data: {
         ...(title !== undefined && { title: title.trim() }),
-        ...(description !== undefined && { description: typeof description === 'string' && description.trim() ? description.trim() : null }),
-        ...(priority !== undefined && { priority }),
-        ...(dueDate !== undefined && { dueDate: parsedDueDate }),
-        ...(status !== undefined && { status, isCompleted: status === 'done' }),
+        ...(description !== undefined && { description: description || null }),
+        ...(parsedPriority !== undefined && { priority: parsedPriority }),
+        ...(dueDate !== undefined && { dueDate }),
+        ...(parsedStatus !== undefined && { status: parsedStatus, isCompleted: parsedStatus === TaskStatus.done }),
         ...(isCompleted !== undefined && { isCompleted }),
       },
     });
 
     return NextResponse.json(task);
   } catch (error) {
+    if (error instanceof InvalidRequestError) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
     console.error('Error updating task:', error);
     return NextResponse.json({ error: 'Failed to update task' }, { status: 500 });
   }

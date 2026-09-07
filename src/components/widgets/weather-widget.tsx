@@ -80,8 +80,8 @@ export default function WeatherWidget({
     return directions[Math.round(degrees / 22.5) % 16];
   };
 
-  const getUVIndex = (temp: number, time: number) => {
-    // Simple UV index simulation based on temperature and time
+  const getUVIndex = (temp: number) => {
+    // Simple UV index simulation based on temperature.
     const baseUV = Math.min(Math.max(Math.floor(temp / 10), 1), 11);
     return baseUV;
   };
@@ -121,6 +121,7 @@ export default function WeatherWidget({
           
           <div className="flex space-x-1">
             <button
+              aria-label="Refresh weather"
               onClick={handleRefresh}
               disabled={isRefreshing}
               className="p-1 text-gray-600 hover:text-gray-800 transition-colors"
@@ -129,6 +130,7 @@ export default function WeatherWidget({
               <RefreshCw size={16} className={isRefreshing ? 'animate-spin' : ''} />
             </button>
             <button
+              aria-label="Change weather location"
               onClick={() => setIsEditing(true)}
               className="p-1 text-gray-600 hover:text-gray-800 transition-colors"
               title="Change city"
@@ -226,6 +228,7 @@ export default function WeatherWidget({
               
               <button
                 onClick={toggleUnit}
+                aria-label={`Switch to degrees ${unit === 'celsius' ? 'Fahrenheit' : 'Celsius'}`}
                 className="px-2 py-1 bg-white/50 text-gray-700 rounded-full text-xs hover:bg-white transition-colors"
               >
                 °{unit === 'celsius' ? 'C' : 'F'}
@@ -315,10 +318,10 @@ export default function WeatherWidget({
                       <Thermometer size={12} className="text-orange-500" />
                     </div>
                     <div className="text-sm font-medium">
-                      {getUVIndex(weather.temp, Date.now())} - {
-                        getUVIndex(weather.temp, Date.now()) < 3 ? 'Low' :
-                        getUVIndex(weather.temp, Date.now()) < 6 ? 'Moderate' :
-                        getUVIndex(weather.temp, Date.now()) < 8 ? 'High' : 'Very High'
+                      {getUVIndex(weather.temp)} - {
+                        getUVIndex(weather.temp) < 3 ? 'Low' :
+                        getUVIndex(weather.temp) < 6 ? 'Moderate' :
+                        getUVIndex(weather.temp) < 8 ? 'High' : 'Very High'
                       }
                     </div>
                   </div>

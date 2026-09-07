@@ -1,6 +1,6 @@
 // src/components/add-widget-dialog.tsx
 'use client';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useDashboard } from '@/contexts/dashboard-context';
 import { WidgetType } from '@/types/dashboard';
 import { AnimatedButton } from './animated-button';
@@ -21,7 +21,6 @@ const widgetOptions: WidgetOption[] = [
   { type: 'news', name: 'News', description: 'Latest news feed', icon: '📰', defaultColSpan: 2 },
   { type: 'pomodoro', name: 'Pomodoro', description: 'Focus timer', icon: '⏱️', defaultColSpan: 1 },
   { type: 'calendar', name: 'Calendar', description: 'Upcoming events', icon: '📅', defaultColSpan: 1 },
-  { type: 'stocks', name: 'Stocks', description: 'Stock market data', icon: '📈', defaultColSpan: 1 },
   { type: 'notes', name: 'Notes', description: 'Quick notes', icon: '📝', defaultColSpan: 1 },
   { type: 'analytics', name: 'Analytics', description: 'Productivity stats', icon: '📊', defaultColSpan: 2 },
   { type: 'bookmarks', name: 'Bookmarks', description: 'Website links', icon: '🔖', defaultColSpan: 1 },
@@ -31,7 +30,24 @@ const widgetOptions: WidgetOption[] = [
 export default function AddWidgetDialog() {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedType, setSelectedType] = useState<WidgetType | null>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
   const { addWidget, state } = useDashboard();
+
+  useEffect(() => {
+    if (!isOpen) return;
+    previousFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    closeButtonRef.current?.focus();
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setIsOpen(false);
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      previousFocusRef.current?.focus();
+      previousFocusRef.current = null;
+    };
+  }, [isOpen]);
 
   const handleAddWidget = (type: WidgetType) => {
     const config = widgetOptions.find(opt => opt.type === type);
@@ -55,6 +71,7 @@ export default function AddWidgetDialog() {
       {/* Add button */}
       <AnimatedButton
         onClick={() => setIsOpen(true)}
+        ariaLabel="Add widget"
         className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700"
       >
         <Plus size={24} />
@@ -79,12 +96,17 @@ export default function AddWidgetDialog() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="add-widget-title"
               className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 bg-white rounded-xl p-6 w-11/12 max-w-4xl max-h-[80vh] overflow-hidden"
             >
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">Add Widget</h2>
+                <h2 id="add-widget-title" className="text-2xl font-bold text-gray-900">Add Widget</h2>
                 <button
+                  ref={closeButtonRef}
                   onClick={() => setIsOpen(false)}
+                  aria-label="Close add widget dialog"
                   className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
                 >
                   <X size={24} />

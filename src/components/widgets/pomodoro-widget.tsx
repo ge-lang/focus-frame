@@ -246,6 +246,7 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
           </h3>
           <div className="flex space-x-2">
             <button
+              aria-label={settings.soundEnabled ? 'Turn sound off' : 'Turn sound on'}
               onClick={() => setSettings({ ...settings, soundEnabled: !settings.soundEnabled })}
               className={`p-1 rounded-full ${
                 settings.soundEnabled ? 'text-green-600' : 'text-gray-400'
@@ -255,6 +256,7 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
               {settings.soundEnabled ? <Bell size={16} /> : <BellOff size={16} />}
             </button>
             <button
+              aria-label={showSettings ? 'Close Pomodoro settings' : 'Open Pomodoro settings'}
               onClick={() => setShowSettings(!showSettings)}
               className="p-1 text-gray-600 hover:text-gray-800 transition-colors"
               title="Settings"
@@ -465,6 +467,7 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
           <div className="flex space-x-3">
             {!isRunning ? (
               <button
+                aria-label="Start focus timer"
                 onClick={startTimer}
                 className="p-3 bg-green-500 text-white rounded-full hover:bg-green-600 transition-colors shadow-lg"
                 title="Start"
@@ -473,6 +476,7 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
               </button>
             ) : (
               <button
+                aria-label="Pause focus timer"
                 onClick={pauseTimer}
                 className="p-3 bg-yellow-500 text-white rounded-full hover:bg-yellow-600 transition-colors shadow-lg"
                 title="Pause"
@@ -482,6 +486,7 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
             )}
             
             <button
+              aria-label="Stop focus timer"
               onClick={stopTimer}
               className="p-3 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors shadow-lg"
               title="Stop"
@@ -490,6 +495,7 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
             </button>
             
             <button
+              aria-label="Reset focus timer"
               onClick={resetTimer}
               className="p-3 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors shadow-lg"
               title="Reset"

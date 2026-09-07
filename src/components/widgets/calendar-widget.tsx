@@ -87,6 +87,7 @@ export default function CalendarWidget({ widgetId, title }: CalendarWidgetProps)
           
           {!isCurrentMonth && (
             <AnimatedButton
+              ariaLabel="Go to today"
               onClick={goToToday}
               className="text-xs px-2 py-1 bg-blue-500 text-white rounded"
             >
@@ -98,6 +99,7 @@ export default function CalendarWidget({ widgetId, title }: CalendarWidgetProps)
         {/* Month navigation */}
         <div className="flex items-center justify-between mb-4">
           <AnimatedButton
+            ariaLabel="Previous month"
             onClick={() => navigateMonth('prev')}
             className="p-1 hover:bg-gray-100 rounded"
           >
@@ -109,6 +111,7 @@ export default function CalendarWidget({ widgetId, title }: CalendarWidgetProps)
           </span>
 
           <AnimatedButton
+            ariaLabel="Next month"
             onClick={() => navigateMonth('next')}
             className="p-1 hover:bg-gray-100 rounded"
           >
