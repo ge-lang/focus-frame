@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { clampWidgetSize, getWidgetSizing, withWidgetSizing } from './dashboard-layout';
+import { addWidgetToLayout, clampWidgetSize, getWidgetSizing, removeWidgetFromLayout, withWidgetSizing } from './dashboard-layout';
 
 describe('dashboard layout sizing', () => {
   it('defines practical constraints for each widget type', () => {
@@ -17,5 +17,20 @@ describe('dashboard layout sizing', () => {
     expect(withWidgetSizing({ i: 'news-1', x: 0, y: 0, w: 1, h: 4, type: 'news' })).toEqual({
       i: 'news-1', x: 0, y: 0, w: 2, h: 2, type: 'news', minW: 2, maxW: 3, minH: 1, maxH: 2,
     });
+  });
+
+  it('removes a widget from the layout without affecting other widgets', () => {
+    const layout = [
+      { i: 'weather-1', x: 0, y: 0, w: 1, h: 1, type: 'weather' as const },
+      { i: 'notes-1', x: 1, y: 0, w: 1, h: 1, type: 'notes' as const },
+    ];
+
+    expect(removeWidgetFromLayout(layout, 'weather-1')).toEqual([layout[1]]);
+  });
+
+  it('adds a widget back with its constrained dimensions', () => {
+    const layout = addWidgetToLayout([], { i: 'news-2', x: 0, y: 0, w: 1, h: 4, type: 'news' });
+
+    expect(layout[0]).toMatchObject({ i: 'news-2', w: 2, h: 2, minW: 2, maxW: 3 });
   });
 });

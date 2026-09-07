@@ -2,7 +2,7 @@
 'use client';
 import React, { createContext, useContext, useEffect, useReducer, useRef, ReactNode } from 'react';
 import { WidgetType } from '@/types/dashboard';
-import { withWidgetSizing } from '@/lib/dashboard-layout';
+import { addWidgetToLayout, removeWidgetFromLayout, withWidgetSizing } from '@/lib/dashboard-layout';
 
 // Types
 export interface Widget {
@@ -82,7 +82,7 @@ function dashboardReducer(state: DashboardState, action: DashboardAction): Dashb
       return {
         ...state,
         widgets: state.widgets.filter(w => w.id !== action.payload),
-        layout: state.layout.filter(item => item.i !== action.payload),
+        layout: removeWidgetFromLayout(state.layout, action.payload),
       };
 
     case 'UPDATE_LAYOUT':
@@ -247,7 +247,7 @@ const addWidget = (type: WidgetType, config?: { title?: string; colSpan?: number
   
   dispatch({ 
     type: 'UPDATE_LAYOUT', 
-    payload: [...state.layout, sizedLayoutItem]
+    payload: addWidgetToLayout(state.layout, sizedLayoutItem)
   });
 };
     

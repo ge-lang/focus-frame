@@ -39,6 +39,14 @@ export function withWidgetSizing(item: LayoutItem): LayoutItem {
   return { ...item, ...sizing, ...size };
 }
 
+export function removeWidgetFromLayout(layout: LayoutItem[], widgetId: string): LayoutItem[] {
+  return layout.filter((item) => item.i !== widgetId);
+}
+
+export function addWidgetToLayout(layout: LayoutItem[], item: LayoutItem): LayoutItem[] {
+  return [...layout, withWidgetSizing(item)];
+}
+
 export function getGridSpanClass(width: number): string {
   return width >= 3 ? 'lg:col-span-3' : width === 2 ? 'lg:col-span-2' : 'lg:col-span-1';
 }
