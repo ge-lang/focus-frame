@@ -44,17 +44,23 @@
   position: relative;
   isolation: isolate;
   overflow: hidden;
+  background: linear-gradient(180deg, #f3f5ff 0%, #f8fafc 42%, #f8fafc 100%);
+}
+
+.ff-page-shell > * {
+  position: relative;
+  z-index: 1;
 }
 
 .ff-page-shell::before {
   position: absolute;
-  z-index: -1;
+  z-index: 0;
   top: -10rem;
   left: 18%;
   width: 32rem;
   height: 24rem;
   border-radius: 9999px;
-  background: radial-gradient(circle, rgba(196, 181, 253, 0.16), rgba(219, 234, 254, 0.06) 48%, transparent 72%);
+  background: radial-gradient(circle, rgba(196, 181, 253, 0.28), rgba(219, 234, 254, 0.12) 48%, transparent 72%);
   content: '';
   filter: blur(42px);
   pointer-events: none;
@@ -62,20 +68,20 @@
 
 .ff-page-shell::after {
   position: absolute;
-  z-index: -1;
+  z-index: 0;
   top: 8rem;
   right: -12rem;
   width: 28rem;
   height: 28rem;
   border-radius: 9999px;
-  background: radial-gradient(circle, rgba(224, 231, 255, 0.18), rgba(255, 255, 255, 0.04) 55%, transparent 74%);
+  background: radial-gradient(circle, rgba(224, 231, 255, 0.28), rgba(255, 255, 255, 0.08) 55%, transparent 74%);
   content: '';
   filter: blur(48px);
   pointer-events: none;
 }
 
 .ff-card {
-  background: rgba(255, 255, 255, 0.91);
+  background: rgba(255, 255, 255, 0.86);
   -webkit-backdrop-filter: blur(14px);
   backdrop-filter: blur(14px);
   border-color: var(--ff-border);
