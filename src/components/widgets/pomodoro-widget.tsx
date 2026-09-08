@@ -241,7 +241,7 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
       <div className="h-full flex flex-col">
         {/* Header and settings */}
         <div className="flex justify-between items-center mb-4">
-          <h3 className="font-semibold text-lg text-gray-800">
+          <h3 className="widget-drag-handle cursor-grab select-none font-semibold text-lg text-gray-800 active:cursor-grabbing">
             {title || 'Pomodoro Timer'}
           </h3>
           <div className="flex space-x-2">

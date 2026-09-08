@@ -357,7 +357,7 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-2">
           <div>
-            <h3 className="font-semibold text-lg text-gray-800">
+            <h3 className="widget-drag-handle cursor-grab select-none font-semibold text-lg text-gray-800 active:cursor-grabbing">
               {title || 'Tasks'}
             </h3>
             <div className="flex items-center space-x-2 mt-1">

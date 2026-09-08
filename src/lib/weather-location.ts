@@ -14,6 +14,8 @@ const countryLocations: Record<string, WeatherLocationDefaults> = {
   IT: { capital: 'Rome', popular: ['Rome', 'Milan', 'Naples', 'Turin'] },
   CA: { capital: 'Ottawa', popular: ['Ottawa', 'Toronto', 'Montreal', 'Vancouver'] },
   AU: { capital: 'Canberra', popular: ['Canberra', 'Sydney', 'Melbourne', 'Brisbane'] },
+  AL: { capital: 'Tirana', popular: ['Tirana', 'Durrës', 'Vlorë'] },
+  KH: { capital: 'Phnom Penh', popular: ['Phnom Penh', 'Siem Reap', 'Battambang'] },
 };
 
 export function getWeatherLocationDefaults(countryCode?: string): WeatherLocationDefaults | undefined {

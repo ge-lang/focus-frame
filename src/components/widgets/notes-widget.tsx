@@ -26,7 +26,7 @@ export default function NotesWidget({ widgetId, title }: NotesWidgetProps) {
   return (
     <AnimatedWidget>
       <div className="h-full flex flex-col">
-        <h3 className="font-semibold text-lg mb-4 text-gray-800">{title || 'Notes'}</h3>
+        <h3 className="widget-drag-handle cursor-grab select-none font-semibold text-lg mb-4 text-gray-800 active:cursor-grabbing">{title || 'Notes'}</h3>
         <textarea
           aria-label="Notes"
           value={content}

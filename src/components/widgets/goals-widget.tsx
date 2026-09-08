@@ -38,7 +38,7 @@ export default function GoalsWidget({ title }: GoalsWidgetProps) {
     <AnimatedWidget>
       <div className="h-full flex flex-col">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="font-semibold text-lg text-gray-800">{title || 'Goals'}</h3>
+          <h3 className="widget-drag-handle cursor-grab select-none font-semibold text-lg text-gray-800 active:cursor-grabbing">{title || 'Goals'}</h3>
           <button aria-label={isAdding ? 'Close add goal form' : 'Add goal'} onClick={() => setIsAdding(!isAdding)} className="rounded-lg p-1.5 text-indigo-600 transition-colors hover:bg-indigo-50 hover:text-indigo-800" title="Add goal">{isAdding ? <X size={16} /> : <Plus size={16} />}</button>
         </div>
 

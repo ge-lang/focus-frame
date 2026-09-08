@@ -16,6 +16,8 @@ describe('weather location helpers', () => {
     expect(getDefaultCityForCountry('BE')).toBe('Brussels');
     expect(getPopularCitiesForCountry('NL')).toContain('Amsterdam');
     expect(getPopularCitiesForCountry('XX')).toEqual([]);
+    expect(resolveCountrySelection('KH', '')).toBe('Phnom Penh');
+    expect(resolveCountrySelection('AL', '')).toBe('Tirana');
   });
 
   it('finds the country for known cities', () => {

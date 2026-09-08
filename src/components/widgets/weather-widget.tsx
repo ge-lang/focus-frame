@@ -96,7 +96,7 @@ export default function WeatherWidget({
       <AnimatedWidget>
         <div className="h-full flex flex-col justify-center">
           <div className="text-center">
-            <h3 className="font-semibold text-lg mb-4 text-gray-800 flex items-center justify-center">
+            <h3 className="widget-drag-handle flex cursor-grab select-none items-center justify-center font-semibold text-lg mb-4 text-gray-800 active:cursor-grabbing">
               <MapPin size={16} className="mr-2" />
               {title || 'Weather'}
             </h3>
@@ -117,7 +117,7 @@ export default function WeatherWidget({
       <AnimatedWidget>
         <div className="flex min-h-40 flex-col items-center justify-center text-center">
           <MapPin size={22} className="mb-2 text-indigo-600" />
-          <h3 className="font-semibold text-slate-900">{title || 'Weather'}</h3>
+          <h3 className="widget-drag-handle cursor-grab select-none font-semibold text-slate-900 active:cursor-grabbing">{title || 'Weather'}</h3>
           <p className="mt-1 text-sm text-slate-500">Choose a location to see local weather.</p>
           <button
             type="button"
@@ -138,7 +138,7 @@ export default function WeatherWidget({
         <div className="flex justify-between items-center mb-4">
           <div className="flex items-center">
             <MapPin size={18} className="text-gray-600 mr-2" />
-            <h3 className="font-semibold text-lg text-gray-800">
+            <h3 className="widget-drag-handle cursor-grab select-none font-semibold text-lg text-gray-800 active:cursor-grabbing">
               {title || 'Weather'}
             </h3>
             {isDemo && <span className="ml-2 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-500">Demo</span>}

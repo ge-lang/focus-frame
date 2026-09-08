@@ -60,7 +60,7 @@ export default function AnalyticsWidget({ title }: AnalyticsWidgetProps) {
       <div className="h-full flex flex-col">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-6 gap-3">
           <div>
-            <h3 className="flex items-center text-lg font-semibold text-slate-900"><BarChart3 size={20} className="mr-2 text-indigo-600" />{title || 'Productivity Analytics'}</h3>
+            <h3 className="widget-drag-handle flex cursor-grab select-none items-center text-lg font-semibold text-slate-900 active:cursor-grabbing"><BarChart3 size={20} className="mr-2 text-indigo-600" />{title || 'Productivity Analytics'}</h3>
             <p className="text-sm text-gray-600 mt-1">{timeRanges.find((range) => range.value === timeRange)?.label} • {data?.streak ?? 0} day streak</p>
           </div>
           <div className="flex items-center gap-2">

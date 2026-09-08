@@ -83,7 +83,7 @@ export default function CalendarWidget({ widgetId, title }: CalendarWidgetProps)
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center">
             <CalendarIcon size={20} className="mr-2 text-indigo-600" />
-            <h3 className="font-semibold text-lg">{title || 'Calendar'}</h3>
+            <h3 className="widget-drag-handle cursor-grab select-none font-semibold text-lg active:cursor-grabbing">{title || 'Calendar'}</h3>
           </div>
           
           {!isCurrentMonth && (

@@ -52,6 +52,17 @@ describe('dashboard layout normalization', () => {
     expect(hasLayoutCollision(next[1], [next[0]])).toBe(false);
   });
 
+  it('places a new widget on the next free row when the preferred row is full', () => {
+    const existing = [
+      { i: 'todo-1', x: 0, y: 0, w: 6, h: 3, type: 'todo' as const },
+      { i: 'news-1', x: 6, y: 0, w: 6, h: 3, type: 'news' as const },
+    ];
+    const next = addWidgetToLayout(existing, { i: 'weather-1', x: 0, y: 0, w: 1, h: 1, type: 'weather' });
+
+    expect(next[2]).toMatchObject({ i: 'weather-1', x: 0, y: 3, w: 4, h: 3 });
+    expect(next.every((item, index) => !hasLayoutCollision(item, next.slice(index + 1)))).toBe(true);
+  });
+
   it('removes a widget without affecting the rest of the layout', () => {
     const layout = [
       { i: 'weather-1', x: 0, y: 0, w: 4, h: 3, type: 'weather' as const },

@@ -3,7 +3,7 @@
 import { WidgetRenderer } from './widget-renderer';
 import { useDashboard } from '@/contexts/dashboard-context';
 import { motion } from 'framer-motion';
-import { GripVertical, Trash2 } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 
 interface SortableWidgetProps {
   id: string;
@@ -24,19 +24,8 @@ export function SortableWidget({ id, type }: SortableWidgetProps) {
 
   return (
     <motion.div
-      className={`group relative h-full rounded-2xl ${state.isEditing ? 'ring-1 ring-indigo-200/60 ring-inset' : ''}`}
+      className="group relative h-full"
     >
-      {state.isEditing && (
-        <button
-          type="button"
-          aria-label={`Drag ${type} widget to rearrange`}
-          className="widget-drag-handle absolute -left-1.5 -top-1.5 z-10 cursor-grab rounded-full bg-indigo-500/90 p-0.5 text-white opacity-70 shadow-sm transition hover:bg-indigo-600 hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-indigo-400 active:cursor-grabbing"
-          title="Drag to rearrange"
-        >
-          <GripVertical size={14} />
-        </button>
-      )}
-
       {/* Widget with a context menu */}
       <WidgetRenderer widget={widget} />
 

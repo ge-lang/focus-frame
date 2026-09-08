@@ -66,7 +66,7 @@ export default function NewsWidget({ widgetId, title }: NewsWidgetProps) {
           <div className="flex items-center gap-2">
             <Newspaper size={20} className="text-indigo-600" />
             <div>
-              <h3 className="font-semibold text-lg text-gray-800">
+              <h3 className="widget-drag-handle cursor-grab select-none font-semibold text-lg text-gray-800 active:cursor-grabbing">
                 {title || 'Latest News'}
               </h3>
               <div className="flex items-center gap-2 mt-1">
