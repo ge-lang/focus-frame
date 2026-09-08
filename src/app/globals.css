@@ -44,7 +44,8 @@
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  background: linear-gradient(180deg, #f3f5ff 0%, #f8fafc 42%, #f8fafc 100%);
+  background:
+    linear-gradient(180deg, rgba(238, 239, 255, 0.78) 0%, rgba(247, 248, 252, 0.96) 38%, #f7f8fc 72%, #f7f8fc 100%);
 }
 
 .ff-page-shell > * {
@@ -55,57 +56,58 @@
 .ff-page-shell::before {
   position: absolute;
   z-index: 0;
-  top: -10rem;
-  left: 18%;
-  width: 32rem;
-  height: 24rem;
+  top: -8rem;
+  left: 8%;
+  width: 42rem;
+  height: 30rem;
   border-radius: 9999px;
-  background: radial-gradient(circle, rgba(196, 181, 253, 0.28), rgba(219, 234, 254, 0.12) 48%, transparent 72%);
+  background: radial-gradient(circle, rgba(196, 181, 253, 0.28), rgba(221, 214, 254, 0.18) 42%, transparent 72%);
   content: '';
-  filter: blur(42px);
+  filter: blur(50px);
   pointer-events: none;
 }
 
 .ff-page-shell::after {
   position: absolute;
   z-index: 0;
-  top: 8rem;
-  right: -12rem;
-  width: 28rem;
-  height: 28rem;
+  top: -4rem;
+  right: -8rem;
+  width: 38rem;
+  height: 32rem;
   border-radius: 9999px;
-  background: radial-gradient(circle, rgba(224, 231, 255, 0.28), rgba(255, 255, 255, 0.08) 55%, transparent 74%);
+  background: radial-gradient(circle, rgba(191, 219, 254, 0.2), rgba(224, 231, 255, 0.12) 50%, transparent 74%);
   content: '';
   filter: blur(48px);
   pointer-events: none;
 }
 
 .ff-card {
-  background: rgba(255, 255, 255, 0.86);
-  -webkit-backdrop-filter: blur(14px);
-  backdrop-filter: blur(14px);
-  border-color: var(--ff-border);
+  background: rgba(255, 255, 255, 0.88);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.72);
   border-radius: 1rem;
-  box-shadow: var(--ff-shadow-sm);
+  box-shadow: 0 0 0 1px rgba(203, 213, 225, 0.48), 0 8px 30px rgba(31, 41, 55, 0.06);
   transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
 }
 
 .ff-card:hover {
   transform: translateY(-1px);
-  border-color: #d8def0;
-  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.065);
+  border-color: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 0 1px rgba(199, 210, 254, 0.4), 0 10px 32px rgba(31, 41, 55, 0.075);
 }
 
 .ff-card.ff-card-solid {
-  background: rgba(255, 255, 255, 0.96);
+  background: rgba(255, 255, 255, 0.95);
 }
 
 .ff-glass-control {
   border: 1px solid rgba(199, 210, 254, 0.72);
   border-radius: var(--ff-radius);
-  background: rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.62) !important;
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
+  box-shadow: 0 4px 16px rgba(79, 70, 229, 0.08);
 }
 
 .ff-glass-control:hover {

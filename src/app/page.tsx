@@ -28,7 +28,7 @@ import { AuthButton } from '@/components/auth-button';
 export default function Home() {
   return (
     <AuthGuard>
-      <main className="container mx-auto p-6">
+      <main className="ff-page-shell min-h-screen container mx-auto p-6">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold">Focus Frame</h1>
           <div className="flex items-center space-x-4">
