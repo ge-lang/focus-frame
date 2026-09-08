@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { AnimatedWidget } from '@/components/animated-widget';
 import { EmptyState } from '@/components/empty-state';
-import { Target } from 'lucide-react';
+import { Plus, Target, X } from 'lucide-react';
 import { Priority, useCreateGoal, useDeleteGoal, useGoals, useUpdateGoal } from '@/hooks/use-personal-widgets';
 
 interface GoalsWidgetProps {
@@ -39,7 +39,7 @@ export default function GoalsWidget({ title }: GoalsWidgetProps) {
       <div className="h-full flex flex-col">
         <div className="flex justify-between items-center mb-4">
           <h3 className="font-semibold text-lg text-gray-800">{title || 'Goals'}</h3>
-          <button aria-label={isAdding ? 'Close add goal form' : 'Add goal'} onClick={() => setIsAdding(!isAdding)} className="p-1 text-indigo-600 transition-colors hover:text-indigo-800" title="Add goal">➕</button>
+          <button aria-label={isAdding ? 'Close add goal form' : 'Add goal'} onClick={() => setIsAdding(!isAdding)} className="rounded-lg p-1.5 text-indigo-600 transition-colors hover:bg-indigo-50 hover:text-indigo-800" title="Add goal">{isAdding ? <X size={16} /> : <Plus size={16} />}</button>
         </div>
 
         <div className="mb-4">
@@ -73,7 +73,7 @@ export default function GoalsWidget({ title }: GoalsWidgetProps) {
                 <input type="checkbox" checked={goal.completed} onChange={() => updateGoal({ id: goal.id, completed: !goal.completed })} className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500" />
                 <span className={`ml-3 flex-1 ${goal.completed ? 'line-through text-gray-500' : 'text-gray-800'}`}>{goal.title}</span>
                 <span className={`ml-2 rounded-full px-2 py-1 text-xs ${priorityClassMap[goal.priority]}`}>{goal.priority}</span>
-                <button aria-label={`Remove goal: ${goal.title}`} onClick={() => deleteGoal(goal.id)} className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity p-1 text-red-500 hover:text-red-700" title="Remove goal">✕</button>
+                <button aria-label={`Remove goal: ${goal.title}`} onClick={() => deleteGoal(goal.id)} className="ml-2 rounded p-1 text-red-500 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-red-50 hover:text-red-700" title="Remove goal"><X size={14} /></button>
               </div>
             </div>
           ))}

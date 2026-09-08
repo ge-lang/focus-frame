@@ -4,25 +4,37 @@ import { useState, useRef, useEffect } from 'react';
 import { useDashboard } from '@/contexts/dashboard-context';
 import { WidgetType } from '@/types/dashboard';
 import { AnimatedButton } from './animated-button';
-import { Plus, X } from 'lucide-react';
+import {
+  BarChart3,
+  Bookmark,
+  CalendarDays,
+  ClipboardList,
+  CloudSun,
+  Newspaper,
+  Plus,
+  StickyNote,
+  Target,
+  Timer,
+  X,
+  type LucideIcon,
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const WIDGET_TYPES: { 
   type: WidgetType; 
   label: string; 
-  icon: string;
+  icon: LucideIcon;
   description: string;
-  colSpan: number;
 }[] = [
-  { type: 'todo', label: 'Tasks', icon: '✅', description: 'Manage your to-do list', colSpan: 1 },
-  { type: 'weather', label: 'Weather', icon: '🌤️', description: 'Check current weather', colSpan: 1 },
-  { type: 'news', label: 'News', icon: '📰', description: 'Latest news feed', colSpan: 2 },
-  { type: 'pomodoro', label: 'Pomodoro', icon: '⏱️', description: 'Focus timer', colSpan: 1 },
-  { type: 'calendar', label: 'Calendar', icon: '📅', description: 'Upcoming events', colSpan: 1 },
-  { type: 'notes', label: 'Notes', icon: '📝', description: 'Quick notes', colSpan: 1 },
-  { type: 'analytics', label: 'Analytics', icon: '📊', description: 'Productivity stats', colSpan: 2 },
-  { type: 'bookmarks', label: 'Bookmarks', icon: '🔖', description: 'Website links', colSpan: 1 },
-  { type: 'goals', label: 'Goals', icon: '🎯', description: 'Personal goals', colSpan: 1 },
+  { type: 'todo', label: 'Tasks', icon: ClipboardList, description: 'Manage your to-do list' },
+  { type: 'weather', label: 'Weather', icon: CloudSun, description: 'Check current weather' },
+  { type: 'news', label: 'News', icon: Newspaper, description: 'Latest news feed' },
+  { type: 'pomodoro', label: 'Pomodoro', icon: Timer, description: 'Focus timer' },
+  { type: 'calendar', label: 'Calendar', icon: CalendarDays, description: 'Upcoming events' },
+  { type: 'notes', label: 'Notes', icon: StickyNote, description: 'Quick notes' },
+  { type: 'analytics', label: 'Analytics', icon: BarChart3, description: 'Productivity stats' },
+  { type: 'bookmarks', label: 'Bookmarks', icon: Bookmark, description: 'Website links' },
+  { type: 'goals', label: 'Goals', icon: Target, description: 'Personal goals' },
 ];
 
 export function WidgetPicker() {
@@ -46,7 +58,6 @@ export function WidgetPicker() {
     if (widgetConfig) {
       addWidget(type, {
         title: widgetConfig.label,
-        colSpan: widgetConfig.colSpan
       });
     }
     setIsOpen(false);
@@ -63,7 +74,7 @@ export function WidgetPicker() {
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
         aria-haspopup="menu"
-        className="flex items-center space-x-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-700"
+        className="inline-flex h-9 items-center gap-2 rounded-lg bg-indigo-600 px-3.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-indigo-700"
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
       >
@@ -90,7 +101,7 @@ export function WidgetPicker() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: -10 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="absolute top-full right-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-gray-200 z-50 overflow-hidden"
+              className="absolute right-0 top-full z-50 mt-2 w-80 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg"
             >
               {/* Header */}
               <div className="flex justify-between items-center p-4 border-b border-gray-100">
@@ -120,14 +131,11 @@ export function WidgetPicker() {
                           : 'opacity-50 cursor-not-allowed'
                       }`}
                     >
-                      <span className="text-2xl mr-3 mt-1">{widget.icon}</span>
+                      <span className="mr-3 mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
+                        <widget.icon size={18} aria-hidden="true" />
+                      </span>
                       <div className="text-left flex-1">
-                        <div className="flex items-center justify-between">
-                          <span className="font-medium text-gray-900">{widget.label}</span>
-                          <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">
-                            {widget.colSpan} col
-                          </span>
-                        </div>
+                        <span className="font-medium text-gray-900">{widget.label}</span>
                         <p className="text-sm text-gray-600 mt-1">{widget.description}</p>
                       </div>
                     </motion.button>
@@ -136,7 +144,7 @@ export function WidgetPicker() {
               </div>
 
               {/* Informational footer */}
-              <div className="p-3 border-t border-gray-100 bg-gray-50">
+              <div className="border-t border-slate-100 bg-slate-50/70 p-3">
                 <p className="text-xs text-gray-500 text-center">
                   {state.widgets.length} widgets on dashboard
                 </p>

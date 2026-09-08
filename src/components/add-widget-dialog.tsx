@@ -5,26 +5,38 @@ import { useDashboard } from '@/contexts/dashboard-context';
 import { WidgetType } from '@/types/dashboard';
 import { AnimatedButton } from './animated-button';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Plus } from 'lucide-react';
+import {
+  BarChart3,
+  Bookmark,
+  CalendarDays,
+  ClipboardList,
+  CloudSun,
+  Newspaper,
+  Plus,
+  StickyNote,
+  Target,
+  Timer,
+  X,
+  type LucideIcon,
+} from 'lucide-react';
 
 interface WidgetOption {
   type: WidgetType;
   name: string;
   description: string;
-  icon: string;
-  defaultColSpan: number;
+  icon: LucideIcon;
 }
 
 const widgetOptions: WidgetOption[] = [
-  { type: 'todo', name: 'Tasks', description: 'Manage your to-do list', icon: '✅', defaultColSpan: 1 },
-  { type: 'weather', name: 'Weather', description: 'Check current weather', icon: '🌤️', defaultColSpan: 1 },
-  { type: 'news', name: 'News', description: 'Latest news feed', icon: '📰', defaultColSpan: 2 },
-  { type: 'pomodoro', name: 'Pomodoro', description: 'Focus timer', icon: '⏱️', defaultColSpan: 1 },
-  { type: 'calendar', name: 'Calendar', description: 'Upcoming events', icon: '📅', defaultColSpan: 1 },
-  { type: 'notes', name: 'Notes', description: 'Quick notes', icon: '📝', defaultColSpan: 1 },
-  { type: 'analytics', name: 'Analytics', description: 'Productivity stats', icon: '📊', defaultColSpan: 2 },
-  { type: 'bookmarks', name: 'Bookmarks', description: 'Website links', icon: '🔖', defaultColSpan: 1 },
-  { type: 'goals', name: 'Goals', description: 'Personal goals', icon: '🎯', defaultColSpan: 1 },
+  { type: 'todo', name: 'Tasks', description: 'Manage your to-do list', icon: ClipboardList },
+  { type: 'weather', name: 'Weather', description: 'Check current weather', icon: CloudSun },
+  { type: 'news', name: 'News', description: 'Latest news feed', icon: Newspaper },
+  { type: 'pomodoro', name: 'Pomodoro', description: 'Focus timer', icon: Timer },
+  { type: 'calendar', name: 'Calendar', description: 'Upcoming events', icon: CalendarDays },
+  { type: 'notes', name: 'Notes', description: 'Quick notes', icon: StickyNote },
+  { type: 'analytics', name: 'Analytics', description: 'Productivity stats', icon: BarChart3 },
+  { type: 'bookmarks', name: 'Bookmarks', description: 'Website links', icon: Bookmark },
+  { type: 'goals', name: 'Goals', description: 'Personal goals', icon: Target },
 ];
 
 export default function AddWidgetDialog() {
@@ -53,7 +65,6 @@ export default function AddWidgetDialog() {
     const config = widgetOptions.find(opt => opt.type === type);
     if (config) {
       addWidget(type, {
-        colSpan: config.defaultColSpan,
         title: config.name
       });
       setIsOpen(false);
@@ -128,13 +139,12 @@ export default function AddWidgetDialog() {
                     }`}
                   >
                     <div className="flex items-center mb-2">
-                      <span className="text-2xl mr-3">{option.icon}</span>
+                      <span className="mr-3 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
+                        <option.icon size={18} aria-hidden="true" />
+                      </span>
                       <h3 className="font-semibold text-gray-900">{option.name}</h3>
                     </div>
                     <p className="text-sm text-gray-600 mb-2">{option.description}</p>
-                    <div className="text-xs text-gray-500">
-                      Size: {option.defaultColSpan} column{option.defaultColSpan > 1 ? 's' : ''}
-                    </div>
                   </motion.button>
                 ))}
               </div>

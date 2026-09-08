@@ -30,7 +30,7 @@ const rangeDays: Record<AnalyticsRange, number> = { today: 1, week: 7, month: 30
 
 const MetricCard = memo(function MetricCard({ Icon, value, label, color, valueProgress, iconClassName }: { Icon: LucideIcon; value: string | number; label: string; color: string; valueProgress: number; iconClassName: string }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+    <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-3">
       <div className="flex items-center justify-between mb-2"><Icon size={20} className={iconClassName} /><span className="text-xs text-gray-500">{valueProgress}%</span></div>
       <div className="text-2xl font-bold text-gray-800">{value}</div>
       <div className="text-xs text-gray-600">{label}</div>
@@ -64,13 +64,13 @@ export default function AnalyticsWidget({ title }: AnalyticsWidgetProps) {
             <p className="text-sm text-gray-600 mt-1">{timeRanges.find((range) => range.value === timeRange)?.label} • {data?.streak ?? 0} day streak</p>
           </div>
           <div className="flex items-center gap-2">
-            <button aria-label={showDetails ? 'Hide analytics details' : 'Show analytics details'} onClick={() => setShowDetails(!showDetails)} className="p-2 text-gray-600 hover:text-gray-800" title={showDetails ? 'Hide details' : 'Show details'}>{showDetails ? <EyeOff size={16} /> : <Eye size={16} />}</button>
-            <button aria-label="Refresh analytics" onClick={() => refetch()} disabled={isFetching} className="p-2 text-gray-600 hover:text-gray-800 disabled:opacity-50" title="Refresh data"><RefreshCw size={16} className={isFetching ? 'animate-spin' : ''} /></button>
+            <button aria-label={showDetails ? 'Hide analytics details' : 'Show analytics details'} onClick={() => setShowDetails(!showDetails)} className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-50 hover:text-slate-800" title={showDetails ? 'Hide details' : 'Show details'}>{showDetails ? <EyeOff size={16} /> : <Eye size={16} />}</button>
+            <button aria-label="Refresh analytics" onClick={() => refetch()} disabled={isFetching} className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-50 hover:text-slate-800 disabled:opacity-50" title="Refresh data"><RefreshCw size={16} className={isFetching ? 'animate-spin' : ''} /></button>
           </div>
         </div>
 
         <div className="flex gap-1 mb-6">
-          {timeRanges.map((range) => <button key={range.value} onClick={() => setTimeRange(range.value)} className={`flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${timeRange === range.value ? 'border-indigo-600 bg-indigo-600 text-white' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'}`}>{range.label}</button>)}
+          {timeRanges.map((range) => <button key={range.value} onClick={() => setTimeRange(range.value)} className={`h-9 flex-1 rounded-lg border px-3 text-sm font-medium transition-colors ${timeRange === range.value ? 'border-indigo-600 bg-indigo-600 text-white' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'}`}>{range.label}</button>)}
         </div>
 
         {isLoading || !data ? <div className="flex-1 grid place-items-center text-sm text-gray-500">{isError ? <div className="text-center"><p>Unable to load analytics.</p><button onClick={() => refetch()} className="mt-2 text-purple-700 underline">Try again</button></div> : 'Loading analytics…'}</div> : <>

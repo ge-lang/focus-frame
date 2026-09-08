@@ -23,8 +23,50 @@
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
+:root {
+  --ff-radius: 0.625rem;
+  --ff-control-height: 2.25rem;
+  --ff-border: #e2e8f0;
+  --ff-muted: #64748b;
+  --ff-accent: #4f46e5;
+}
+
+.ff-btn-primary,
+.ff-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  min-height: var(--ff-control-height);
+  border-radius: var(--ff-radius);
+  padding-inline: 0.875rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+.ff-btn-primary {
+  background: var(--ff-accent);
+  color: white;
+}
+
+.ff-btn-primary:hover {
+  background: #4338ca;
+}
+
+.ff-btn-secondary {
+  border: 1px solid var(--ff-border);
+  background: white;
+  color: #475569;
+}
+
+.ff-btn-secondary:hover {
+  background: #f8fafc;
+  color: #1e293b;
+}
+
 /* Keep the react-grid-layout drop target aligned with the neutral card system. */
-.react-grid-item.react-grid-placeholder {
+.react-grid-layout .react-grid-item.react-grid-placeholder {
   background: rgba(99, 102, 241, 0.08);
   border: 1px dashed rgba(99, 102, 241, 0.35);
   border-radius: 1rem;

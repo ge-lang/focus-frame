@@ -1,7 +1,6 @@
 // src/components/auth-button.tsx
 'use client';
 import { useSession, signIn, signOut } from "next-auth/react";
-import { AnimatedButton } from "./animated-button";
 
 export function AuthButton() {
   const { data: session } = useSession();
@@ -12,22 +11,22 @@ export function AuthButton() {
         <span className="text-sm text-gray-700">
           Welcome, {session.user?.name}!
         </span>
-        <AnimatedButton
+        <button
           onClick={() => signOut()}
-          className="border border-slate-200 bg-transparent px-3 py-1 text-sm text-slate-600 hover:bg-slate-50"
+          className="rounded-lg border border-slate-200 bg-transparent px-3 py-1.5 text-sm text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-700"
         >
           Sign Out
-        </AnimatedButton>
+        </button>
       </div>
     );
   }
 
   return (
-    <AnimatedButton
+    <button
       onClick={() => signIn("google")}
-      className="rounded-lg bg-indigo-600 px-3 py-1 text-sm text-white hover:bg-indigo-700"
+      className="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm text-white hover:bg-indigo-700"
     >
       Sign In
-    </AnimatedButton>
+    </button>
   );
 }

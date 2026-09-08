@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { AnimatedWidget } from '@/components/animated-widget';
 import { EmptyState } from '@/components/empty-state';
-import { Bookmark } from 'lucide-react';
+import { Bookmark, Plus, X } from 'lucide-react';
 import { useBookmarks, useCreateBookmark, useDeleteBookmark } from '@/hooks/use-personal-widgets';
 
 interface BookmarksWidgetProps {
@@ -29,7 +29,7 @@ export default function BookmarksWidget({ title }: BookmarksWidgetProps) {
       <div className="h-full flex flex-col">
         <div className="flex justify-between items-center mb-4">
           <h3 className="font-semibold text-lg text-gray-800">{title || 'Bookmarks'}</h3>
-          <button aria-label={isAdding ? 'Close add bookmark form' : 'Add bookmark'} onClick={() => setIsAdding(!isAdding)} className="p-1 text-indigo-600 transition-colors hover:text-indigo-800" title="Add bookmark">➕</button>
+          <button aria-label={isAdding ? 'Close add bookmark form' : 'Add bookmark'} onClick={() => setIsAdding(!isAdding)} className="rounded-lg p-1.5 text-indigo-600 transition-colors hover:bg-indigo-50 hover:text-indigo-800" title="Add bookmark">{isAdding ? <X size={16} /> : <Plus size={16} />}</button>
         </div>
 
         {isAdding && (
@@ -53,7 +53,7 @@ export default function BookmarksWidget({ title }: BookmarksWidgetProps) {
                 <div className="text-xs text-gray-600 truncate">{bookmark.url}</div>
                 {bookmark.category && <span className="mt-1 inline-block rounded-full bg-slate-100 px-2 py-1 text-xs text-slate-600">{bookmark.category}</span>}
               </a>
-              <button aria-label={`Remove bookmark: ${bookmark.title}`} onClick={() => deleteBookmark(bookmark.id)} className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1 text-red-500 hover:text-red-700" title="Remove bookmark">✕</button>
+              <button aria-label={`Remove bookmark: ${bookmark.title}`} onClick={() => deleteBookmark(bookmark.id)} className="absolute right-2 top-2 rounded p-1 text-red-500 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-red-50 hover:text-red-700" title="Remove bookmark"><X size={14} /></button>
             </div>
           ))}
         </div>

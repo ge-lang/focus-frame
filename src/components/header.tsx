@@ -11,15 +11,15 @@ export default function Header() {
   return (
     <header className="border-b border-slate-200 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">
             <div className="text-xl font-semibold tracking-tight text-slate-900">FocusFrame</div>
           </div>
           
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center gap-3">
             {session?.user && (
               <>
-                <span className="text-sm text-slate-500">
+                <span className="hidden text-sm text-slate-500 sm:inline">
                   Hello, {session.user.name}
                 </span>
                 <Image
@@ -29,11 +29,11 @@ export default function Header() {
                   alt="User avatar"
                   width={32}
                   height={32}
-                  className="w-8 h-8 rounded-full"
+                  className="h-8 w-8 rounded-full ring-1 ring-slate-200"
                 />
                 <button
                   onClick={() => signOut()}
-                  className="rounded-lg border border-slate-200 bg-transparent px-3 py-2 text-sm font-medium text-slate-500 transition-colors hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700"
+                  className="inline-flex h-9 items-center rounded-lg border border-slate-200 bg-transparent px-3 text-sm font-medium text-slate-500 transition-colors hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700"
                 >
                   Sign out
                 </button>

@@ -411,7 +411,7 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
                   cy="50"
                   r="45"
                   fill="none"
-                  stroke={getModeColor() === 'red' ? '#ef4444' : getModeColor() === 'green' ? '#10b981' : '#3b82f6'}
+                  stroke={getModeColor() === 'red' ? '#6366f1' : getModeColor() === 'green' ? '#818cf8' : '#4f46e5'}
                   strokeWidth="8"
                   strokeLinecap="round"
                   strokeDasharray="283"
@@ -426,8 +426,8 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
                 {formatTime(timeLeft)}
               </div>
               <div className={`text-sm font-medium ${
-                getModeColor() === 'red' ? 'text-red-600' : 
-                getModeColor() === 'green' ? 'text-green-600' : 'text-blue-600'
+                getModeColor() === 'red' ? 'text-indigo-600' :
+                getModeColor() === 'green' ? 'text-indigo-500' : 'text-indigo-700'
               }`}>
                 {getModeLabel()}
               </div>
@@ -441,7 +441,7 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
                 key={index}
                 className={`w-3 h-3 rounded-full ${
                   index < pomodoroCount % settings.longBreakInterval 
-                    ? 'bg-red-600' 
+                    ? 'bg-indigo-500'
                     : 'bg-gray-300'
                 }`}
                 title={`Pomodoro ${index + 1}`}

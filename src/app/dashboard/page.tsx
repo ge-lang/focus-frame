@@ -22,7 +22,7 @@ export default function DashboardPage() {
           </div>
           <div className="flex items-center gap-2">
             {state.isEditing && <WidgetPicker />}
-            <button onClick={toggleEdit} className={`inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${state.isEditing ? 'border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'}`}>
+            <button onClick={toggleEdit} className={`inline-flex h-9 items-center gap-2 rounded-lg border px-3.5 text-sm font-medium transition-colors ${state.isEditing ? 'border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'}`}>
               {state.isEditing ? <Check size={18} /> : <SlidersHorizontal size={18} />}
               {state.isEditing ? 'Done editing' : 'Customize layout'}
             </button>

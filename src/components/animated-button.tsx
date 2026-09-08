@@ -29,7 +29,7 @@ export function AnimatedButton({
       whileHover={{ scale: disabled ? 1 : 1.02 }}
       whileTap={{ scale: disabled ? 1 : 0.95 }}
       transition={{ duration: 0.2 }}
-      className={`rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700 disabled:bg-slate-300 ${className}`}
+      className={`inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-indigo-600 px-3.5 text-sm font-medium text-white transition-colors hover:bg-indigo-700 disabled:bg-slate-300 ${className}`}
     >
       {children}
     </motion.button>

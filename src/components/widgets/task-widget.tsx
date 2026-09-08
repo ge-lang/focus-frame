@@ -87,7 +87,7 @@ function TaskCard({
       transition={{ duration: 0.2 }}
       draggable
       onDragStart={() => onDragStart(task, status)}
-      className="group relative cursor-move rounded-xl border border-slate-200 bg-white p-3 shadow-sm"
+      className="group relative cursor-move rounded-lg border border-slate-200 bg-white p-2.5"
     >
       {/* Drag handle */}
       <div className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab">
@@ -212,7 +212,7 @@ function TaskColumn({
       onDragOver={(e) => onDragOver(e, status)}
       onDrop={(e) => onDrop(e, status)}
     >
-      <div className={`p-3 rounded-t-lg text-center font-medium ${
+      <div className={`rounded-t-lg p-2.5 text-center font-medium ${
         status === 'todo' ? 'bg-slate-100 text-slate-700' :
         status === 'in_progress' ? 'bg-indigo-50 text-indigo-700' :
         'bg-emerald-50 text-emerald-700'
@@ -221,7 +221,7 @@ function TaskColumn({
         <div className="text-xs opacity-75">{tasks.length} tasks</div>
       </div>
       
-      <div className={`min-h-0 flex-1 overflow-y-auto p-3 space-y-3 ${
+      <div className={`min-h-0 flex-1 space-y-3 overflow-y-auto rounded-b-lg bg-slate-50/70 p-2.5 ${
         'bg-slate-50'
       } rounded-b-lg`}>
         <AnimatePresence>
@@ -375,7 +375,7 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
           
           <AnimatedButton
             onClick={() => setIsAdding(true)}
-            className="w-full rounded-lg bg-indigo-600 px-3 py-2 text-sm text-white hover:bg-indigo-700 sm:w-auto"
+            className="ff-btn-primary h-9 w-full sm:w-auto"
           >
             <Plus size={16} className="mr-1" />
             Add Task
@@ -460,15 +460,15 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Search tasks..."
-            className="w-full rounded border border-gray-300 p-2 text-sm sm:col-span-2"
+            className="h-9 w-full rounded-lg border border-slate-200 p-2 text-sm sm:col-span-2"
           />
-          <select aria-label="Filter tasks by priority" value={priorityFilter} onChange={(event) => setPriorityFilter(event.target.value as 'all' | Task['priority'])} className="p-2 border border-gray-300 rounded text-sm">
+          <select aria-label="Filter tasks by priority" value={priorityFilter} onChange={(event) => setPriorityFilter(event.target.value as 'all' | Task['priority'])} className="h-9 rounded-lg border border-slate-200 bg-white px-2 text-sm">
             <option value="all">All priorities</option>
             <option value="high">High priority</option>
             <option value="medium">Medium priority</option>
             <option value="low">Low priority</option>
           </select>
-          <select aria-label="Filter tasks by due date" value={dueDateFilter} onChange={(event) => setDueDateFilter(event.target.value as DueDateFilter)} className="p-2 border border-gray-300 rounded text-sm">
+          <select aria-label="Filter tasks by due date" value={dueDateFilter} onChange={(event) => setDueDateFilter(event.target.value as DueDateFilter)} className="h-9 rounded-lg border border-slate-200 bg-white px-2 text-sm">
             <option value="all">All deadlines</option>
             <option value="overdue">Overdue</option>
             <option value="today">Due today</option>
