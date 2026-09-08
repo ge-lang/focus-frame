@@ -22,3 +22,12 @@
   transform: translateY(-2px);
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
+
+/* Keep the react-grid-layout drop target aligned with the neutral card system. */
+.react-grid-item.react-grid-placeholder {
+  background: rgba(99, 102, 241, 0.08);
+  border: 1px dashed rgba(99, 102, 241, 0.35);
+  border-radius: 1rem;
+  box-sizing: border-box;
+  opacity: 1;
+}
