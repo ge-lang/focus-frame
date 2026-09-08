@@ -86,5 +86,7 @@ export function removeWidgetFromLayout(layout: LayoutItem[], widgetId: string): 
 
 export function addWidgetToLayout(layout: LayoutItem[], item: LayoutItem): LayoutItem[] {
   const sized = withWidgetSizing(item);
-  return [...layout, findFreePosition(sized, layout, DESKTOP_GRID_COLUMNS)];
+  const nextRow = layout.reduce((bottom, current) => Math.max(bottom, current.y + current.h), 0);
+  const appended = { ...sized, x: 0, y: nextRow };
+  return [...layout, findFreePosition(appended, layout, DESKTOP_GRID_COLUMNS)];
 }

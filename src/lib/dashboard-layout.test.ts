@@ -43,13 +43,22 @@ describe('dashboard layout normalization', () => {
     expect(hasLayoutCollision(layout[0], [layout[1]])).toBe(false);
   });
 
-  it('adds widgets to a free position without moving existing widgets', () => {
+  it('adds widgets after the occupied layout without moving existing widgets', () => {
     const existing = [{ i: 'todo-1', x: 0, y: 0, w: 6, h: 3, type: 'todo' as const }];
     const next = addWidgetToLayout(existing, { i: 'weather-1', x: 0, y: 0, w: 1, h: 1, type: 'weather' });
 
     expect(next[0]).toEqual(existing[0]);
-    expect(next[1]).toMatchObject({ i: 'weather-1', x: 6, y: 0, w: 4, h: 3 });
+    expect(next[1]).toMatchObject({ i: 'weather-1', x: 0, y: 3, w: 4, h: 3 });
     expect(hasLayoutCollision(next[1], [next[0]])).toBe(false);
+  });
+
+  it('keeps repeated widget types in separate appended positions', () => {
+    const existing = [{ i: 'pomodoro-1', x: 4, y: 2, w: 4, h: 3, type: 'pomodoro' as const }];
+    const next = addWidgetToLayout(existing, { i: 'pomodoro-2', x: 0, y: 0, w: 1, h: 1, type: 'pomodoro' });
+
+    expect(next[1]).toMatchObject({ i: 'pomodoro-2', x: 0, y: 5, w: 4, h: 3 });
+    expect(next[0]).toMatchObject({ x: 4, y: 2 });
+    expect(hasLayoutCollision(next[1], next.slice(0, 1))).toBe(false);
   });
 
   it('places a new widget on the next free row when the preferred row is full', () => {

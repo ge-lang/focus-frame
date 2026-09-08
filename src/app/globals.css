@@ -73,3 +73,8 @@
   box-sizing: border-box;
   opacity: 1;
 }
+
+/* Keep the active card visible while it passes over neighboring grid items. */
+.react-grid-item.react-draggable-dragging {
+  z-index: 20 !important;
+}
