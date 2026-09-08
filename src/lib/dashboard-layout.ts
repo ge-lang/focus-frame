@@ -41,9 +41,10 @@ function clampX(x: number, width: number, columns: number): number {
 function findFreePosition(item: LayoutItem, occupied: LayoutItem[], columns: number): LayoutItem {
   const preferredX = clampX(item.x, item.w, columns);
   const preferredY = Math.max(0, Math.round(item.y));
+  const candidates = Array.from({ length: columns }, (_, x) => x)
+    .sort((first, second) => Math.abs(first - preferredX) - Math.abs(second - preferredX));
 
   for (let y = preferredY; y <= preferredY + occupied.length + 20; y += 1) {
-    const candidates = [preferredX, ...Array.from({ length: columns }, (_, x) => x).filter((x) => x !== preferredX)];
     for (const x of candidates) {
       const candidate = { ...item, x, y };
       if (!hasLayoutCollision(candidate, occupied)) return candidate;

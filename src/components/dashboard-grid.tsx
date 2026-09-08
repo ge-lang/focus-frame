@@ -54,8 +54,8 @@ export function DashboardGrid() {
       const state = autoScrollRef.current;
       if (!state.active) return;
 
-      const edgeThreshold = 96;
-      const maximumSpeed = 8;
+      const edgeThreshold = 80;
+      const maximumSpeed = 5;
       const distanceFromTop = state.pointerY;
       const distanceFromBottom = window.innerHeight - state.pointerY;
       let scrollDelta = 0;
@@ -121,8 +121,8 @@ export function DashboardGrid() {
           layouts={layouts}
           breakpoints={BREAKPOINTS}
           cols={COLUMNS}
-          rowHeight={96}
-          margin={[20, 20]}
+          rowHeight={72}
+          margin={[16, 16]}
           containerPadding={[0, 0]}
           compactor={fixedGridCompactor}
           dragConfig={{

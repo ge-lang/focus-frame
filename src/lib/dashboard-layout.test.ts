@@ -39,7 +39,7 @@ describe('dashboard layout normalization', () => {
     ]);
 
     expect(layout[0]).toMatchObject({ x: 8, y: 0, w: 4, h: 3 });
-    expect(layout[1]).toMatchObject({ x: 0, y: 0, w: 4, h: 3 });
+    expect(layout[1]).toMatchObject({ x: 4, y: 0, w: 4, h: 3 });
     expect(hasLayoutCollision(layout[0], [layout[1]])).toBe(false);
   });
 
