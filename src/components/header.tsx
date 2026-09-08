@@ -13,14 +13,14 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">
-            <div className="text-xl font-semibold tracking-tight text-slate-900">FocusFrame</div>
+            <div className="text-lg font-semibold tracking-tight text-slate-900 sm:text-xl">FocusFrame</div>
           </div>
           
           <div className="flex items-center gap-3">
             {session?.user && (
               <>
                 <span className="hidden text-sm text-slate-500 sm:inline">
-                  Hello, {session.user.name}
+                  Welcome, {session.user.name}
                 </span>
                 <Image
                   loader={avatarLoader}

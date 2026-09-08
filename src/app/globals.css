@@ -24,11 +24,40 @@
 }
 
 :root {
+  --ff-background: #f8fafc;
+  --ff-surface: #ffffff;
   --ff-radius: 0.625rem;
   --ff-control-height: 2.25rem;
   --ff-border: #e2e8f0;
+  --ff-text-primary: #1e293b;
+  --ff-text-secondary: #64748b;
   --ff-muted: #64748b;
   --ff-accent: #4f46e5;
+  --ff-accent-hover: #4338ca;
+  --ff-success: #15803d;
+  --ff-warning: #b45309;
+  --ff-danger: #b91c1c;
+  --ff-shadow-sm: 0 4px 16px rgba(15, 23, 42, 0.045);
+}
+
+.ff-card {
+  background: var(--ff-surface);
+  border-color: var(--ff-border);
+  border-radius: 1rem;
+  box-shadow: var(--ff-shadow-sm);
+}
+
+.ff-card .border-slate-200,
+.ff-card .border-gray-300 {
+  border-color: var(--ff-border);
+}
+
+.ff-card .bg-slate-50 {
+  background: #f8fafc;
+}
+
+.ff-card .shadow-sm {
+  box-shadow: none;
 }
 
 .ff-btn-primary,
@@ -51,7 +80,7 @@
 }
 
 .ff-btn-primary:hover {
-  background: #4338ca;
+  background: var(--ff-accent-hover);
 }
 
 .ff-btn-secondary {

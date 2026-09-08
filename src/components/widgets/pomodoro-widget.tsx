@@ -488,7 +488,7 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
             <button
               aria-label="Stop focus timer"
               onClick={stopTimer}
-                className="rounded-full bg-red-600 p-3 text-white shadow-sm transition-colors hover:bg-red-700"
+                className="rounded-full border border-red-200 bg-white p-3 text-red-600 shadow-sm transition-colors hover:bg-red-50"
               title="Stop"
             >
               <Square size={20} />
