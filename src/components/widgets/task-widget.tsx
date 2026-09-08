@@ -352,7 +352,7 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
   const completionPercentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
   return (
-    <AnimatedWidget className="w-full min-h-0">
+    <AnimatedWidget className="ff-card-solid w-full min-h-0">
       <div className="flex h-full min-h-0 flex-col">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-2">

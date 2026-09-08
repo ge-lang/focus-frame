@@ -32,13 +32,13 @@ export default function NotesWidget({ widgetId, title }: NotesWidgetProps) {
           value={content}
           onChange={(event) => setContent(event.target.value)}
           placeholder="Write your notes here..."
-          className="w-full flex-1 resize-none rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="w-full flex-1 resize-none rounded-lg border border-slate-100 bg-slate-50/70 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-200"
           rows={5}
           disabled={isLoading}
         />
         <div className="flex justify-between items-center mt-3">
           <span className="text-xs text-gray-500">{isSaving ? 'Saving…' : `${content.length} characters`}</span>
-          <button aria-label="Clear notes" onClick={() => setContent('')} className="rounded-lg border border-slate-200 bg-white px-3 py-1 text-sm text-slate-600 transition-colors hover:bg-slate-50">
+          <button aria-label="Clear notes" onClick={() => setContent('')} className="rounded-lg px-2 py-1 text-sm text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-700">
             Clear
           </button>
         </div>

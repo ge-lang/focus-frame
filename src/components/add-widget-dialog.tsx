@@ -83,7 +83,7 @@ export default function AddWidgetDialog() {
       <AnimatedButton
         onClick={() => setIsOpen(true)}
         ariaLabel="Add widget"
-        className="fixed bottom-6 right-6 z-50 h-12 w-12 rounded-full bg-indigo-600 text-white shadow-sm hover:bg-indigo-700"
+        className="ff-glass-control fixed bottom-6 right-6 z-50 h-12 w-12 rounded-full text-indigo-700 shadow-sm hover:bg-indigo-50/90"
       >
         <Plus size={24} />
       </AnimatedButton>

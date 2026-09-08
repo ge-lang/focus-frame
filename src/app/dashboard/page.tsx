@@ -11,7 +11,7 @@ export default function DashboardPage() {
   const { state, toggleEdit } = useDashboard();
 
   return (
-    <div className="min-h-screen bg-[var(--ff-background)]">
+    <div className="ff-page-shell min-h-screen bg-[var(--ff-background)]">
       <Header />
       
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -22,7 +22,7 @@ export default function DashboardPage() {
           </div>
           <div className="flex items-center gap-2">
             {state.isEditing && <WidgetPicker />}
-            <button onClick={toggleEdit} className={`inline-flex h-9 items-center gap-2 rounded-lg border px-3.5 text-sm font-medium transition-colors ${state.isEditing ? 'border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'}`}>
+            <button onClick={toggleEdit} className={`ff-glass-control inline-flex h-9 items-center gap-2 px-3.5 text-sm font-medium transition-colors ${state.isEditing ? 'text-indigo-700 hover:bg-indigo-50/80' : 'text-slate-700 hover:bg-white/90'}`}>
               {state.isEditing ? <Check size={18} /> : <SlidersHorizontal size={18} />}
               {state.isEditing ? 'Done editing' : 'Customize layout'}
             </button>

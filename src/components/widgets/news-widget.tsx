@@ -59,7 +59,7 @@ export default function NewsWidget({ widgetId, title }: NewsWidgetProps) {
   };
 
   return (
-    <AnimatedWidget>
+    <AnimatedWidget className="ff-card-solid">
       <div className="h-full flex flex-col">
         {/* Header and status */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 gap-2">

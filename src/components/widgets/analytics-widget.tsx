@@ -30,7 +30,7 @@ const rangeDays: Record<AnalyticsRange, number> = { today: 1, week: 7, month: 30
 
 const MetricCard = memo(function MetricCard({ Icon, value, label, color, valueProgress, iconClassName }: { Icon: LucideIcon; value: string | number; label: string; color: string; valueProgress: number; iconClassName: string }) {
   return (
-    <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-3">
+    <div className="rounded-xl bg-slate-50/50 p-3">
       <div className="flex items-center justify-between mb-2"><Icon size={20} className={iconClassName} /><span className="text-xs text-gray-500">{valueProgress}%</span></div>
       <div className="text-2xl font-bold text-gray-800">{value}</div>
       <div className="text-xs text-gray-600">{label}</div>
@@ -56,7 +56,7 @@ export default function AnalyticsWidget({ title }: AnalyticsWidgetProps) {
   }, [data, timeRange]);
 
   return (
-    <AnimatedWidget>
+    <AnimatedWidget className="ff-card-solid">
       <div className="h-full flex flex-col">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-6 gap-3">
           <div>
@@ -82,13 +82,13 @@ export default function AnalyticsWidget({ title }: AnalyticsWidgetProps) {
 
           <AnimatePresence>
             {showDetails && <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="space-y-4 overflow-hidden">
-              <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <div className="rounded-xl bg-slate-50/60 p-4">
                 <h4 className="font-medium text-gray-800 mb-3">Focus over the last 7 days</h4>
                 <div className="flex gap-2 items-end h-24">
                   {data.dailyFocus.map((day) => <div key={day.label} className="flex h-full flex-1 flex-col items-center justify-end"><span className="mb-1 text-xs text-slate-600">{day.minutes}m</span><div className="w-full rounded-t bg-indigo-500" style={{ height: `${Math.max(4, progress(day.minutes, 100))}%` }} /><span className="mt-1 text-xs text-slate-600">{day.label}</span></div>)}
                 </div>
               </div>
-              <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <div className="rounded-xl bg-slate-50/60 p-4">
                 <h4 className="font-medium text-gray-800 mb-3">Peak focus hours</h4>
                 {data.peakHours.length ? <div className="flex flex-wrap gap-2">{data.peakHours.map((hour) => <span key={hour} className="rounded-full bg-indigo-50 px-3 py-1 text-sm text-indigo-700">{hour}</span>)}</div> : <p className="text-sm text-gray-500">Complete a focus session to see your peak hours.</p>}
               </div>
