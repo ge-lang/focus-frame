@@ -7,7 +7,7 @@ import { useWeather, useWeatherSearch } from '@/hooks/useWeather';
 import { countries } from '@/lib/countries';
 import { findCountryForCity, getPopularCitiesForCountry, resolveCountrySelection } from '@/lib/weather-location';
 import { WeatherIcon } from '@/components/weather-icon';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { 
   MapPin, 
   Settings, 
@@ -41,13 +41,6 @@ export default function WeatherWidget({
   const [unit, setUnit] = useState<'celsius' | 'fahrenheit'>('celsius');
   const { suggestions, isSearching } = useWeatherSearch(isEditing ? inputCity : '', countryCode || undefined);
   const popularCities = getPopularCitiesForCountry(countryCode);
-
-  useEffect(() => {
-    if (!isEditing) return;
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = previousOverflow; };
-  }, [isEditing]);
 
   // Temperature conversion
   const displayTemp = unit === 'celsius' ? weather.temp : Math.round((weather.temp * 9/5) + 32);
