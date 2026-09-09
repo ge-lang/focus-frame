@@ -64,6 +64,7 @@ function TaskCard({
   onEdit, 
   onDelete, 
   onDragStart,
+  onDragEnd,
   onMoveStatus,
   editState,
   onSaveEdit,
@@ -74,6 +75,7 @@ function TaskCard({
   onEdit: (task: Task, status: TaskStatus) => void;
   onDelete: (id: string) => void;
   onDragStart: (task: Task, status: TaskStatus) => void;
+  onDragEnd: () => void;
   onMoveStatus: (task: Task, status: TaskStatus) => void;
   editState: EditState;
   onSaveEdit: () => void;
@@ -90,6 +92,7 @@ function TaskCard({
       transition={{ duration: 0.2 }}
       draggable
       onDragStart={() => onDragStart(task, status)}
+      onDragEnd={onDragEnd}
       className="group relative rounded-lg border border-slate-200 bg-white p-2.5"
     >
       {/* Drag handle */}
@@ -219,6 +222,7 @@ function TaskColumn({
   onEdit, 
   onDelete, 
   onDragStart,
+  onDragEnd,
   onMoveStatus,
   isDropTarget,
   editState,
@@ -232,6 +236,7 @@ function TaskColumn({
   onEdit: (task: Task, status: TaskStatus) => void;
   onDelete: (id: string) => void;
   onDragStart: (task: Task, status: TaskStatus) => void;
+  onDragEnd: () => void;
   onMoveStatus: (task: Task, status: TaskStatus) => void;
   isDropTarget: boolean;
   editState: EditState;
@@ -266,6 +271,7 @@ function TaskColumn({
               onEdit={onEdit}
               onDelete={onDelete}
               onDragStart={onDragStart}
+              onDragEnd={onDragEnd}
               onMoveStatus={onMoveStatus}
               editState={editState}
               onSaveEdit={onSaveEdit}
@@ -303,6 +309,7 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
   });
   const [isAdding, setIsAdding] = useState(false);
   const [draggedTask, setDraggedTask] = useState<{ task: Task; status: TaskStatus } | null>(null);
+  const [dragOverStatus, setDragOverStatus] = useState<TaskStatus | null>(null);
   const [search, setSearch] = useState('');
   const [priorityFilter, setPriorityFilter] = useState<'all' | Task['priority']>('all');
   const [dueDateFilter, setDueDateFilter] = useState<DueDateFilter>('all');
@@ -375,19 +382,29 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
 
   const handleDragStart = (task: Task, status: TaskStatus) => {
     setDraggedTask({ task, status });
+    setDragOverStatus(null);
   };
 
   const handleDragOver = (event: React.DragEvent, status: TaskStatus) => {
     event.preventDefault();
     event.dataTransfer.dropEffect = 'move';
+    setDragOverStatus((currentStatus) => currentStatus === status ? currentStatus : status);
   };
 
   const handleDrop = async (event: React.DragEvent, newStatus: TaskStatus) => {
     event.preventDefault();
-    if (draggedTask && draggedTask.status !== newStatus) {
-      await updateTask({ id: draggedTask.task.id, status: newStatus });
-    }
+    const taskId = event.dataTransfer.getData('text/plain') || draggedTask?.task.id;
+    const currentTask = draggedTask;
     setDraggedTask(null);
+    setDragOverStatus(null);
+    if (currentTask && taskId && currentTask.status !== newStatus) {
+      await updateTask({ id: taskId, status: newStatus });
+    }
+  };
+
+  const handleDragEnd = () => {
+    setDraggedTask(null);
+    setDragOverStatus(null);
   };
 
   const handleMoveStatus = async (task: Task, newStatus: TaskStatus) => {
@@ -539,13 +556,14 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
                 key={status}
                 status={status as TaskStatus}
                 tasks={statusTasks}
-                onDragOver={() => undefined}
-                onDrop={() => undefined}
+                onDragOver={handleDragOver}
+                onDrop={handleDrop}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
                 onDragStart={handleDragStart}
+                onDragEnd={handleDragEnd}
                 onMoveStatus={handleMoveStatus}
-                isDropTarget={false}
+                isDropTarget={dragOverStatus === status}
                 editState={editState}
                 onSaveEdit={handleSaveEdit}
                 onCancelEdit={() => setEditState({ id: null, title: '', description: '', priority: 'medium', dueDate: '' })}
@@ -560,13 +578,14 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
                 key={status}
                 status={status as TaskStatus}
                 tasks={statusTasks}
-                onDragOver={() => undefined}
-                onDrop={() => undefined}
+                onDragOver={handleDragOver}
+                onDrop={handleDrop}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
                 onDragStart={handleDragStart}
+                onDragEnd={handleDragEnd}
                 onMoveStatus={handleMoveStatus}
-                isDropTarget={false}
+                isDropTarget={dragOverStatus === status}
                 editState={editState}
                 onSaveEdit={handleSaveEdit}
                 onCancelEdit={() => setEditState({ id: null, title: '', description: '', priority: 'medium', dueDate: '' })}
@@ -586,6 +605,7 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
                     onEdit={handleEdit}
                     onDelete={handleDelete}
                 onDragStart={handleDragStart}
+                onDragEnd={handleDragEnd}
                 onMoveStatus={handleMoveStatus}
                 isDropTarget={false}
                     editState={editState}
