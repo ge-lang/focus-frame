@@ -402,7 +402,7 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
         <div className="flex-1 flex flex-col items-center justify-center">
           {/* Progress circle */}
           <div className="relative mb-6">
-              <div className="h-48 w-48 rounded-full bg-slate-50 shadow-inner ring-8 ring-indigo-100">
+              <div className="ff-pomodoro-ring-shell h-48 w-48 rounded-full bg-slate-50 shadow-inner ring-8 ring-indigo-100">
               <svg className="w-full h-full" viewBox="0 0 100 100">
                 <circle
                   cx="50"

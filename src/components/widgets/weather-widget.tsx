@@ -281,9 +281,9 @@ export default function WeatherWidget({
 
             {/* Primary metrics */}
             <div className="text-center mb-6">
-              <WeatherIcon icon={weather.icon} className="text-6xl mb-2 mx-auto" />
+              <WeatherIcon icon={weather.icon} className="ff-weather-hero-icon text-5xl mb-2 mx-auto" />
               
-              <div className="text-5xl font-bold text-gray-800 mb-1">
+              <div className="ff-weather-hero-temperature text-4xl font-bold text-gray-800 mb-1">
                 {displayTemp}°{unit === 'celsius' ? 'C' : 'F'}
               </div>
               
@@ -298,13 +298,13 @@ export default function WeatherWidget({
 
             {/* Quick metrics */}
             <div className="grid grid-cols-2 gap-3 mb-4">
-              <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-center">
+              <div className="ff-weather-detail-block rounded-lg border border-slate-200 bg-slate-50 p-3 text-center">
                 <Droplets size={16} className="mx-auto mb-1 text-indigo-600" />
                 <div className="text-sm font-medium">{weather.humidity}%</div>
                 <div className="text-xs text-gray-600">Humidity</div>
               </div>
               
-              <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-center">
+              <div className="ff-weather-detail-block rounded-lg border border-slate-200 bg-slate-50 p-3 text-center">
                 <Wind size={16} className="mx-auto mb-1 text-indigo-600" />
                 <div className="text-sm font-medium">{weather.windSpeed} m/s</div>
                 <div className="text-xs text-gray-600">Wind</div>
@@ -328,8 +328,8 @@ export default function WeatherWidget({
                   exit={{ opacity: 0, height: 0 }}
                   className="space-y-3 overflow-hidden"
                 >
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                  <div className="ff-weather-details grid grid-cols-2 gap-3">
+                    <div className="ff-weather-detail-block rounded-lg border border-slate-200 bg-slate-50 p-3">
                       <div className="flex items-center justify-between">
                         <span className="text-xs text-gray-600">Pressure</span>
                         <Gauge size={12} className="text-indigo-600" />
@@ -337,7 +337,7 @@ export default function WeatherWidget({
                       <div className="text-sm font-medium">{weather.pressure} hPa</div>
                     </div>
                     
-                    <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                    <div className="ff-weather-detail-block rounded-lg border border-slate-200 bg-slate-50 p-3">
                       <div className="flex items-center justify-between">
                         <span className="text-xs text-gray-600">Visibility</span>
                         <Eye size={12} className="text-indigo-600" />
@@ -346,7 +346,7 @@ export default function WeatherWidget({
                     </div>
                   </div>
                   
-                  <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                  <div className="ff-weather-detail-block rounded-lg border border-slate-200 bg-slate-50 p-3">
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-xs text-gray-600">Wind Direction</span>
                       <Compass size={12} className="text-indigo-600" />
@@ -356,7 +356,7 @@ export default function WeatherWidget({
                     </div>
                   </div>
 
-                  <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                  <div className="ff-weather-detail-block rounded-lg border border-slate-200 bg-slate-50 p-3">
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-xs text-gray-600">UV Index</span>
                       <Thermometer size={12} className="text-amber-600" />
