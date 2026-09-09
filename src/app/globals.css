@@ -24,7 +24,7 @@
 }
 
 :root {
-  --ff-background: #f8fafc;
+  --ff-background: #f7f8fc;
   --ff-surface: #ffffff;
   --ff-radius: 0.625rem;
   --ff-control-height: 2.25rem;
@@ -45,9 +45,10 @@
   isolation: isolate;
   overflow: hidden;
   background:
-    radial-gradient(72% 46% at 17% 0%, rgba(196, 181, 253, 0.24), transparent 72%),
-    radial-gradient(64% 44% at 84% 2%, rgba(191, 219, 254, 0.18), transparent 74%),
-    linear-gradient(180deg, rgba(238, 239, 255, 0.82) 0%, rgba(247, 248, 252, 0.96) 38%, #f7f8fc 72%, #f7f8fc 100%);
+    radial-gradient(58rem 23rem at 18% 1%, rgba(196, 181, 253, 0.34), transparent 72%),
+    radial-gradient(48rem 21rem at 82% 4%, rgba(147, 197, 253, 0.22), transparent 74%),
+    radial-gradient(38rem 17rem at 50% 16%, rgba(255, 255, 255, 0.78), transparent 72%),
+    linear-gradient(180deg, #eef0ff 0%, #f3f5fd 22%, #f7f8fc 48%, #f7f8fc 100%);
 }
 
 .ff-page-shell > * {
@@ -58,49 +59,49 @@
 .ff-page-shell::before {
   position: absolute;
   z-index: 0;
-  top: 2rem;
-  left: -10%;
-  width: 120%;
-  height: 18rem;
-  border-radius: 0 0 52% 42%;
-  background: linear-gradient(105deg, transparent 4%, rgba(196, 181, 253, 0.14) 30%, rgba(255, 255, 255, 0.26) 52%, rgba(191, 219, 254, 0.1) 78%, transparent 96%);
+  top: 0;
+  left: -8%;
+  width: 116%;
+  height: 21rem;
+  border-radius: 0 0 58% 44% / 0 0 42% 30%;
+  background: linear-gradient(118deg, rgba(167, 139, 250, 0.28) 4%, rgba(196, 181, 253, 0.34) 28%, rgba(255, 255, 255, 0.62) 51%, rgba(191, 219, 254, 0.25) 76%, rgba(147, 197, 253, 0.08) 96%);
   content: '';
-  filter: blur(28px);
+  filter: blur(22px);
   pointer-events: none;
 }
 
 .ff-page-shell::after {
   position: absolute;
   z-index: 0;
-  top: -4rem;
-  right: -8rem;
-  width: 38rem;
-  height: 32rem;
+  top: -7rem;
+  right: -10rem;
+  width: 42rem;
+  height: 35rem;
   border-radius: 9999px;
-  background: radial-gradient(circle, rgba(191, 219, 254, 0.2), rgba(224, 231, 255, 0.12) 50%, transparent 74%);
+  background: radial-gradient(circle, rgba(191, 219, 254, 0.3), rgba(224, 231, 255, 0.16) 52%, transparent 74%);
   content: '';
-  filter: blur(48px);
+  filter: blur(42px);
   pointer-events: none;
 }
 
 .ff-card {
-  background: rgba(255, 255, 255, 0.88);
+  background: rgba(255, 255, 255, 0.84);
   -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.8);
   border-radius: 1rem;
-  box-shadow: 0 0 0 1px rgba(203, 213, 225, 0.48), 0 8px 30px rgba(31, 41, 55, 0.06);
+  box-shadow: 0 0 0 1px rgba(203, 213, 225, 0.3), 0 10px 30px rgba(31, 41, 55, 0.09), inset 0 1px 0 rgba(255, 255, 255, 0.72);
   transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
 }
 
 .ff-card:hover {
   transform: translateY(-1px);
   border-color: rgba(255, 255, 255, 0.9);
-  box-shadow: 0 0 0 1px rgba(199, 210, 254, 0.4), 0 10px 32px rgba(31, 41, 55, 0.075);
+  box-shadow: 0 0 0 1px rgba(199, 210, 254, 0.46), 0 12px 34px rgba(31, 41, 55, 0.11), inset 0 1px 0 rgba(255, 255, 255, 0.82);
 }
 
 .ff-card.ff-card-solid {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.94);
 }
 
 .ff-glass-control {
@@ -138,11 +139,36 @@
 
 .ff-card .border-slate-200,
 .ff-card .border-gray-300 {
-  border-color: var(--ff-border);
+  border-color: rgba(203, 213, 225, 0.56) !important;
 }
 
 .ff-card .bg-slate-50 {
-  background: #f8fafc;
+  background: rgba(241, 245, 249, 0.58) !important;
+}
+
+.ff-card .bg-white {
+  background: rgba(255, 255, 255, 0.62) !important;
+}
+
+.ff-card .bg-gray-50,
+.ff-card .bg-gray-100 {
+  background: rgba(241, 245, 249, 0.58) !important;
+}
+
+.ff-card .border-slate-100,
+.ff-card .border-gray-200 {
+  border-color: rgba(203, 213, 225, 0.5) !important;
+}
+
+.ff-metric-tile {
+  border: 1px solid rgba(255, 255, 255, 0.68);
+  background: rgba(248, 250, 252, 0.48);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.56);
+}
+
+.ff-analytics-panel {
+  border: 1px solid rgba(226, 232, 240, 0.42);
+  background: rgba(241, 245, 249, 0.42);
 }
 
 .ff-card .shadow-sm {
