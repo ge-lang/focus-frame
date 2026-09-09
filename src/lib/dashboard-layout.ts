@@ -1,6 +1,7 @@
 import type { LayoutItem, WidgetType } from '@/types/dashboard';
 
 export const DESKTOP_GRID_COLUMNS = 12;
+const MAX_PRESERVED_EMPTY_ROWS = 6;
 
 export interface WidgetSizing {
   w: number;
@@ -69,10 +70,14 @@ export function normalizeLayout(layout: LayoutItem[], columns = DESKTOP_GRID_COL
 
   for (const item of layout) {
     const sized = withWidgetSizing(item);
+    const previousBottom = normalized.reduce((bottom, current) => Math.max(bottom, current.y + current.h), 0);
+    const preferredY = normalized.length === 0
+      ? Math.min(Math.max(0, Math.round(item.y)), MAX_PRESERVED_EMPTY_ROWS)
+      : Math.min(Math.max(0, Math.round(item.y)), previousBottom + MAX_PRESERVED_EMPTY_ROWS);
     const candidate = {
       ...sized,
       x: legacy ? item.x * 4 : item.x,
-      y: item.y,
+      y: preferredY,
     };
     normalized.push(findFreePosition(candidate, normalized, columns));
   }

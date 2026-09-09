@@ -174,7 +174,7 @@ export default function WeatherWidget({
               exit={{ opacity: 0, height: 0 }}
               className="mb-4 overflow-hidden"
             >
-              <form onSubmit={handleSubmit} className="space-y-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
+              <form onSubmit={handleSubmit} data-no-drag className="space-y-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
                 <label className="block text-xs font-medium text-gray-700">
                   Country
                   <select

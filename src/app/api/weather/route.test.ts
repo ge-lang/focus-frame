@@ -40,6 +40,22 @@ describe('/api/weather configuration', () => {
     await expect(response.json()).resolves.toEqual([{ name: 'Ghent', state: null, country: 'BE', lat: 51.05, lon: 3.72 }]);
   });
 
+  it('returns live weather and forecast for a country-scoped city', async () => {
+    process.env.OPENWEATHER_API_KEY = 'server-only-test-key';
+    axiosGet
+      .mockResolvedValueOnce({ data: { main: { temp: 18.4, feels_like: 17.8, humidity: 64, pressure: 1012 }, weather: [{ description: 'clear sky', icon: '01d' }], wind: { speed: 2.1, deg: 180 }, visibility: 10000, clouds: { all: 5 }, sys: { country: 'BE', sunrise: 1, sunset: 2 }, name: 'Brussels' } })
+      .mockResolvedValueOnce({ data: { list: [{ dt: 1, main: { temp: 17.2 }, weather: [{ icon: '02d', description: 'few clouds' }] }] } });
+    const { GET } = await import('./route');
+
+    const response = await GET(new NextRequest('http://localhost/api/weather?city=Brussels&country=BE'));
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toMatchObject({
+      weather: { city: 'Brussels', country: 'BE', temp: 18, description: 'clear sky' },
+      forecast: [{ dt: 1, temp: 17, icon: '02d' }],
+    });
+  });
+
   it.each([
     [404, 'City not found'],
     [429, 'Weather service rate limit reached'],

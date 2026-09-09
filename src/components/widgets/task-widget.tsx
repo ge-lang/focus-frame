@@ -15,7 +15,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { Task, TaskStatus } from '@/types/task';
 import { useCreateTask, useDeleteTask, useTasks, useUpdateTask } from '@/hooks/use-tasks';
-import { filterTasks, getDueDateMeta, type DueDateFilter } from '@/lib/task-utils';
+import { filterTasks, getDueDateMeta, toDateInputValue, type DueDateFilter } from '@/lib/task-utils';
 import { EmptyState } from '@/components/empty-state';
 
 interface TaskWidgetProps {
@@ -251,7 +251,7 @@ function TaskColumn({
 // Main component
 export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
   const { data: tasks = [], isLoading } = useTasks();
-  const { mutateAsync: createTask } = useCreateTask();
+  const { mutateAsync: createTask, isPending: isCreating } = useCreateTask();
   const { mutateAsync: updateTask } = useUpdateTask();
   const { mutateAsync: deleteTask } = useDeleteTask();
   const [newTask, setNewTask] = useState({
@@ -272,6 +272,7 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
   const [search, setSearch] = useState('');
   const [priorityFilter, setPriorityFilter] = useState<'all' | Task['priority']>('all');
   const [dueDateFilter, setDueDateFilter] = useState<DueDateFilter>('all');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const tasksByStatus = useMemo<Record<TaskStatus, Task[]>>(() => ({
     todo: tasks.filter((task) => task.status === 'todo'),
     in_progress: tasks.filter((task) => task.status === 'in_progress'),
@@ -287,7 +288,10 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (newTask.title.trim()) {
+    if (isSubmitting || !newTask.title.trim()) return;
+
+    setIsSubmitting(true);
+    try {
       await createTask({
         title: newTask.title.trim(),
         description: newTask.description.trim() || null,
@@ -298,6 +302,11 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
       
       setNewTask({ title: '', description: '', priority: 'medium', dueDate: '' });
       setIsAdding(false);
+      setSearch('');
+      setPriorityFilter('all');
+      setDueDateFilter('all');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -307,7 +316,7 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
       title: task.title, 
       description: task.description || '',
       priority: task.priority,
-      dueDate: task.dueDate || ''
+      dueDate: toDateInputValue(task.dueDate)
     });
   };
 
@@ -416,7 +425,7 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
                   <select
                     id="new-task-priority"
                     value={newTask.priority}
-                    onChange={(e) => setNewTask({ ...newTask, priority: e.target.value as any })}
+                    onChange={(e) => setNewTask({ ...newTask, priority: e.target.value as Task['priority'] })}
                     className="p-2 border border-gray-300 rounded text-sm"
                   >
                     <option value="low">Low Priority</option>
@@ -435,6 +444,7 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
                 <div className="flex space-x-2">
                   <button
                     type="submit"
+                    disabled={isSubmitting || isCreating}
                     className="flex-1 rounded-lg bg-indigo-600 py-2 text-sm text-white hover:bg-indigo-700"
                   >
                     Add Task

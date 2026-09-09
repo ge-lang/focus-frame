@@ -32,6 +32,16 @@ describe('dashboard layout normalization', () => {
     expect(layout[0]).toMatchObject({ i: 'notes-1', x: 7, y: 5, w: 4, h: 3 });
   });
 
+  it('limits pathological vertical gaps without compacting normal spacing', () => {
+    const layout = normalizeLayout([
+      { i: 'analytics-1', x: 0, y: 0, w: 8, h: 3, type: 'analytics' },
+      { i: 'notes-1', x: 0, y: 1000, w: 4, h: 3, type: 'notes' },
+    ]);
+
+    expect(layout[0]).toMatchObject({ x: 0, y: 0 });
+    expect(layout[1].y).toBe(9);
+  });
+
   it('clamps positions and resolves overlaps deterministically', () => {
     const layout = normalizeLayout([
       { i: 'goals-1', x: 20, y: 0, w: 1, h: 1, type: 'goals' },

@@ -133,7 +133,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ state: { widgets: state.widgets, layout: state.layout } }),
       }).catch((error) => console.error('Failed to save dashboard:', error));
-    }, 500);
+    }, 750);
 
     return () => window.clearTimeout(timeoutId);
   }, [state.widgets, state.layout]);

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { filterTasks, getDueDateMeta } from './task-utils';
+import { filterTasks, getDueDateMeta, toDateInputValue } from './task-utils';
 import type { Task } from '@/types/task';
 
 const tasks: Task[] = [
@@ -9,6 +9,11 @@ const tasks: Task[] = [
 
 describe('task helpers', () => {
   const now = new Date(2025, 0, 10, 12);
+
+  it('converts API ISO dates to native date input values', () => {
+    expect(toDateInputValue('2026-09-09T00:00:00.000Z')).toBe('2026-09-09');
+    expect(toDateInputValue(null)).toBe('');
+  });
 
   it('classifies overdue, today, upcoming and missing deadlines', () => {
     expect(getDueDateMeta('2025-01-09', now)?.type).toBe('overdue');

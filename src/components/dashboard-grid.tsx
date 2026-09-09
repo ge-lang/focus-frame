@@ -31,6 +31,7 @@ export function DashboardGrid() {
     pointerY: 0,
     frame: null,
   });
+  const isDraggingRef = useRef(false);
 
   const stopAutoScroll = useCallback(() => {
     const state = autoScrollRef.current;
@@ -70,16 +71,11 @@ export function DashboardGrid() {
       state.frame = window.requestAnimationFrame(scrollFrame);
     };
 
-    const updatePointerPosition = (event: MouseEvent) => {
-      autoScrollRef.current.pointerY = event.clientY;
-    };
     window.addEventListener('pointermove', handlePointerMove);
-    window.addEventListener('mousemove', updatePointerPosition);
     autoScrollRef.current.frame = window.requestAnimationFrame(scrollFrame);
 
     const cleanup = () => {
       window.removeEventListener('pointermove', handlePointerMove);
-      window.removeEventListener('mousemove', updatePointerPosition);
     };
     autoScrollRef.current.cleanup = cleanup;
   }, [stopAutoScroll]);
@@ -99,7 +95,7 @@ export function DashboardGrid() {
   const getWidgetById = (id: string) => widgets.find((widget) => widget.id === id);
 
   const handleLayoutChange = (nextLayout: GridLayout) => {
-    if (breakpointRef.current !== 'lg') return;
+    if (breakpointRef.current !== 'lg' || isDraggingRef.current) return;
 
     const types = new Map(layout.map((item) => [item.i, item.type]));
     const persistedLayout: LayoutItem[] = nextLayout.map((item: GridLayoutItem) => ({
@@ -131,8 +127,8 @@ export function DashboardGrid() {
             cancel: 'button, input, textarea, select, a, [draggable], [data-no-drag]',
           }}
           resizeConfig={{ enabled: false }}
-          onDragStart={startAutoScroll}
-          onDragStop={stopAutoScroll}
+          onDragStart={() => { isDraggingRef.current = true; startAutoScroll(); }}
+          onDragStop={(nextLayout) => { isDraggingRef.current = false; stopAutoScroll(); handleLayoutChange(nextLayout); }}
           onBreakpointChange={(nextBreakpoint) => { breakpointRef.current = nextBreakpoint; }}
           onLayoutChange={handleLayoutChange}
         >

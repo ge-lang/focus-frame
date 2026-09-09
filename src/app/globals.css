@@ -532,6 +532,17 @@
 .ff-dark-workspace .ff-card select:focus,
 .ff-dark-workspace .ff-card textarea:focus { border-color: rgba(139, 126, 255, 0.8) !important; box-shadow: 0 0 0 3px rgba(124, 108, 255, 0.18) !important; }
 
+.ff-dark-workspace .ff-card input[type='date'] {
+  color-scheme: dark;
+  min-height: 2.5rem;
+}
+
+.ff-dark-workspace .ff-card input[type='date']::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  filter: invert(0.9) sepia(0.2) saturate(1.4) hue-rotate(205deg);
+  opacity: 0.9;
+}
+
 .ff-dark-workspace .text-slate-900,
 .ff-dark-workspace .text-slate-800,
 .ff-dark-workspace .text-gray-900,
