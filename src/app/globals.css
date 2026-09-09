@@ -907,6 +907,10 @@ body.ff-document-body {
   background: rgba(7, 10, 28, 0.84) !important;
 }
 
+.ff-task-modal-backdrop {
+  z-index: 0 !important;
+}
+
 .ff-modal-panel {
   border-color: rgba(167, 157, 255, 0.3) !important;
   background: #252b52 !important;

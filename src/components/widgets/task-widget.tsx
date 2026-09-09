@@ -450,14 +450,15 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
         <AnimatePresence>
           {isAdding && (
             <ModalPortal>
-              <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="ff-modal-backdrop fixed inset-0 flex items-start justify-center overflow-y-auto overscroll-contain p-4 pt-[max(4rem,10vh)]"
-              onClick={() => setIsAdding(false)}
-            >
-              <form onSubmit={handleSubmit} onClick={(event) => event.stopPropagation()} className="ff-modal-panel w-full max-w-md max-h-[calc(100dvh-6rem)] overflow-y-auto rounded-lg border border-slate-200 bg-slate-50 p-3 space-y-2 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+              <div className="ff-modal-layer fixed inset-0 z-[var(--ff-z-modal)] flex items-start justify-center overflow-y-auto overscroll-contain p-4 pt-[max(4rem,10vh)]" onClick={() => setIsAdding(false)}>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="ff-modal-backdrop ff-task-modal-backdrop absolute inset-0"
+                  aria-hidden="true"
+                />
+              <form autoComplete="off" onSubmit={handleSubmit} onClick={(event) => event.stopPropagation()} className="ff-modal-panel relative z-10 w-full max-w-md max-h-[calc(100dvh-6rem)] overflow-y-auto rounded-lg border border-slate-200 bg-slate-50 p-3 space-y-2 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
                 <label className="sr-only" htmlFor="new-task-title">Task title</label>
                 <input
                   id="new-task-title"
@@ -465,6 +466,7 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
                   value={newTask.title}
                   onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
                   placeholder="Task title"
+                  autoComplete="off"
                   className="w-full p-2 border border-gray-300 rounded text-sm"
                   autoFocus
                 />
@@ -515,7 +517,7 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
                   </button>
                 </div>
               </form>
-              </motion.div>
+              </div>
             </ModalPortal>
           )}
         </AnimatePresence>

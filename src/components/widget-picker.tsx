@@ -8,6 +8,7 @@ import {
   BarChart3,
   Bookmark,
   CalendarDays,
+  Check,
   ClipboardList,
   CloudSun,
   Newspaper,
@@ -37,6 +38,14 @@ const WIDGET_TYPES: {
   { type: 'goals', label: 'Goals', icon: Target, description: 'Personal goals' },
 ];
 
+export function getWidgetAvailability(widgets: { type: WidgetType }[]) {
+  const presentTypes = new Set(widgets.map((widget) => widget.type));
+  return {
+    available: WIDGET_TYPES.filter((widget) => !presentTypes.has(widget.type)),
+    onDashboard: WIDGET_TYPES.filter((widget) => presentTypes.has(widget.type)),
+  };
+}
+
 export function WidgetPicker() {
   const [isOpen, setIsOpen] = useState(false);
   const { addWidget, state } = useDashboard();
@@ -53,7 +62,10 @@ export function WidgetPicker() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const { available, onDashboard } = getWidgetAvailability(state.widgets);
+
   const handleAddWidget = (type: WidgetType) => {
+    if (!available.some((widget) => widget.type === type)) return;
     const widgetConfig = WIDGET_TYPES.find(w => w.type === type);
     if (widgetConfig) {
       addWidget(type, {
@@ -63,9 +75,30 @@ export function WidgetPicker() {
     setIsOpen(false);
   };
 
-  const canAddWidget = (type: WidgetType) => {
-    return true;
-  };
+  const renderWidgetRow = (widget: (typeof WIDGET_TYPES)[number], isAvailable: boolean) => (
+    <motion.button
+      key={widget.type}
+      type="button"
+      whileHover={isAvailable ? { scale: 1.02 } : undefined}
+      whileTap={isAvailable ? { scale: 0.98 } : undefined}
+      onClick={() => handleAddWidget(widget.type)}
+      disabled={!isAvailable}
+      className={`mb-1 flex w-full items-start rounded-lg p-3 text-left transition-all ${
+        isAvailable
+          ? 'cursor-pointer hover:border-indigo-200 hover:bg-indigo-50'
+          : 'cursor-default bg-slate-50/60'
+      }`}
+    >
+      <span className={`mr-3 mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${isAvailable ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-100 text-slate-500'}`}>
+        {isAvailable ? <widget.icon size={18} aria-hidden="true" /> : <Check size={18} aria-hidden="true" />}
+      </span>
+      <span className="flex-1">
+        <span className="font-medium text-gray-900">{widget.label}</span>
+        <span className="mt-1 block text-sm text-gray-600">{widget.description}</span>
+      </span>
+      {!isAvailable && <span className="ml-2 mt-1 text-xs font-medium text-slate-500">Added</span>}
+    </motion.button>
+  );
 
   return (
     <div className="relative" ref={pickerRef}>
@@ -117,36 +150,22 @@ export function WidgetPicker() {
 
               {/* Widget list */}
               <div className="max-h-96 overflow-y-auto">
-                <div className="p-2">
-                  {WIDGET_TYPES.map((widget) => (
-                    <motion.button
-                      key={widget.type}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => handleAddWidget(widget.type)}
-                      disabled={!canAddWidget(widget.type)}
-                      className={`w-full flex items-start p-3 rounded-lg mb-1 transition-all ${
-                        canAddWidget(widget.type)
-                          ? 'cursor-pointer hover:border-indigo-200 hover:bg-indigo-50'
-                          : 'opacity-50 cursor-not-allowed'
-                      }`}
-                    >
-                      <span className="mr-3 mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
-                        <widget.icon size={18} aria-hidden="true" />
-                      </span>
-                      <div className="text-left flex-1">
-                        <span className="font-medium text-gray-900">{widget.label}</span>
-                        <p className="text-sm text-gray-600 mt-1">{widget.description}</p>
-                      </div>
-                    </motion.button>
-                  ))}
+                <div className="space-y-4 p-2">
+                  <section aria-labelledby="available-widgets-heading">
+                    <h4 id="available-widgets-heading" className="px-2 pb-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Available to add</h4>
+                    {available.length > 0 ? available.map((widget) => renderWidgetRow(widget, true)) : <p className="px-2 py-3 text-sm text-slate-500">All widgets are already on your dashboard.</p>}
+                  </section>
+                  <section aria-labelledby="dashboard-widgets-heading">
+                    <h4 id="dashboard-widgets-heading" className="px-2 pb-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">On your dashboard</h4>
+                    {onDashboard.map((widget) => renderWidgetRow(widget, false))}
+                  </section>
                 </div>
               </div>
 
               {/* Informational footer */}
               <div className="border-t border-slate-100 bg-slate-50/70 p-3">
                 <p className="text-xs text-gray-500 text-center">
-                  {state.widgets.length} widgets on dashboard
+                  {onDashboard.length} of {WIDGET_TYPES.length} widget types on dashboard · {available.length} available
                 </p>
               </div>
             </motion.div>
