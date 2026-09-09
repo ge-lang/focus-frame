@@ -93,6 +93,7 @@ function dashboardReducer(state: DashboardState, action: DashboardAction): Dashb
 
 interface DashboardContextType {
   state: DashboardState;
+  isHydrated: boolean;
   dispatch: React.Dispatch<DashboardAction>;
   addWidget: (type: WidgetType, config?: { title?: string; colSpan?: number; rowSpan?: number }) => void;
   removeWidget: (id: string) => void;
@@ -188,7 +189,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   const toggleEdit = () => dispatch({ type: 'TOGGLE_EDIT' });
 
   return (
-    <DashboardContext.Provider value={{ state, dispatch, addWidget, removeWidget, updateLayout, updateWidgetConfig, toggleEdit }}>
+    <DashboardContext.Provider value={{ state, isHydrated: dashboardHydration === 'ready', dispatch, addWidget, removeWidget, updateLayout, updateWidgetConfig, toggleEdit }}>
       {children}
     </DashboardContext.Provider>
   );

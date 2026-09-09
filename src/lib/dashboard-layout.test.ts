@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   addWidgetToLayout,
+  canPersistDesktopLayout,
   getGridHeightForContent,
   getWidgetSizing,
   hasLayoutCollision,
@@ -20,6 +21,13 @@ describe('dashboard layout normalization', () => {
   it('converts rendered content height into grid rows', () => {
     expect(getGridHeightForContent(200, 72, 16, 3)).toBe(3);
     expect(getGridHeightForContent(360, 72, 16, 3)).toBe(5);
+  });
+
+  it('rejects transient or non-desktop measurements for canonical persistence', () => {
+    expect(canPersistDesktopLayout(false, 1440, 'lg')).toBe(false);
+    expect(canPersistDesktopLayout(true, 0, 'lg')).toBe(false);
+    expect(canPersistDesktopLayout(true, 800, 'md')).toBe(false);
+    expect(canPersistDesktopLayout(true, 1440, 'lg')).toBe(true);
   });
 
   it('expands a widget without leaving layout collisions', () => {

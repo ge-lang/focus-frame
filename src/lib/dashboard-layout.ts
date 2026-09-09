@@ -47,6 +47,15 @@ export function getGridHeightForContent(
   return Math.max(minimumHeight, Math.ceil((safeHeight + rowMargin) / (rowHeight + rowMargin)));
 }
 
+export function canPersistDesktopLayout(
+  isHydrated: boolean,
+  width: number,
+  breakpoint: string,
+  minimumWidth = 1024,
+): boolean {
+  return isHydrated && breakpoint === 'lg' && Number.isFinite(width) && width >= minimumWidth;
+}
+
 function overlaps(first: LayoutItem, second: LayoutItem): boolean {
   return first.x < second.x + second.w &&
     first.x + first.w > second.x &&
