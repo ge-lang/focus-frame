@@ -161,12 +161,12 @@
 .ff-welcome-band {
   position: relative;
   display: flex;
-  min-height: 11rem;
+  min-height: 9.75rem;
   align-items: center;
   justify-content: space-between;
   overflow: hidden;
   margin: 0.5rem 0 1.25rem;
-  padding: 2rem clamp(1.25rem, 4vw, 3.25rem);
+  padding: 1.7rem clamp(1.25rem, 4vw, 3.25rem);
   border: 1px solid rgba(255, 255, 255, 0.76);
   border-radius: 1.75rem;
   background: linear-gradient(115deg, rgba(255, 255, 255, 0.38), rgba(224, 231, 255, 0.18) 50%, rgba(255, 255, 255, 0.34));
@@ -198,7 +198,7 @@
   max-width: 32rem;
   margin-top: 0.45rem;
   color: #1b2440;
-  font-size: clamp(1.65rem, 3vw, 2.35rem);
+  font-size: clamp(1.55rem, 2.7vw, 2.1rem);
   font-weight: 760;
   letter-spacing: -0.055em;
   line-height: 1.05;
@@ -236,6 +236,69 @@
 .ff-dashboard-stage {
   position: relative;
   z-index: 1;
+}
+
+.ff-widget-surface {
+  position: relative;
+  overflow: hidden;
+}
+
+.ff-widget-surface::before {
+  position: absolute;
+  top: 0;
+  right: 1.1rem;
+  left: 1.1rem;
+  height: 2px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.18);
+  content: '';
+}
+
+.ff-widget-host-analytics .ff-widget-surface {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(245, 243, 255, 0.9)) !important;
+  box-shadow: 0 0 0 1px rgba(129, 140, 248, 0.18), 0 18px 46px rgba(79, 70, 229, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.ff-widget-host-analytics .ff-widget-surface::before {
+  background: linear-gradient(90deg, #6366f1, #a78bfa, rgba(167, 139, 250, 0));
+}
+
+.ff-widget-host-pomodoro .ff-widget-surface {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.93), rgba(239, 246, 255, 0.88)) !important;
+}
+
+.ff-widget-host-pomodoro .ff-widget-surface::before {
+  background: linear-gradient(90deg, #818cf8, #38bdf8, rgba(56, 189, 248, 0));
+}
+
+.ff-widget-host-goals .ff-widget-surface,
+.ff-widget-host-weather .ff-widget-surface {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(239, 246, 255, 0.78)) !important;
+}
+
+.ff-widget-host-goals .ff-widget-surface::before { background: linear-gradient(90deg, #34d399, rgba(167, 243, 208, 0)); }
+.ff-widget-host-weather .ff-widget-surface::before { background: linear-gradient(90deg, #38bdf8, rgba(186, 230, 253, 0)); }
+
+.ff-widget-host-notes .ff-widget-surface,
+.ff-widget-host-bookmarks .ff-widget-surface {
+  background: rgba(255, 255, 255, 0.78) !important;
+}
+
+.ff-widget-host-news .ff-widget-surface,
+.ff-widget-host-todo .ff-widget-surface {
+  background: rgba(255, 255, 255, 0.92) !important;
+}
+
+.ff-widget-host-calendar .ff-widget-surface::before { background: linear-gradient(90deg, #818cf8, rgba(196, 181, 253, 0)); }
+
+.ff-widget-host .widget-drag-handle {
+  letter-spacing: -0.02em;
+}
+
+.ff-widget-host .ff-empty-state {
+  margin-top: 0.45rem;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .ff-empty-state {

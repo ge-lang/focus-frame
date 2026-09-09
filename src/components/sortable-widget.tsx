@@ -24,7 +24,7 @@ export function SortableWidget({ id, type }: SortableWidgetProps) {
 
   return (
     <motion.div
-      className="group relative h-full"
+      className={`ff-widget-host ff-widget-host-${type} group relative h-full`}
     >
       {/* Widget with a context menu */}
       <WidgetRenderer widget={widget} />
