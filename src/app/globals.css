@@ -56,6 +56,194 @@
   z-index: 1;
 }
 
+.ff-app-frame {
+  position: relative;
+  z-index: 1;
+}
+
+.ff-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  min-height: 4.5rem;
+  padding: 0.35rem 0.25rem 1rem;
+}
+
+.ff-brand,
+.ff-topbar-actions,
+.ff-user-zone {
+  display: flex;
+  align-items: center;
+}
+
+.ff-brand {
+  gap: 0.75rem;
+}
+
+.ff-brand-mark {
+  position: relative;
+  display: grid;
+  width: 2.55rem;
+  height: 2.55rem;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.82);
+  border-radius: 0.9rem;
+  background: linear-gradient(145deg, rgba(129, 140, 248, 0.92), rgba(99, 102, 241, 0.82));
+  box-shadow: 0 10px 24px rgba(79, 70, 229, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.48);
+}
+
+.ff-brand-mark::before,
+.ff-brand-mark::after,
+.ff-brand-mark span {
+  position: absolute;
+  display: block;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: 999px;
+  content: '';
+}
+
+.ff-brand-mark::before { width: 1.65rem; height: 1.65rem; }
+.ff-brand-mark::after { width: 1rem; height: 1rem; border-color: rgba(224, 231, 255, 0.94); }
+.ff-brand-mark span { width: 0.36rem; height: 0.36rem; border: 0; background: #fff; }
+
+.ff-brand-title {
+  color: #18213b;
+  font-size: 1.12rem;
+  font-weight: 750;
+  letter-spacing: -0.035em;
+  line-height: 1.1;
+}
+
+.ff-brand-subtitle {
+  margin-top: 0.25rem;
+  color: #7b849b;
+  font-size: 0.67rem;
+  font-weight: 650;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.ff-topbar-actions {
+  gap: 0.55rem;
+}
+
+.ff-action-divider {
+  width: 1px;
+  height: 1.35rem;
+  margin-inline: 0.25rem;
+  background: rgba(148, 163, 184, 0.28);
+}
+
+.ff-user-zone {
+  gap: 0.7rem;
+  padding: 0.25rem 0.15rem;
+}
+
+.ff-user-greeting {
+  color: #5c667d;
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.ff-signout {
+  border: 0;
+  background: transparent;
+  color: #8790a5;
+  font-size: 0.76rem;
+  font-weight: 600;
+  transition: color 160ms ease;
+}
+
+.ff-signout:hover { color: #4f46e5; }
+
+.ff-welcome-band {
+  position: relative;
+  display: flex;
+  min-height: 11rem;
+  align-items: center;
+  justify-content: space-between;
+  overflow: hidden;
+  margin: 0.5rem 0 1.25rem;
+  padding: 2rem clamp(1.25rem, 4vw, 3.25rem);
+  border: 1px solid rgba(255, 255, 255, 0.76);
+  border-radius: 1.75rem;
+  background: linear-gradient(115deg, rgba(255, 255, 255, 0.38), rgba(224, 231, 255, 0.18) 50%, rgba(255, 255, 255, 0.34));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.54), 0 18px 48px rgba(79, 70, 229, 0.07);
+  backdrop-filter: blur(14px);
+}
+
+.ff-welcome-band::after {
+  position: absolute;
+  right: 11%;
+  bottom: -7rem;
+  width: 24rem;
+  height: 14rem;
+  border-radius: 50%;
+  background: rgba(165, 180, 252, 0.22);
+  content: '';
+  filter: blur(34px);
+}
+
+.ff-eyebrow {
+  color: #6458d9;
+  font-size: 0.68rem;
+  font-weight: 750;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.ff-welcome-band h2 {
+  max-width: 32rem;
+  margin-top: 0.45rem;
+  color: #1b2440;
+  font-size: clamp(1.65rem, 3vw, 2.35rem);
+  font-weight: 760;
+  letter-spacing: -0.055em;
+  line-height: 1.05;
+}
+
+.ff-welcome-copy {
+  max-width: 30rem;
+  margin-top: 0.7rem;
+  color: #69738d;
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+.ff-welcome-orbit {
+  position: relative;
+  z-index: 1;
+  width: 9rem;
+  height: 9rem;
+  margin-right: clamp(0rem, 4vw, 3rem);
+  opacity: 0.85;
+}
+
+.ff-orbit-ring,
+.ff-orbit-core {
+  position: absolute;
+  display: block;
+  border-radius: 999px;
+}
+
+.ff-orbit-ring { border: 1px solid rgba(99, 102, 241, 0.24); }
+.ff-orbit-ring-one { inset: 0.4rem; transform: rotate(28deg) scaleX(0.72); }
+.ff-orbit-ring-two { inset: 1.25rem; transform: rotate(-38deg) scaleX(1.32); border-color: rgba(147, 197, 253, 0.5); }
+.ff-orbit-core { inset: 3.45rem; background: linear-gradient(145deg, #818cf8, #6366f1); box-shadow: 0 0 0 0.75rem rgba(129, 140, 248, 0.12), 0 12px 24px rgba(79, 70, 229, 0.18); }
+
+.ff-dashboard-stage {
+  position: relative;
+  z-index: 1;
+}
+
+.ff-empty-state {
+  min-height: 5.2rem;
+  border-radius: 0.9rem;
+  background: rgba(241, 245, 249, 0.24);
+}
+
 .ff-page-shell::before {
   position: absolute;
   z-index: 0;
@@ -173,6 +361,38 @@
 
 .ff-card .shadow-sm {
   box-shadow: none;
+}
+
+@media (max-width: 720px) {
+  .ff-topbar {
+    align-items: flex-start;
+    flex-direction: column;
+    padding-bottom: 0.7rem;
+  }
+
+  .ff-topbar-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .ff-user-zone { margin-right: auto; }
+
+  .ff-welcome-band {
+    min-height: 9rem;
+    padding: 1.4rem 1.25rem;
+  }
+
+  .ff-welcome-orbit {
+    position: absolute;
+    right: -1.5rem;
+    width: 7rem;
+    height: 7rem;
+    margin: 0;
+    opacity: 0.55;
+  }
+
+  .ff-welcome-band h2 { max-width: 18rem; font-size: 1.65rem; }
+  .ff-welcome-copy { max-width: 18rem; font-size: 0.8rem; }
 }
 
 .ff-btn-primary,

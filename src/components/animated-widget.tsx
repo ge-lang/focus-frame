@@ -15,7 +15,7 @@ export function AnimatedWidget({ children, className = '' }: AnimatedWidgetProps
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.3 }}
-      className={`ff-card
+      className={`ff-card ff-widget-surface
         p-4 transition-shadow duration-200
         ${className}
       `}

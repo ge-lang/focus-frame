@@ -7,13 +7,13 @@ export function AuthButton() {
 
   if (session) {
     return (
-      <div className="flex items-center space-x-4">
-        <span className="text-sm text-gray-700">
+      <div className="ff-user-zone">
+        <span className="ff-user-greeting">
           Welcome, {session.user?.name?.split(' ')[0] ?? 'there'}
         </span>
         <button
           onClick={() => signOut()}
-          className="rounded-lg border border-slate-200 bg-transparent px-3 py-1.5 text-sm text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-700"
+          className="ff-signout"
         >
           Sign Out
         </button>
