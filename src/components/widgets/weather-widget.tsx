@@ -280,7 +280,7 @@ export default function WeatherWidget({
             </div>
 
             {/* Primary metrics */}
-            <div className="text-center mb-6">
+            <div className="ff-weather-hero text-center mb-6">
               <WeatherIcon icon={weather.icon} className="ff-weather-hero-icon text-5xl mb-2 mx-auto" />
               
               <div className="ff-weather-hero-temperature text-4xl font-bold text-gray-800 mb-1">
@@ -291,13 +291,13 @@ export default function WeatherWidget({
                 {weather.description}
               </div>
               
-              <div className="text-sm text-gray-600">
+              <div className="ff-weather-feels-like text-sm text-gray-600">
                 Feels like {displayFeelsLike}°
               </div>
             </div>
 
             {/* Quick metrics */}
-            <div className="grid grid-cols-2 gap-3 mb-4">
+            <div className="ff-weather-quick-metrics grid grid-cols-2 gap-3 mb-4">
               <div className="ff-weather-detail-block rounded-lg border border-slate-200 bg-slate-50 p-3 text-center">
                 <Droplets size={16} className="mx-auto mb-1 text-indigo-600" />
                 <div className="text-sm font-medium">{weather.humidity}%</div>
@@ -314,7 +314,7 @@ export default function WeatherWidget({
             {/* Details button */}
             <button
               onClick={() => setShowDetails(!showDetails)}
-              className="mb-4 w-full rounded-lg border border-slate-200 bg-white py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
+              className="ff-weather-details-toggle mb-4 w-full rounded-lg border border-slate-200 bg-white py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
             >
               {showDetails ? 'Hide Details' : 'Show Details'}
             </button>
@@ -326,7 +326,7 @@ export default function WeatherWidget({
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
-                  className="space-y-3 overflow-hidden"
+                  className="ff-weather-expanded-details space-y-3 overflow-hidden"
                 >
                   <div className="ff-weather-details grid grid-cols-2 gap-3">
                     <div className="ff-weather-detail-block rounded-lg border border-slate-200 bg-slate-50 p-3">
