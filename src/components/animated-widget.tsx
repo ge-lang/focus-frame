@@ -1,16 +1,20 @@
 // src/components/animated-widget.tsx
 'use client';
 import { motion } from 'framer-motion';
-import { ReactNode } from 'react';
+import { ReactNode, Ref } from 'react';
 
 interface AnimatedWidgetProps {
   children: ReactNode;
   className?: string;
+  contentRef?: Ref<HTMLDivElement>;
+  dataWidgetId?: string;
 }
 
-export function AnimatedWidget({ children, className = '' }: AnimatedWidgetProps) {
+export function AnimatedWidget({ children, className = '', contentRef, dataWidgetId }: AnimatedWidgetProps) {
   return (
     <motion.div
+      ref={contentRef}
+      data-widget-content={dataWidgetId}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}

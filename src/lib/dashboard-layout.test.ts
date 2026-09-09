@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import {
   addWidgetToLayout,
+  getGridHeightForContent,
   getWidgetSizing,
   hasLayoutCollision,
   normalizeLayout,
   removeWidgetFromLayout,
+  resizeWidgetInLayout,
   stackLayoutForMobile,
 } from './dashboard-layout';
 
@@ -13,6 +15,24 @@ describe('dashboard layout normalization', () => {
     expect(getWidgetSizing('todo')).toEqual({ w: 6, h: 3 });
     expect(getWidgetSizing('analytics')).toEqual({ w: 8, h: 3 });
     expect(getWidgetSizing('weather')).toEqual({ w: 4, h: 3 });
+  });
+
+  it('converts rendered content height into grid rows', () => {
+    expect(getGridHeightForContent(200, 72, 16, 3)).toBe(3);
+    expect(getGridHeightForContent(360, 72, 16, 3)).toBe(5);
+  });
+
+  it('expands a widget without leaving layout collisions', () => {
+    const layout = [
+      { i: 'weather-1', x: 0, y: 0, w: 4, h: 3, type: 'weather' as const },
+      { i: 'notes-1', x: 0, y: 3, w: 4, h: 3, type: 'notes' as const },
+    ];
+
+    const expanded = resizeWidgetInLayout(layout, 'weather-1', 5);
+
+    expect(expanded[0]).toMatchObject({ i: 'weather-1', x: 0, y: 0, h: 5 });
+    expect(expanded[1]).toMatchObject({ i: 'notes-1', x: 4, y: 3 });
+    expect(expanded.every((item) => !hasLayoutCollision(item, expanded))).toBe(true);
   });
 
   it('converts legacy three-column positions to the twelve-column grid', () => {

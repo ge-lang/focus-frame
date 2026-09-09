@@ -8,9 +8,10 @@ import { Trash2 } from 'lucide-react';
 interface SortableWidgetProps {
   id: string;
   type: string;
+  onContentHeightChange?: (widgetId: string, height: number) => void;
 }
 
-export function SortableWidget({ id, type }: SortableWidgetProps) {
+export function SortableWidget({ id, type, onContentHeightChange }: SortableWidgetProps) {
   const { state, removeWidget } = useDashboard();
   const widget = state.widgets.find(w => w.id === id);
 
@@ -27,7 +28,7 @@ export function SortableWidget({ id, type }: SortableWidgetProps) {
       className="group relative h-full"
     >
       {/* Widget with a context menu */}
-      <WidgetRenderer widget={widget} />
+      <WidgetRenderer widget={widget} onContentHeightChange={onContentHeightChange} />
 
       {state.isEditing && (
         <button

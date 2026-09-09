@@ -7,7 +7,7 @@ import { useWeather, useWeatherSearch } from '@/hooks/useWeather';
 import { countries } from '@/lib/countries';
 import { findCountryForCity, getPopularCitiesForCountry, resolveCountrySelection } from '@/lib/weather-location';
 import { WeatherIcon } from '@/components/weather-icon';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useDashboard } from '@/contexts/dashboard-context';
 import { 
   MapPin, 
@@ -28,13 +28,15 @@ interface WeatherWidgetProps {
   initialCity?: string;
   initialCountryCode?: string;
   title?: string;
+  onContentHeightChange?: (widgetId: string, height: number) => void;
 }
 
 export default function WeatherWidget({ 
   widgetId,
   initialCity = '',
   initialCountryCode,
-  title 
+  title,
+  onContentHeightChange,
 }: WeatherWidgetProps) {
   const { updateWidgetConfig } = useDashboard();
   const { weather, setLocation, refresh, isDemo } = useWeather(initialCity, initialCountryCode);
@@ -44,8 +46,26 @@ export default function WeatherWidget({
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [unit, setUnit] = useState<'celsius' | 'fahrenheit'>('celsius');
+  const contentRef = useRef<HTMLDivElement>(null);
   const { suggestions, isSearching } = useWeatherSearch(isEditing ? inputCity : '', countryCode || undefined);
   const popularCities = getPopularCitiesForCountry(countryCode);
+
+  useEffect(() => {
+    const element = contentRef.current;
+    if (!element || !onContentHeightChange || typeof ResizeObserver === 'undefined') return;
+
+    const reportHeight = () => onContentHeightChange(widgetId, element.scrollHeight);
+    const observer = new ResizeObserver(reportHeight);
+    observer.observe(element);
+    const frame = window.requestAnimationFrame(reportHeight);
+    const settleTimer = window.setTimeout(reportHeight, 350);
+
+    return () => {
+      observer.disconnect();
+      window.cancelAnimationFrame(frame);
+      window.clearTimeout(settleTimer);
+    };
+  }, [isEditing, onContentHeightChange, showDetails, weather.city, weather.loading, widgetId]);
 
   // Temperature conversion
   const displayTemp = unit === 'celsius' ? weather.temp : Math.round((weather.temp * 9/5) + 32);
@@ -100,7 +120,7 @@ export default function WeatherWidget({
 
   if (weather.loading) {
     return (
-      <AnimatedWidget>
+      <AnimatedWidget contentRef={contentRef} dataWidgetId={widgetId}>
         <div className="h-full flex flex-col justify-center">
           <div className="text-center">
             <h3 className="widget-drag-handle flex cursor-grab select-none items-center justify-center font-semibold text-lg mb-4 text-gray-800 active:cursor-grabbing">
@@ -121,7 +141,7 @@ export default function WeatherWidget({
 
   if (!weather.city && !isEditing) {
     return (
-      <AnimatedWidget>
+      <AnimatedWidget contentRef={contentRef} dataWidgetId={widgetId}>
         <div className="flex min-h-40 flex-col items-center justify-center text-center">
           <MapPin size={22} className="mb-2 text-indigo-600" />
           <h3 className="widget-drag-handle cursor-grab select-none font-semibold text-slate-900 active:cursor-grabbing">{title || 'Weather'}</h3>
@@ -139,7 +159,7 @@ export default function WeatherWidget({
   }
 
   return (
-    <AnimatedWidget className="h-full">
+    <AnimatedWidget contentRef={contentRef} dataWidgetId={widgetId} className="ff-weather-widget h-full">
       <div className="h-full flex flex-col">
         {/* Header and controls */}
         <div className="flex justify-between items-center mb-4">

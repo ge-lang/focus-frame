@@ -1,11 +1,11 @@
 'use client';
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Responsive, useContainerWidth, type Layout as GridLayout, type LayoutItem as GridLayoutItem } from 'react-grid-layout';
 import { noCompactor } from 'react-grid-layout/core';
 import 'react-grid-layout/css/styles.css';
 import { useDashboard } from '@/contexts/dashboard-context';
 import { SortableWidget } from './sortable-widget';
-import { normalizeLayout, stackLayoutForMobile } from '@/lib/dashboard-layout';
+import { getGridHeightForContent, getWidgetSizing, normalizeLayout, resizeWidgetInLayout, stackLayoutForMobile } from '@/lib/dashboard-layout';
 import type { LayoutItem } from '@/types/dashboard';
 
 const BREAKPOINTS = { lg: 1024, md: 768, sm: 640, xs: 480, xxs: 0 } as const;
@@ -16,6 +16,7 @@ type AutoScrollState = { active: boolean; pointerY: number; frame: number | null
 export function DashboardGrid() {
   const { state, updateLayout } = useDashboard();
   const { layout, isEditing, widgets } = state;
+  const [desktopLayout, setDesktopLayout] = useState(layout);
   const { width, containerRef, mounted } = useContainerWidth({ measureBeforeMount: true });
   const breakpointRef = useRef('lg');
   const autoScrollRef = useRef<AutoScrollState>({
@@ -24,6 +25,19 @@ export function DashboardGrid() {
     frame: null,
   });
   const isDraggingRef = useRef(false);
+  const contentSizingRef = useRef(false);
+  const desktopLayoutRef = useRef(desktopLayout);
+  const weatherBaseLayoutRef = useRef<typeof desktopLayout | null>(null);
+
+  useEffect(() => {
+    desktopLayoutRef.current = desktopLayout;
+  }, [desktopLayout]);
+
+  useEffect(() => {
+    if (contentSizingRef.current) return;
+    desktopLayoutRef.current = layout;
+    setDesktopLayout(layout);
+  }, [layout]);
 
   const stopAutoScroll = useCallback(() => {
     const state = autoScrollRef.current;
@@ -77,12 +91,12 @@ export function DashboardGrid() {
   }, [stopAutoScroll]);
 
   const layouts = useMemo(() => ({
-    lg: layout,
+    lg: desktopLayout,
     md: stackLayoutForMobile(layout, COLUMNS.md),
     sm: stackLayoutForMobile(layout, COLUMNS.sm),
     xs: stackLayoutForMobile(layout, COLUMNS.xs),
     xxs: stackLayoutForMobile(layout, COLUMNS.xxs),
-  }), [layout]);
+  }), [desktopLayout, layout]);
 
   const getWidgetById = (id: string) => widgets.find((widget) => widget.id === id);
 
@@ -90,24 +104,64 @@ export function DashboardGrid() {
     const widget = getWidgetById(item.i);
     return widget ? (
       <div key={item.i}>
-        <SortableWidget id={item.i} type={item.type} />
+        <SortableWidget id={item.i} type={item.type} onContentHeightChange={handleWidgetContentHeight} />
       </div>
     ) : null;
   };
 
-  const handleLayoutChange = (nextLayout: GridLayout) => {
-    if (breakpointRef.current !== 'lg' || isDraggingRef.current) return;
+  function handleWidgetContentHeight(widgetId: string, contentHeight: number) {
+    if (!mounted || width < BREAKPOINTS.sm || breakpointRef.current !== 'lg') return;
 
-    const types = new Map(layout.map((item) => [item.i, item.type]));
+    const currentItem = desktopLayoutRef.current.find((item) => item.i === widgetId);
+    if (!currentItem) return;
+
+    const minimumHeight = getWidgetSizing(currentItem.type).h;
+    const requiredHeight = getGridHeightForContent(contentHeight, 72, 16, minimumHeight);
+    if (requiredHeight === currentItem.h) return;
+
+    let nextLayout;
+    if (requiredHeight > minimumHeight && currentItem.h === minimumHeight) {
+      weatherBaseLayoutRef.current = desktopLayoutRef.current;
+      nextLayout = resizeWidgetInLayout(desktopLayoutRef.current, widgetId, requiredHeight);
+    } else if (requiredHeight === minimumHeight && currentItem.h > minimumHeight && weatherBaseLayoutRef.current) {
+      nextLayout = resizeWidgetInLayout(weatherBaseLayoutRef.current, widgetId, minimumHeight);
+      weatherBaseLayoutRef.current = null;
+    } else {
+      nextLayout = resizeWidgetInLayout(desktopLayoutRef.current, widgetId, requiredHeight);
+    }
+
+    contentSizingRef.current = true;
+    desktopLayoutRef.current = nextLayout;
+    setDesktopLayout(nextLayout);
+    window.requestAnimationFrame(() => {
+      contentSizingRef.current = false;
+    });
+  }
+
+  const handleLayoutChange = (nextLayout: GridLayout) => {
+    if (breakpointRef.current !== 'lg' || isDraggingRef.current || contentSizingRef.current) return;
+
+    const types = new Map(desktopLayoutRef.current.map((item) => [item.i, item.type]));
     const persistedLayout: LayoutItem[] = nextLayout.map((item: GridLayoutItem) => ({
       i: item.i,
       x: item.x,
       y: item.y,
       w: item.w,
-      h: item.h,
+      h: getWidgetSizing(types.get(item.i) ?? 'notes').h,
       type: types.get(item.i) ?? 'notes',
     }));
-    updateLayout(normalizeLayout(persistedLayout));
+    const normalized = normalizeLayout(persistedLayout);
+    weatherBaseLayoutRef.current = null;
+    contentSizingRef.current = true;
+    desktopLayoutRef.current = nextLayout.map((item) => ({
+      ...item,
+      type: types.get(item.i) ?? 'notes',
+    }));
+    setDesktopLayout(desktopLayoutRef.current);
+    updateLayout(normalized);
+    window.requestAnimationFrame(() => {
+      contentSizingRef.current = false;
+    });
   };
 
   return (

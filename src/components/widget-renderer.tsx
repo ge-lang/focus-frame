@@ -12,9 +12,10 @@ import GoalsWidget from './widgets/goals-widget';
 
 interface WidgetRendererProps {
   widget: Widget;
+  onContentHeightChange?: (widgetId: string, height: number) => void;
 }
 
-export function WidgetRenderer({ widget }: WidgetRendererProps) {
+export function WidgetRenderer({ widget, onContentHeightChange }: WidgetRendererProps) {
   if (!widget) {
     return <div className="p-4 text-center text-gray-500">Widget not found</div>;
   }
@@ -31,6 +32,7 @@ export function WidgetRenderer({ widget }: WidgetRendererProps) {
             title={widget.title}
             initialCity={typeof widget.config?.city === 'string' ? widget.config.city : ''}
             initialCountryCode={typeof widget.config?.country === 'string' ? widget.config.country : undefined}
+            onContentHeightChange={onContentHeightChange}
           />
         );
       case 'news':

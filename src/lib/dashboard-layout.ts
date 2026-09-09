@@ -37,6 +37,16 @@ export function getWidgetSizing(type: WidgetType): WidgetSizing {
   return widgetSizing[type];
 }
 
+export function getGridHeightForContent(
+  contentHeight: number,
+  rowHeight = 72,
+  rowMargin = 16,
+  minimumHeight = 1,
+): number {
+  const safeHeight = Math.max(0, Math.ceil(contentHeight));
+  return Math.max(minimumHeight, Math.ceil((safeHeight + rowMargin) / (rowHeight + rowMargin)));
+}
+
 function overlaps(first: LayoutItem, second: LayoutItem): boolean {
   return first.x < second.x + second.w &&
     first.x + first.w > second.x &&
@@ -122,4 +132,19 @@ export function addWidgetToLayout(layout: LayoutItem[], item: LayoutItem): Layou
   const nextRow = normalized.reduce((bottom, current) => Math.max(bottom, current.y + current.h), 0);
   const appended = { ...sized, x: 0, y: nextRow };
   return [...normalized, findFreePosition(appended, normalized, DESKTOP_GRID_COLUMNS)];
+}
+
+export function resizeWidgetInLayout(layout: LayoutItem[], widgetId: string, height: number): LayoutItem[] {
+  const target = layout.find((item) => item.i === widgetId);
+  if (!target) return layout;
+
+  const resizedTarget = { ...target, h: Math.max(1, Math.round(height)) };
+  const ordered = [resizedTarget, ...layout.filter((item) => item.i !== widgetId)];
+  const resolved: LayoutItem[] = [];
+
+  for (const item of ordered) {
+    resolved.push(resolved.length === 0 ? item : findFreePosition(item, resolved, DESKTOP_GRID_COLUMNS));
+  }
+
+  return layout.map((item) => resolved.find((candidate) => candidate.i === item.i) ?? item);
 }

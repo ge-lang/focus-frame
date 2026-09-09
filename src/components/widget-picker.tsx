@@ -83,20 +83,20 @@ export function WidgetPicker() {
       whileTap={isAvailable ? { scale: 0.98 } : undefined}
       onClick={() => handleAddWidget(widget.type)}
       disabled={!isAvailable}
-      className={`mb-1 flex w-full items-start rounded-lg p-3 text-left transition-all ${
+      className={`ff-picker-row mb-1 flex w-full items-start rounded-lg p-3 text-left transition-all ${
         isAvailable
           ? 'cursor-pointer hover:border-indigo-200 hover:bg-indigo-50'
-          : 'cursor-default bg-slate-50/60'
+          : 'ff-picker-row-added cursor-default'
       }`}
     >
-      <span className={`mr-3 mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${isAvailable ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-100 text-slate-500'}`}>
+      <span className={`ff-picker-icon mr-3 mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${isAvailable ? 'bg-indigo-50 text-indigo-600' : ''}`}>
         {isAvailable ? <widget.icon size={18} aria-hidden="true" /> : <Check size={18} aria-hidden="true" />}
       </span>
       <span className="flex-1">
         <span className="font-medium text-gray-900">{widget.label}</span>
         <span className="mt-1 block text-sm text-gray-600">{widget.description}</span>
       </span>
-      {!isAvailable && <span className="ml-2 mt-1 text-xs font-medium text-slate-500">Added</span>}
+      {!isAvailable && <span className="ff-picker-added-label ml-2 mt-1 text-xs font-medium">Added</span>}
     </motion.button>
   );
 
