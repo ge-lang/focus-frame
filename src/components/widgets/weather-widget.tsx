@@ -172,9 +172,10 @@ export default function WeatherWidget({
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="mb-4 overflow-hidden"
+              className="fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto bg-slate-950/70 p-4 pt-[max(4rem,10vh)]"
+              onClick={resetLocationForm}
             >
-              <form onSubmit={handleSubmit} data-no-drag className="space-y-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
+              <form onSubmit={handleSubmit} data-no-drag onClick={(event) => event.stopPropagation()} className="w-full max-w-md max-h-[calc(100dvh-7rem)] overflow-y-auto space-y-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
                 <label className="block text-xs font-medium text-gray-700">
                   Country
                   <select

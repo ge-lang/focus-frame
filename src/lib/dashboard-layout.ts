@@ -2,6 +2,17 @@ import type { LayoutItem, WidgetType } from '@/types/dashboard';
 
 export const DESKTOP_GRID_COLUMNS = 12;
 const MAX_PRESERVED_EMPTY_ROWS = 6;
+const mobileWidgetHeights: Record<WidgetType, number> = {
+  todo: 7,
+  weather: 6,
+  news: 7,
+  pomodoro: 6,
+  calendar: 7,
+  notes: 5,
+  analytics: 7,
+  bookmarks: 5,
+  goals: 5,
+};
 
 export interface WidgetSizing {
   w: number;
@@ -86,7 +97,22 @@ export function normalizeLayout(layout: LayoutItem[], columns = DESKTOP_GRID_COL
 }
 
 export function removeWidgetFromLayout(layout: LayoutItem[], widgetId: string): LayoutItem[] {
-  return layout.filter((item) => item.i !== widgetId);
+  return normalizeLayout(layout.filter((item) => item.i !== widgetId));
+}
+
+export function stackLayoutForMobile(layout: LayoutItem[], columns: number): LayoutItem[] {
+  let y = 0;
+  return layout.map((item) => {
+    const stacked = {
+      ...item,
+      x: 0,
+      y,
+      w: columns,
+      h: Math.max(item.h, mobileWidgetHeights[item.type]),
+    };
+    y += stacked.h;
+    return stacked;
+  });
 }
 
 export function addWidgetToLayout(layout: LayoutItem[], item: LayoutItem): LayoutItem[] {

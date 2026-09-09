@@ -5,21 +5,13 @@ import { noCompactor } from 'react-grid-layout/core';
 import 'react-grid-layout/css/styles.css';
 import { useDashboard } from '@/contexts/dashboard-context';
 import { SortableWidget } from './sortable-widget';
+import { stackLayoutForMobile } from '@/lib/dashboard-layout';
 import type { LayoutItem } from '@/types/dashboard';
 
 const BREAKPOINTS = { lg: 1024, md: 768, sm: 640, xs: 480, xxs: 0 } as const;
 const COLUMNS = { lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 } as const;
 const fixedGridCompactor = { ...noCompactor, preventCollision: true };
 type AutoScrollState = { active: boolean; pointerY: number; frame: number | null; cleanup?: () => void };
-
-function stackLayout(layout: LayoutItem[], columns: number): LayoutItem[] {
-  let y = 0;
-  return layout.map((item) => {
-    const stacked = { ...item, x: 0, y, w: columns };
-    y += item.h;
-    return stacked;
-  });
-}
 
 export function DashboardGrid() {
   const { state, updateLayout } = useDashboard();
@@ -86,10 +78,10 @@ export function DashboardGrid() {
 
   const layouts = useMemo(() => ({
     lg: layout,
-    md: stackLayout(layout, COLUMNS.md),
-    sm: stackLayout(layout, COLUMNS.sm),
-    xs: stackLayout(layout, COLUMNS.xs),
-    xxs: stackLayout(layout, COLUMNS.xxs),
+    md: stackLayoutForMobile(layout, COLUMNS.md),
+    sm: stackLayoutForMobile(layout, COLUMNS.sm),
+    xs: stackLayoutForMobile(layout, COLUMNS.xs),
+    xxs: stackLayoutForMobile(layout, COLUMNS.xxs),
   }), [layout]);
 
   const getWidgetById = (id: string) => widgets.find((widget) => widget.id === id);

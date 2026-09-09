@@ -5,6 +5,7 @@ import {
   hasLayoutCollision,
   normalizeLayout,
   removeWidgetFromLayout,
+  stackLayoutForMobile,
 } from './dashboard-layout';
 
 describe('dashboard layout normalization', () => {
@@ -89,5 +90,23 @@ describe('dashboard layout normalization', () => {
     ];
 
     expect(removeWidgetFromLayout(layout, 'weather-1')).toEqual([layout[1]]);
+  });
+
+  it('derives a deterministic one-column mobile layout without changing desktop data', () => {
+    const desktop = [
+      { i: 'weather-1', x: 8, y: 4, w: 4, h: 3, type: 'weather' as const },
+      { i: 'notes-1', x: 0, y: 0, w: 4, h: 3, type: 'notes' as const },
+    ];
+    const mobile = stackLayoutForMobile(desktop, 2);
+
+    expect(mobile).toMatchObject([
+      { i: 'weather-1', x: 0, y: 0, w: 2, h: 6 },
+      { i: 'notes-1', x: 0, y: 6, w: 2, h: 5 },
+    ]);
+    expect(desktop).toMatchObject([
+      { i: 'weather-1', x: 8, y: 4, w: 4, h: 3 },
+      { i: 'notes-1', x: 0, y: 0, w: 4, h: 3 },
+    ]);
+    expect(mobile.every((item, index) => !hasLayoutCollision(item, mobile.slice(index + 1)))).toBe(true);
   });
 });
