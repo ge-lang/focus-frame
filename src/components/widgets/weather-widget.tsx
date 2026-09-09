@@ -6,7 +6,7 @@ import { useWeather, useWeatherSearch } from '@/hooks/useWeather';
 import { countries } from '@/lib/countries';
 import { findCountryForCity, getPopularCitiesForCountry, resolveCountrySelection } from '@/lib/weather-location';
 import { WeatherIcon } from '@/components/weather-icon';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { 
   MapPin, 
   Settings, 
@@ -40,6 +40,13 @@ export default function WeatherWidget({
   const [unit, setUnit] = useState<'celsius' | 'fahrenheit'>('celsius');
   const { suggestions, isSearching } = useWeatherSearch(isEditing ? inputCity : '', countryCode || undefined);
   const popularCities = getPopularCitiesForCountry(countryCode);
+
+  useEffect(() => {
+    if (!isEditing) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = previousOverflow; };
+  }, [isEditing]);
 
   // Temperature conversion
   const displayTemp = unit === 'celsius' ? weather.temp : Math.round((weather.temp * 9/5) + 32);
@@ -172,10 +179,10 @@ export default function WeatherWidget({
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto bg-slate-950/70 p-4 pt-[max(4rem,10vh)]"
+              className="fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto overscroll-contain bg-slate-950/70 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-[max(4rem,10vh)]"
               onClick={resetLocationForm}
             >
-              <form onSubmit={handleSubmit} data-no-drag onClick={(event) => event.stopPropagation()} className="w-full max-w-md max-h-[calc(100dvh-7rem)] overflow-y-auto space-y-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
+              <form onSubmit={handleSubmit} data-no-drag onClick={(event) => event.stopPropagation()} className="w-full max-w-md max-h-[calc(100dvh-6rem)] overflow-y-auto overscroll-contain space-y-3 rounded-lg border border-slate-200 bg-slate-50 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
                 <label className="block text-xs font-medium text-gray-700">
                   Country
                   <select

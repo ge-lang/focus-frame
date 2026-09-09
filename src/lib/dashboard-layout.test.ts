@@ -30,7 +30,7 @@ describe('dashboard layout normalization', () => {
       { i: 'notes-1', x: 7, y: 5, w: 4, h: 1, type: 'notes' },
     ]);
 
-    expect(layout[0]).toMatchObject({ i: 'notes-1', x: 7, y: 5, w: 4, h: 3 });
+    expect(layout[0]).toMatchObject({ i: 'notes-1', x: 7, y: 3, w: 4, h: 3 });
   });
 
   it('limits pathological vertical gaps without compacting normal spacing', () => {
@@ -40,7 +40,7 @@ describe('dashboard layout normalization', () => {
     ]);
 
     expect(layout[0]).toMatchObject({ x: 0, y: 0 });
-    expect(layout[1].y).toBe(9);
+    expect(layout[1].y).toBe(6);
   });
 
   it('clamps positions and resolves overlaps deterministically', () => {

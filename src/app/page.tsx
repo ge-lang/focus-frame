@@ -24,6 +24,7 @@ import { DashboardGrid } from '@/components/dashboard-grid';
 import { EditToggle } from '@/components/edit-toggle';
 import { WidgetPicker } from '@/components/widget-picker';
 import { AuthButton } from '@/components/auth-button';
+import { MobileStickyActions } from '@/components/mobile-sticky-actions';
 
 export default function Home() {
   return (
@@ -46,6 +47,8 @@ export default function Home() {
               <EditToggle />
             </div>
           </header>
+
+          <MobileStickyActions />
 
           <div className="ff-dashboard-stage">
             <DashboardGrid />

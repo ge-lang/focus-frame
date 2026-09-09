@@ -1,7 +1,9 @@
 import type { LayoutItem, WidgetType } from '@/types/dashboard';
 
 export const DESKTOP_GRID_COLUMNS = 12;
-const MAX_PRESERVED_EMPTY_ROWS = 6;
+// Keep intentional breathing room, but prevent persisted layouts from creating
+// several hundred pixels of empty space after reload or widget removal.
+const MAX_PRESERVED_EMPTY_ROWS = 3;
 const mobileWidgetHeights: Record<WidgetType, number> = {
   todo: 7,
   weather: 6,

@@ -88,7 +88,7 @@ export default function NewsWidget({ widgetId, title }: NewsWidgetProps) {
           </div>
           
           {/* API status */}
-          <div className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs ${
+            <div className={`ff-news-status inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs ${
             isDemo 
               ? 'bg-amber-50 text-amber-700' 
               : 'bg-emerald-50 text-emerald-700'
@@ -149,10 +149,10 @@ export default function NewsWidget({ widgetId, title }: NewsWidgetProps) {
                   href={article.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group block rounded-xl border-b border-slate-200 p-3 transition-colors duration-200 hover:bg-slate-50"
+                  className="ff-news-article group block rounded-xl border-b border-slate-200 p-3 transition-colors duration-200 hover:bg-slate-50"
                 >
                   <div className="flex justify-between items-start mb-2">
-                    <span className="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2 py-1 text-xs font-medium text-indigo-700">
+                    <span className="ff-news-category inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2 py-1 text-xs font-medium text-indigo-700">
                       <span>{categoryEmojis[article.category] || '📰'}</span>
                       <span className="capitalize">{categoryLabels[article.category] || article.category}</span>
                     </span>
@@ -171,7 +171,7 @@ export default function NewsWidget({ widgetId, title }: NewsWidgetProps) {
                   </p>
                   
                   <div className="flex justify-between items-center">
-                    <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                    <span className="ff-news-source text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded">
                       {article.source}
                     </span>
                     <div className="flex items-center gap-1 text-indigo-600 transition-colors group-hover:text-indigo-700">

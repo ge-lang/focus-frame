@@ -1,6 +1,7 @@
 import axios from 'axios';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
+import { deduplicateWeatherResults, type WeatherSearchResult } from '@/lib/weather-location';
 
 const WEATHER_API_URL = 'https://api.openweathermap.org/data/2.5';
 const GEO_API_URL = 'https://api.openweathermap.org/geo/1.0/direct';
@@ -20,13 +21,14 @@ export async function GET(request: NextRequest) {
       const response = await axios.get(GEO_API_URL, {
         params: { q: country ? `${search},${country}` : search, limit: 8, appid: apiKey },
       });
-      return NextResponse.json(response.data.map((location: { name: string; state?: string; country: string; lat: number; lon: number }) => ({
+      const results = response.data.map((location: { name: string; state?: string; country: string; lat: number; lon: number }): WeatherSearchResult => ({
         name: location.name,
         state: location.state ?? null,
         country: location.country.toUpperCase(),
         lat: location.lat,
         lon: location.lon,
-      })));
+      }));
+      return NextResponse.json(deduplicateWeatherResults(results));
     }
 
     if (!city) return NextResponse.json({ error: 'A city is required' }, { status: 400 });

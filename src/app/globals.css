@@ -781,3 +781,112 @@ body.ff-document-body {
 }
 
 .ff-dark-workspace .ff-btn-primary:hover { background: #897cff; }
+
+/* Widget-specific dark surfaces stay layered without reintroducing bright panels. */
+.ff-dark-workspace .ff-metric-tile {
+  border: 1px solid rgba(160, 165, 211, 0.2);
+  background: rgba(47, 54, 96, 0.68);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045);
+}
+
+.ff-dark-workspace .ff-metric-tile:nth-child(1) { border-top-color: rgba(141, 128, 255, 0.72); }
+.ff-dark-workspace .ff-metric-tile:nth-child(2) { border-top-color: rgba(103, 215, 229, 0.62); }
+.ff-dark-workspace .ff-metric-tile:nth-child(3) { border-top-color: rgba(180, 220, 114, 0.68); }
+.ff-dark-workspace .ff-metric-tile:nth-child(4) { border-top-color: rgba(233, 149, 201, 0.62); }
+
+.ff-dark-workspace .ff-news-article {
+  border-bottom-color: rgba(164, 166, 210, 0.22) !important;
+  background: rgba(46, 52, 91, 0.42);
+}
+
+.ff-dark-workspace .ff-news-article:hover {
+  background: rgba(69, 72, 125, 0.62) !important;
+}
+
+.ff-dark-workspace .ff-news-category {
+  background: rgba(124, 108, 255, 0.18) !important;
+  color: #dcd7ff !important;
+}
+
+.ff-dark-workspace .ff-news-source {
+  background: rgba(75, 82, 125, 0.56) !important;
+  color: #b9c0db !important;
+}
+
+.ff-dark-workspace .ff-news-status {
+  border: 1px solid rgba(167, 157, 255, 0.18);
+}
+
+.ff-dark-workspace .ff-analytics-panel {
+  border-color: rgba(160, 165, 211, 0.2);
+  background: rgba(47, 54, 96, 0.52);
+}
+
+.ff-dark-workspace .ff-card .hover\:bg-slate-50:hover {
+  background: rgba(69, 72, 125, 0.62) !important;
+}
+
+.ff-dark-workspace .ff-card .hover\:bg-indigo-50:hover {
+  background: rgba(124, 108, 255, 0.2) !important;
+}
+
+.ff-mobile-widget-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.ff-mobile-widget-stack > div,
+.ff-mobile-task-columns > div,
+.ff-mobile-task-columns .ff-task-column {
+  width: 100%;
+  min-width: 0;
+  height: auto;
+}
+
+.ff-mobile-task-columns .ff-task-items {
+  flex: none;
+  overflow: visible;
+}
+
+.ff-task-drag-handle {
+  touch-action: none;
+}
+
+.ff-mobile-sticky-actions {
+  display: none;
+}
+
+@media (max-width: 639px) {
+  .ff-dark-workspace .ff-topbar {
+    position: static;
+  }
+
+  .ff-dark-workspace .ff-topbar-actions {
+    position: static;
+  }
+
+  .ff-mobile-sticky-actions {
+    position: fixed;
+    top: env(safe-area-inset-top, 0px);
+    right: 0.75rem;
+    left: 0.75rem;
+    z-index: 55;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    border: 1px solid rgba(167, 157, 255, 0.24);
+    border-radius: 0.85rem;
+    background: rgba(20, 24, 52, 0.9);
+    box-shadow: 0 8px 24px rgba(4, 6, 19, 0.28);
+    backdrop-filter: blur(16px);
+  }
+
+  .ff-mobile-sticky-actions .ff-glass-control,
+  .ff-mobile-sticky-actions .ff-glass-control-primary {
+    min-height: 2.5rem;
+    opacity: 1;
+  }
+}

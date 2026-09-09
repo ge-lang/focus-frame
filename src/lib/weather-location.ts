@@ -3,6 +3,14 @@ export interface WeatherLocationDefaults {
   popular: string[];
 }
 
+export interface WeatherSearchResult {
+  name: string;
+  state: string | null;
+  country: string;
+  lat: number;
+  lon: number;
+}
+
 const countryLocations: Record<string, WeatherLocationDefaults> = {
   BE: { capital: 'Brussels', popular: ['Brussels', 'Antwerp', 'Ghent', 'Bruges'] },
   NL: { capital: 'Amsterdam', popular: ['Amsterdam', 'Rotterdam', 'The Hague', 'Utrecht'] },
@@ -43,4 +51,18 @@ export function findCountryForCity(city: string): string | undefined {
   return Object.entries(countryLocations).find(([, defaults]) =>
     defaults.popular.some((popularCity) => popularCity.toLowerCase() === normalizedCity),
   )?.[0];
+}
+
+function normalizeLocationPart(value: string | null | undefined): string {
+  return (value ?? '').trim().toLocaleLowerCase();
+}
+
+export function deduplicateWeatherResults(results: WeatherSearchResult[]): WeatherSearchResult[] {
+  const seen = new Set<string>();
+  return results.filter((result) => {
+    const key = [result.name, result.state, result.country].map(normalizeLocationPart).join('|');
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }

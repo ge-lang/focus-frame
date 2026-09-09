@@ -273,9 +273,11 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="mb-4 overflow-hidden rounded-lg border border-slate-200 bg-slate-50 p-3"
+              className="fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto overscroll-contain bg-slate-950/70 p-4 pt-[max(4rem,10vh)]"
+              onClick={() => setShowSettings(false)}
             >
-              <div className="grid grid-cols-2 gap-3 text-sm">
+              <div onClick={(event) => event.stopPropagation()} className="w-full max-w-md max-h-[calc(100dvh-6rem)] overflow-y-auto rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs text-gray-600 mb-1">Work (min)</label>
                   <input
@@ -387,6 +389,7 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
                 >
                   Apply
                 </button>
+              </div>
               </div>
             </motion.div>
           )}

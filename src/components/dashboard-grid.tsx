@@ -86,6 +86,15 @@ export function DashboardGrid() {
 
   const getWidgetById = (id: string) => widgets.find((widget) => widget.id === id);
 
+  const renderWidget = (item: LayoutItem) => {
+    const widget = getWidgetById(item.i);
+    return widget ? (
+      <div key={item.i}>
+        <SortableWidget id={item.i} type={item.type} />
+      </div>
+    ) : null;
+  };
+
   const handleLayoutChange = (nextLayout: GridLayout) => {
     if (breakpointRef.current !== 'lg' || isDraggingRef.current) return;
 
@@ -103,7 +112,11 @@ export function DashboardGrid() {
 
   return (
     <div ref={containerRef} className="min-w-0">
-      {mounted && (
+      {mounted && width < BREAKPOINTS.sm ? (
+        <div className="ff-mobile-widget-stack">
+          {layout.map(renderWidget)}
+        </div>
+      ) : mounted && (
         <Responsive
           width={width}
           layouts={layouts}
@@ -124,14 +137,7 @@ export function DashboardGrid() {
           onBreakpointChange={(nextBreakpoint) => { breakpointRef.current = nextBreakpoint; }}
           onLayoutChange={handleLayoutChange}
         >
-          {layout.map((item) => {
-            const widget = getWidgetById(item.i);
-            return widget ? (
-              <div key={item.i}>
-                <SortableWidget id={item.i} type={item.type} />
-              </div>
-            ) : null;
-          })}
+          {layout.map(renderWidget)}
         </Responsive>
       )}
     </div>
