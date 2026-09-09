@@ -91,7 +91,7 @@ export function WidgetPicker() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black bg-opacity-50 z-40"
+              className="ff-widget-picker-backdrop fixed inset-0 z-[var(--ff-z-modal)] bg-black bg-opacity-50"
               onClick={() => setIsOpen(false)}
             />
             
@@ -101,7 +101,7 @@ export function WidgetPicker() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: -10 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="absolute right-0 top-full z-50 mt-2 w-80 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg"
+              className="ff-widget-picker-menu absolute right-0 top-full z-[var(--ff-z-dialog)] mt-2 w-80 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg"
             >
               {/* Header */}
               <div className="flex justify-between items-center p-4 border-b border-gray-100">

@@ -5,7 +5,7 @@ import { noCompactor } from 'react-grid-layout/core';
 import 'react-grid-layout/css/styles.css';
 import { useDashboard } from '@/contexts/dashboard-context';
 import { SortableWidget } from './sortable-widget';
-import { stackLayoutForMobile } from '@/lib/dashboard-layout';
+import { normalizeLayout, stackLayoutForMobile } from '@/lib/dashboard-layout';
 import type { LayoutItem } from '@/types/dashboard';
 
 const BREAKPOINTS = { lg: 1024, md: 768, sm: 640, xs: 480, xxs: 0 } as const;
@@ -107,7 +107,7 @@ export function DashboardGrid() {
       h: item.h,
       type: types.get(item.i) ?? 'notes',
     }));
-    updateLayout(persistedLayout);
+    updateLayout(normalizeLayout(persistedLayout));
   };
 
   return (

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useReducer, useRef, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useReducer, useState, ReactNode } from 'react';
 import { WidgetType } from '@/types/dashboard';
 import { addWidgetToLayout, getWidgetSizing, normalizeLayout, removeWidgetFromLayout } from '@/lib/dashboard-layout';
 
@@ -95,7 +95,7 @@ const DashboardContext = createContext<DashboardContextType | null>(null);
 
 export function DashboardProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(dashboardReducer, initialState);
-  const hasLoaded = useRef(false);
+  const [hasLoaded, setHasLoaded] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -116,7 +116,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       })
       .catch((error) => console.error('Failed to load dashboard:', error))
       .finally(() => {
-        if (isMounted) hasLoaded.current = true;
+        if (isMounted) setHasLoaded(true);
       });
 
     return () => {
@@ -125,7 +125,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (!hasLoaded.current) return;
+    if (!hasLoaded) return;
 
     const timeoutId = window.setTimeout(() => {
       fetch('/api/dashboard', {
@@ -136,7 +136,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     }, 750);
 
     return () => window.clearTimeout(timeoutId);
-  }, [state.widgets, state.layout]);
+  }, [hasLoaded, state.widgets, state.layout]);
 
   const addWidget = (type: WidgetType, config?: { title?: string; colSpan?: number; rowSpan?: number }) => {
     const sizing = getWidgetSizing(type);

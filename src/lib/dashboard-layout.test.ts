@@ -54,6 +54,18 @@ describe('dashboard layout normalization', () => {
     expect(hasLayoutCollision(layout[0], [layout[1]])).toBe(false);
   });
 
+  it('repairs several persisted intersections deterministically', () => {
+    const persisted = [
+      { i: 'todo-1', x: 0, y: 0, w: 6, h: 3, type: 'todo' as const },
+      { i: 'bookmarks-1', x: 0, y: 0, w: 4, h: 3, type: 'bookmarks' as const },
+      { i: 'goals-1', x: 0, y: 0, w: 4, h: 3, type: 'goals' as const },
+    ];
+    const normalized = normalizeLayout(persisted);
+
+    expect(normalized.every((item, index) => !hasLayoutCollision(item, normalized.slice(index + 1)))).toBe(true);
+    expect(normalized).toEqual(normalizeLayout(persisted));
+  });
+
   it('adds widgets after the occupied layout without moving existing widgets', () => {
     const existing = [{ i: 'todo-1', x: 0, y: 0, w: 6, h: 3, type: 'todo' as const }];
     const next = addWidgetToLayout(existing, { i: 'weather-1', x: 0, y: 0, w: 1, h: 1, type: 'weather' });
@@ -80,6 +92,21 @@ describe('dashboard layout normalization', () => {
     const next = addWidgetToLayout(existing, { i: 'weather-1', x: 0, y: 0, w: 1, h: 1, type: 'weather' });
 
     expect(next[2]).toMatchObject({ i: 'weather-1', x: 0, y: 3, w: 4, h: 3 });
+    expect(next.every((item, index) => !hasLayoutCollision(item, next.slice(index + 1)))).toBe(true);
+  });
+
+  it('normalizes a stale re-added widget position before insertion', () => {
+    const existing = [
+      { i: 'todo-1', x: 0, y: 0, w: 6, h: 3, type: 'todo' as const },
+      { i: 'bookmarks-1', x: 6, y: 0, w: 4, h: 3, type: 'bookmarks' as const },
+    ];
+    const next = addWidgetToLayout(existing, {
+      i: 'bookmarks-2', x: 6, y: 0, w: 4, h: 3, type: 'bookmarks',
+    });
+
+    expect(next[0]).toMatchObject({ i: 'todo-1', x: 0, y: 0 });
+    expect(next[1]).toMatchObject({ i: 'bookmarks-1', x: 6, y: 0 });
+    expect(next[2]).toMatchObject({ i: 'bookmarks-2', y: 3 });
     expect(next.every((item, index) => !hasLayoutCollision(item, next.slice(index + 1)))).toBe(true);
   });
 

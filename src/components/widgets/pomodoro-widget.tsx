@@ -1,6 +1,7 @@
 // src/components/widgets/pomodoro-widget.tsx
 'use client';
 import { AnimatedWidget } from '@/components/animated-widget';
+import { ModalPortal } from '@/components/modal-portal';
 import { useState, useEffect, useRef } from 'react';
 import { Play, Pause, Square, RotateCcw, Settings, Bell, BellOff } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -269,14 +270,15 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
         {/* Settings */}
         <AnimatePresence>
           {showSettings && (
-            <motion.div
+            <ModalPortal>
+              <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto overscroll-contain bg-slate-950/70 p-4 pt-[max(4rem,10vh)]"
+              className="ff-modal-backdrop fixed inset-0 flex items-start justify-center overflow-y-auto overscroll-contain p-4 pt-[max(4rem,10vh)]"
               onClick={() => setShowSettings(false)}
             >
-              <div onClick={(event) => event.stopPropagation()} className="w-full max-w-md max-h-[calc(100dvh-6rem)] overflow-y-auto rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+              <div onClick={(event) => event.stopPropagation()} className="ff-modal-panel w-full max-w-md max-h-[calc(100dvh-6rem)] overflow-y-auto rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs text-gray-600 mb-1">Work (min)</label>
@@ -391,7 +393,8 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
                 </button>
               </div>
               </div>
-            </motion.div>
+              </motion.div>
+            </ModalPortal>
           )}
         </AnimatePresence>
 

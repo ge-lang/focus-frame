@@ -55,17 +55,16 @@ function clampX(x: number, width: number, columns: number): number {
 function findFreePosition(item: LayoutItem, occupied: LayoutItem[], columns: number): LayoutItem {
   const preferredX = clampX(item.x, item.w, columns);
   const preferredY = Math.max(0, Math.round(item.y));
-  const candidates = Array.from({ length: columns }, (_, x) => x)
+  const maxX = Math.max(columns - item.w, 0);
+  const candidates = Array.from({ length: maxX + 1 }, (_, x) => x)
     .sort((first, second) => Math.abs(first - preferredX) - Math.abs(second - preferredX));
 
-  for (let y = preferredY; y <= preferredY + occupied.length + 20; y += 1) {
+  for (let y = preferredY; ; y += 1) {
     for (const x of candidates) {
       const candidate = { ...item, x, y };
       if (!hasLayoutCollision(candidate, occupied)) return candidate;
     }
   }
-
-  return { ...item, x: 0, y: preferredY + occupied.length + 1 };
 }
 
 export function withWidgetSizing(item: LayoutItem): LayoutItem {
@@ -118,8 +117,9 @@ export function stackLayoutForMobile(layout: LayoutItem[], columns: number): Lay
 }
 
 export function addWidgetToLayout(layout: LayoutItem[], item: LayoutItem): LayoutItem[] {
+  const normalized = normalizeLayout(layout);
   const sized = withWidgetSizing(item);
-  const nextRow = layout.reduce((bottom, current) => Math.max(bottom, current.y + current.h), 0);
+  const nextRow = normalized.reduce((bottom, current) => Math.max(bottom, current.y + current.h), 0);
   const appended = { ...sized, x: 0, y: nextRow };
-  return [...layout, findFreePosition(appended, layout, DESKTOP_GRID_COLUMNS)];
+  return [...normalized, findFreePosition(appended, normalized, DESKTOP_GRID_COLUMNS)];
 }

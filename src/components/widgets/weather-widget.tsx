@@ -1,6 +1,7 @@
 // src/components/widgets/weather-widget.tsx
 'use client';
 import { AnimatedWidget } from '@/components/animated-widget';
+import { ModalPortal } from '@/components/modal-portal';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useWeather, useWeatherSearch } from '@/hooks/useWeather';
 import { countries } from '@/lib/countries';
@@ -175,14 +176,15 @@ export default function WeatherWidget({
         {/* City editing mode */}
         <AnimatePresence>
           {isEditing && (
-            <motion.div
+            <ModalPortal>
+              <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto overscroll-contain bg-slate-950/70 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-[max(4rem,10vh)]"
+              className="ff-modal-backdrop fixed inset-0 flex items-start justify-center overflow-y-auto overscroll-contain p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-[max(4rem,10vh)]"
               onClick={resetLocationForm}
             >
-              <form onSubmit={handleSubmit} data-no-drag onClick={(event) => event.stopPropagation()} className="w-full max-w-md max-h-[calc(100dvh-6rem)] overflow-y-auto overscroll-contain space-y-3 rounded-lg border border-slate-200 bg-slate-50 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+              <form onSubmit={handleSubmit} data-no-drag onClick={(event) => event.stopPropagation()} className="ff-modal-panel w-full max-w-md max-h-[calc(100dvh-6rem)] overflow-y-auto overscroll-contain space-y-3 rounded-lg border border-slate-200 bg-slate-50 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
                 <label className="block text-xs font-medium text-gray-700">
                   Country
                   <select
@@ -255,7 +257,8 @@ export default function WeatherWidget({
                 </div>
 
               </form>
-            </motion.div>
+              </motion.div>
+            </ModalPortal>
           )}
         </AnimatePresence>
 

@@ -448,7 +448,7 @@ body.ff-document-body {
 .ff-dark-workspace .ff-topbar {
   position: sticky;
   top: 0;
-  z-index: 50;
+  z-index: var(--ff-z-sticky);
   min-height: 4rem;
   padding-top: 0;
   padding-bottom: 0.9rem;
@@ -638,7 +638,7 @@ body.ff-document-body {
 
 /* Keep the active card visible while it passes over neighboring grid items. */
 .react-grid-item.react-draggable-dragging {
-  z-index: 20 !important;
+  z-index: var(--ff-z-drag, 50) !important;
 }
 
 /* Dark readability and accent hierarchy. Keep accents reserved for meaning and focus. */
@@ -651,6 +651,10 @@ body.ff-document-body {
   --ff-dark-cyan: #67d7e5;
   --ff-dark-orange: #f2ad69;
   --ff-dark-pink: #e995c9;
+  --ff-z-sticky: 40;
+  --ff-z-drag: 50;
+  --ff-z-modal: 100;
+  --ff-z-dialog: 110;
 }
 
 .ff-dark-workspace .ff-card,
@@ -854,8 +858,48 @@ body.ff-document-body {
   touch-action: none;
 }
 
+.ff-mobile-task-actions {
+  display: none;
+}
+
 .ff-mobile-sticky-actions {
   display: none;
+}
+
+.ff-modal-backdrop {
+  z-index: var(--ff-z-modal) !important;
+  background: rgba(7, 10, 28, 0.84) !important;
+}
+
+.ff-modal-panel {
+  border-color: rgba(167, 157, 255, 0.3) !important;
+  background: #252b52 !important;
+  color: #f7f7ff;
+  box-shadow: 0 22px 60px rgba(2, 4, 16, 0.5);
+}
+
+.ff-widget-picker-menu {
+  z-index: var(--ff-z-dialog);
+}
+
+.ff-dark-workspace .ff-widget-picker-menu {
+  border-color: rgba(167, 157, 255, 0.3);
+  background: #252b52 !important;
+  color: #f7f7ff;
+  box-shadow: 0 22px 60px rgba(2, 4, 16, 0.5);
+}
+
+.ff-dark-workspace .ff-widget-picker-menu .bg-indigo-50 {
+  background: rgba(124, 108, 255, 0.2) !important;
+  color: #dcd7ff !important;
+}
+
+.ff-dark-workspace .ff-widget-picker-menu .hover\:bg-indigo-50:hover {
+  background: rgba(124, 108, 255, 0.3) !important;
+}
+
+.ff-dark-workspace .ff-widget-picker-menu .bg-slate-50\/70 {
+  background: rgba(31, 36, 73, 0.8) !important;
 }
 
 @media (max-width: 639px) {
@@ -872,7 +916,7 @@ body.ff-document-body {
     top: env(safe-area-inset-top, 0px);
     right: 0.75rem;
     left: 0.75rem;
-    z-index: 55;
+    z-index: var(--ff-z-sticky);
     display: flex;
     justify-content: flex-end;
     gap: 0.5rem;
@@ -887,6 +931,16 @@ body.ff-document-body {
   .ff-mobile-sticky-actions .ff-glass-control,
   .ff-mobile-sticky-actions .ff-glass-control-primary {
     min-height: 2.5rem;
+    opacity: 1;
+  }
+
+  .ff-task-drag-handle {
+    display: none;
+  }
+
+  .ff-mobile-task-actions { display: block; }
+
+  .ff-task-card-actions {
     opacity: 1;
   }
 }

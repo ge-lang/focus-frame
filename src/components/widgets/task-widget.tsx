@@ -1,8 +1,8 @@
 // src/components/widgets/task-widget.tsx
 'use client';
-import { useEffect, useMemo, useRef, useState } from 'react';
-import type { PointerEvent as ReactPointerEvent } from 'react';
+import { useMemo, useState } from 'react';
 import { AnimatedWidget } from '@/components/animated-widget';
+import { ModalPortal } from '@/components/modal-portal';
 import { AnimatedButton } from '@/components/animated-button';
 import {
   Plus, 
@@ -30,18 +30,6 @@ interface EditState {
   description: string;
   priority: 'low' | 'medium' | 'high';
   dueDate: string;
-}
-
-interface PointerTaskDrag {
-  task: Task;
-  sourceStatus: TaskStatus;
-  currentStatus: TaskStatus;
-  pointerId: number;
-  startX: number;
-  startY: number;
-  active: boolean;
-  timer: number | null;
-  cleanup?: () => void;
 }
 
 // Helper functions
@@ -75,7 +63,8 @@ function TaskCard({
   status, 
   onEdit, 
   onDelete, 
-  onPointerDragStart,
+  onDragStart,
+  onMoveStatus,
   editState,
   onSaveEdit,
   onCancelEdit 
@@ -84,7 +73,8 @@ function TaskCard({
   status: TaskStatus;
   onEdit: (task: Task, status: TaskStatus) => void;
   onDelete: (id: string) => void;
-  onPointerDragStart: (task: Task, status: TaskStatus, event: ReactPointerEvent<HTMLButtonElement>) => void;
+  onDragStart: (task: Task, status: TaskStatus) => void;
+  onMoveStatus: (task: Task, status: TaskStatus) => void;
   editState: EditState;
   onSaveEdit: () => void;
   onCancelEdit: () => void;
@@ -98,6 +88,8 @@ function TaskCard({
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.9 }}
       transition={{ duration: 0.2 }}
+      draggable
+      onDragStart={() => onDragStart(task, status)}
       className="group relative rounded-lg border border-slate-200 bg-white p-2.5"
     >
       {/* Drag handle */}
@@ -105,7 +97,6 @@ function TaskCard({
         type="button"
         data-no-drag
         aria-label={`Move task: ${task.title}`}
-        onPointerDown={(event) => onPointerDragStart(task, status, event)}
         className="ff-task-drag-handle absolute left-2 top-2 rounded p-1 text-gray-400 opacity-0 transition-opacity hover:text-indigo-400 focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-indigo-400/50 group-hover:opacity-100"
       >
         <GripVertical size={12} className="text-gray-400" />
@@ -153,7 +144,7 @@ function TaskCard({
                 <p className="text-gray-600 text-xs mt-1 leading-relaxed">{task.description}</p>
               )}
             </div>
-            <div className="flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity ml-2">
+            <div className="ff-task-card-actions flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity ml-2">
               <button
                 aria-label={`Edit task: ${task.title}`}
                 onClick={() => onEdit(task, status)}
@@ -193,6 +184,26 @@ function TaskCard({
           {formatFocusTime(task.focusSeconds) && (
             <p className="mt-2 text-xs text-indigo-600">⏱ {formatFocusTime(task.focusSeconds)}</p>
           )}
+          <div className="ff-mobile-task-actions mt-2">
+            <details className="relative">
+              <summary className="inline-flex min-h-10 cursor-pointer list-none items-center rounded-md border border-slate-200 bg-white px-2.5 text-xs font-medium text-slate-700">
+                Move to…
+              </summary>
+              <div className="absolute bottom-full left-0 z-20 mb-1 w-36 rounded-lg border border-slate-200 bg-white p-1 shadow-lg">
+                {(['todo', 'in_progress', 'done'] as TaskStatus[]).map((nextStatus) => (
+                  <button
+                    key={nextStatus}
+                    type="button"
+                    disabled={nextStatus === status}
+                    onClick={() => onMoveStatus(task, nextStatus)}
+                    className="block min-h-10 w-full rounded px-2 text-left text-xs text-slate-700 hover:bg-slate-50 disabled:cursor-default disabled:opacity-40"
+                  >
+                    {getStatusLabel(nextStatus)}
+                  </button>
+                ))}
+              </div>
+            </details>
+          </div>
         </div>
       )}
     </motion.div>
@@ -207,7 +218,8 @@ function TaskColumn({
   onDrop, 
   onEdit, 
   onDelete, 
-  onPointerDragStart,
+  onDragStart,
+  onMoveStatus,
   isDropTarget,
   editState,
   onSaveEdit,
@@ -219,7 +231,8 @@ function TaskColumn({
   onDrop: (e: React.DragEvent, status: TaskStatus) => void;
   onEdit: (task: Task, status: TaskStatus) => void;
   onDelete: (id: string) => void;
-  onPointerDragStart: (task: Task, status: TaskStatus, event: ReactPointerEvent<HTMLButtonElement>) => void;
+  onDragStart: (task: Task, status: TaskStatus) => void;
+  onMoveStatus: (task: Task, status: TaskStatus) => void;
   isDropTarget: boolean;
   editState: EditState;
   onSaveEdit: () => void;
@@ -252,7 +265,8 @@ function TaskColumn({
               status={status}
               onEdit={onEdit}
               onDelete={onDelete}
-              onPointerDragStart={onPointerDragStart}
+              onDragStart={onDragStart}
+              onMoveStatus={onMoveStatus}
               editState={editState}
               onSaveEdit={onSaveEdit}
               onCancelEdit={onCancelEdit}
@@ -288,10 +302,7 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
     dueDate: ''
   });
   const [isAdding, setIsAdding] = useState(false);
-  const pointerDragRef = useRef<PointerTaskDrag | null>(null);
-  const taskScrollRef = useRef<{ active: boolean; pointerY: number; frame: number | null }>({ active: false, pointerY: 0, frame: null });
-  const [draggingTaskId, setDraggingTaskId] = useState<string | null>(null);
-  const [dropStatus, setDropStatus] = useState<TaskStatus | null>(null);
+  const [draggedTask, setDraggedTask] = useState<{ task: Task; status: TaskStatus } | null>(null);
   const [search, setSearch] = useState('');
   const [priorityFilter, setPriorityFilter] = useState<'all' | Task['priority']>('all');
   const [dueDateFilter, setDueDateFilter] = useState<DueDateFilter>('all');
@@ -362,114 +373,26 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
     }
   };
 
-  const stopTaskAutoScroll = () => {
-    const scroll = taskScrollRef.current;
-    scroll.active = false;
-    if (scroll.frame !== null) {
-      window.cancelAnimationFrame(scroll.frame);
-      scroll.frame = null;
-    }
+  const handleDragStart = (task: Task, status: TaskStatus) => {
+    setDraggedTask({ task, status });
   };
 
-  const startTaskAutoScroll = () => {
-    const scroll = taskScrollRef.current;
-    if (scroll.active) return;
-    scroll.active = true;
-    const tick = () => {
-      if (!scroll.active) return;
-      const edge = 84;
-      const distanceFromTop = scroll.pointerY;
-      const distanceFromBottom = window.innerHeight - scroll.pointerY;
-      const delta = distanceFromTop < edge
-        ? -4 * (1 - distanceFromTop / edge)
-        : distanceFromBottom < edge ? 4 * (1 - distanceFromBottom / edge) : 0;
-      if (delta) window.scrollBy(0, delta);
-      scroll.frame = window.requestAnimationFrame(tick);
-    };
-    scroll.frame = window.requestAnimationFrame(tick);
-  };
-
-  const clearPointerTaskDrag = () => {
-    const drag = pointerDragRef.current;
-    if (drag?.timer !== null && drag?.timer !== undefined) window.clearTimeout(drag.timer);
-    drag?.cleanup?.();
-    pointerDragRef.current = null;
-    setDraggingTaskId(null);
-    setDropStatus(null);
-    stopTaskAutoScroll();
-  };
-
-  const finishPointerTaskDrag = async () => {
-    const drag = pointerDragRef.current;
-    if (!drag) return;
-    const destination = drag.currentStatus;
-    const shouldMove = drag.active && destination !== drag.sourceStatus;
-    clearPointerTaskDrag();
-    if (shouldMove) await updateTask({ id: drag.task.id, status: destination });
-  };
-
-  const handlePointerDragStart = (task: Task, status: TaskStatus, event: ReactPointerEvent<HTMLButtonElement>) => {
-    if (event.pointerType === 'mouse' && event.button !== 0) return;
-    if (pointerDragRef.current) return;
+  const handleDragOver = (event: React.DragEvent, status: TaskStatus) => {
     event.preventDefault();
-    event.stopPropagation();
-
-    const drag: PointerTaskDrag = {
-      task,
-      sourceStatus: status,
-      currentStatus: status,
-      pointerId: event.pointerId,
-      startX: event.clientX,
-      startY: event.clientY,
-      active: event.pointerType !== 'touch',
-      timer: null,
-    };
-    const activate = () => {
-      if (pointerDragRef.current !== drag) return;
-      drag.active = true;
-      setDraggingTaskId(task.id);
-      setDropStatus(status);
-      taskScrollRef.current.pointerY = event.clientY;
-      startTaskAutoScroll();
-    };
-    const onMove = (moveEvent: PointerEvent) => {
-      if (moveEvent.pointerId !== drag.pointerId || pointerDragRef.current !== drag) return;
-      const distance = Math.hypot(moveEvent.clientX - drag.startX, moveEvent.clientY - drag.startY);
-      if (!drag.active) {
-        if (distance > 10) clearPointerTaskDrag();
-        return;
-      }
-      moveEvent.preventDefault();
-      taskScrollRef.current.pointerY = moveEvent.clientY;
-      const dropTarget = document.elementFromPoint(moveEvent.clientX, moveEvent.clientY)?.closest<HTMLElement>('[data-task-drop-status]');
-      const nextStatus = dropTarget?.dataset.taskDropStatus as TaskStatus | undefined;
-      if (nextStatus) {
-        drag.currentStatus = nextStatus;
-        setDropStatus(nextStatus);
-      }
-    };
-    const onEnd = () => { void finishPointerTaskDrag(); };
-    drag.cleanup = () => {
-      window.removeEventListener('pointermove', onMove);
-      window.removeEventListener('pointerup', onEnd);
-      window.removeEventListener('pointercancel', onEnd);
-    };
-    pointerDragRef.current = drag;
-    window.addEventListener('pointermove', onMove, { passive: false });
-    window.addEventListener('pointerup', onEnd, { once: true });
-    window.addEventListener('pointercancel', onEnd, { once: true });
-    if (event.pointerType === 'touch') drag.timer = window.setTimeout(activate, 220);
-    else activate();
+    event.dataTransfer.dropEffect = 'move';
   };
 
-  useEffect(() => () => {
-    const drag = pointerDragRef.current;
-    if (drag?.timer !== null && drag?.timer !== undefined) window.clearTimeout(drag.timer);
-    drag?.cleanup?.();
-    const scroll = taskScrollRef.current;
-    scroll.active = false;
-    if (scroll.frame !== null) window.cancelAnimationFrame(scroll.frame);
-  }, []);
+  const handleDrop = async (event: React.DragEvent, newStatus: TaskStatus) => {
+    event.preventDefault();
+    if (draggedTask && draggedTask.status !== newStatus) {
+      await updateTask({ id: draggedTask.task.id, status: newStatus });
+    }
+    setDraggedTask(null);
+  };
+
+  const handleMoveStatus = async (task: Task, newStatus: TaskStatus) => {
+    if (task.status !== newStatus) await updateTask({ id: task.id, status: newStatus });
+  };
 
   const totalTasks = tasks.length;
   const completedTasks = tasksByStatus.done.length;
@@ -509,14 +432,15 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
         {/* Task creation form */}
         <AnimatePresence>
           {isAdding && (
-            <motion.div
+            <ModalPortal>
+              <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto overscroll-contain bg-slate-950/70 p-4 pt-[max(4rem,10vh)]"
+              className="ff-modal-backdrop fixed inset-0 flex items-start justify-center overflow-y-auto overscroll-contain p-4 pt-[max(4rem,10vh)]"
               onClick={() => setIsAdding(false)}
             >
-              <form onSubmit={handleSubmit} onClick={(event) => event.stopPropagation()} className="w-full max-w-md max-h-[calc(100dvh-6rem)] overflow-y-auto rounded-lg border border-slate-200 bg-slate-50 p-3 space-y-2 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+              <form onSubmit={handleSubmit} onClick={(event) => event.stopPropagation()} className="ff-modal-panel w-full max-w-md max-h-[calc(100dvh-6rem)] overflow-y-auto rounded-lg border border-slate-200 bg-slate-50 p-3 space-y-2 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
                 <label className="sr-only" htmlFor="new-task-title">Task title</label>
                 <input
                   id="new-task-title"
@@ -574,7 +498,8 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
                   </button>
                 </div>
               </form>
-            </motion.div>
+              </motion.div>
+            </ModalPortal>
           )}
         </AnimatePresence>
 
@@ -618,8 +543,9 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
                 onDrop={() => undefined}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
-                onPointerDragStart={handlePointerDragStart}
-                isDropTarget={dropStatus === status && draggingTaskId !== null}
+                onDragStart={handleDragStart}
+                onMoveStatus={handleMoveStatus}
+                isDropTarget={false}
                 editState={editState}
                 onSaveEdit={handleSaveEdit}
                 onCancelEdit={() => setEditState({ id: null, title: '', description: '', priority: 'medium', dueDate: '' })}
@@ -638,8 +564,9 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
                 onDrop={() => undefined}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
-                onPointerDragStart={handlePointerDragStart}
-                isDropTarget={dropStatus === status && draggingTaskId !== null}
+                onDragStart={handleDragStart}
+                onMoveStatus={handleMoveStatus}
+                isDropTarget={false}
                 editState={editState}
                 onSaveEdit={handleSaveEdit}
                 onCancelEdit={() => setEditState({ id: null, title: '', description: '', priority: 'medium', dueDate: '' })}
@@ -658,8 +585,9 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
                 onDrop={() => undefined}
                     onEdit={handleEdit}
                     onDelete={handleDelete}
-                onPointerDragStart={handlePointerDragStart}
-                isDropTarget={dropStatus === status && draggingTaskId !== null}
+                onDragStart={handleDragStart}
+                onMoveStatus={handleMoveStatus}
+                isDropTarget={false}
                     editState={editState}
                     onSaveEdit={handleSaveEdit}
                     onCancelEdit={() => setEditState({ id: null, title: '', description: '', priority: 'medium', dueDate: '' })}
