@@ -28,7 +28,7 @@ import { AuthButton } from '@/components/auth-button';
 export default function Home() {
   return (
     <AuthGuard>
-      <main className="ff-page-shell min-h-screen px-4 py-5 sm:px-6 lg:px-8">
+      <main className="ff-page-shell ff-dark-workspace min-h-screen px-4 py-5 sm:px-6 lg:px-8">
         <div className="ff-app-frame mx-auto max-w-[1440px]">
           <header className="ff-topbar">
             <div className="ff-brand">
@@ -46,19 +46,6 @@ export default function Home() {
               <EditToggle />
             </div>
           </header>
-
-          <section className="ff-welcome-band" aria-labelledby="workspace-title">
-            <div>
-              <p className="ff-eyebrow">Personal workspace</p>
-              <h2 id="workspace-title">Make room for focused work.</h2>
-              <p className="ff-welcome-copy">A calm place to plan the day, protect your attention and move forward.</p>
-            </div>
-            <div className="ff-welcome-orbit" aria-hidden="true">
-              <span className="ff-orbit-ring ff-orbit-ring-one" />
-              <span className="ff-orbit-ring ff-orbit-ring-two" />
-              <span className="ff-orbit-core" />
-            </div>
-          </section>
 
           <div className="ff-dashboard-stage">
             <DashboardGrid />

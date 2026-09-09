@@ -395,6 +395,169 @@
   .ff-welcome-copy { max-width: 18rem; font-size: 0.8rem; }
 }
 
+/* Dark analytics workspace theme. The layout and widget mechanics remain unchanged. */
+.ff-dark-workspace {
+  --ff-dark-bg: #11152a;
+  --ff-dark-surface: #1b2040;
+  --ff-dark-surface-raised: #242752;
+  --ff-dark-border: rgba(167, 157, 255, 0.2);
+  --ff-dark-text: #f6f5ff;
+  --ff-dark-muted: #9da2c2;
+  --ff-dark-indigo: #7c6cff;
+  --ff-dark-violet: #c16cff;
+  position: relative;
+  isolation: isolate;
+  color: var(--ff-dark-text);
+  background:
+    radial-gradient(60rem 34rem at 4% -12%, rgba(112, 73, 209, 0.28), transparent 68%),
+    radial-gradient(48rem 30rem at 96% 0%, rgba(38, 115, 204, 0.16), transparent 70%),
+    linear-gradient(180deg, #17132f 0%, #11152a 42%, #0f1325 100%);
+}
+
+.ff-dark-workspace::before {
+  top: -6rem;
+  left: -12%;
+  width: 124%;
+  height: 27rem;
+  border-radius: 0 0 48% 38% / 0 0 34% 24%;
+  background: linear-gradient(112deg, rgba(121, 75, 221, 0.26), rgba(49, 64, 164, 0.1) 42%, rgba(39, 179, 205, 0.1) 74%, transparent 96%);
+  filter: blur(34px);
+}
+
+.ff-dark-workspace::after {
+  top: 10rem;
+  right: -14rem;
+  width: 36rem;
+  height: 32rem;
+  background: radial-gradient(circle, rgba(78, 72, 201, 0.18), transparent 70%);
+  filter: blur(40px);
+}
+
+.ff-dark-workspace .ff-topbar {
+  min-height: 4rem;
+  padding-top: 0;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid rgba(167, 157, 255, 0.12);
+}
+
+.ff-dark-workspace .ff-brand-mark {
+  border-color: rgba(180, 173, 255, 0.38);
+  background: linear-gradient(145deg, #7665ff, #3b347e);
+  box-shadow: 0 0 0 5px rgba(124, 108, 255, 0.08), 0 10px 26px rgba(48, 34, 134, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.ff-dark-workspace .ff-brand-title { color: #fbfaff; }
+.ff-dark-workspace .ff-brand-subtitle { color: #858bb0; }
+.ff-dark-workspace .ff-action-divider { background: rgba(167, 157, 255, 0.18); }
+.ff-dark-workspace .ff-user-greeting { color: #c9c7e7; }
+.ff-dark-workspace .ff-signout { color: #8389ab; }
+.ff-dark-workspace .ff-signout:hover { color: #b9b0ff; }
+
+.ff-dark-workspace .ff-glass-control {
+  border-color: rgba(167, 157, 255, 0.25);
+  background: rgba(31, 35, 73, 0.82) !important;
+  color: #dcd9ff !important;
+  box-shadow: 0 5px 18px rgba(4, 5, 18, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.ff-dark-workspace .ff-glass-control-primary {
+  border-color: rgba(147, 132, 255, 0.62);
+  background: linear-gradient(135deg, rgba(124, 108, 255, 0.96), rgba(99, 76, 202, 0.88)) !important;
+  color: #fff !important;
+  box-shadow: 0 8px 22px rgba(78, 57, 204, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.ff-dark-workspace .ff-glass-control:hover { border-color: rgba(196, 188, 255, 0.62); background: rgba(48, 51, 100, 0.92) !important; }
+.ff-dark-workspace .ff-glass-control-primary:hover { background: linear-gradient(135deg, #887aff, #715be0) !important; }
+
+.ff-dark-workspace .ff-dashboard-stage { padding-top: 1.2rem; }
+
+.ff-dark-workspace .ff-card,
+.ff-dark-workspace .ff-card.ff-card-solid {
+  color: var(--ff-dark-text);
+  border-color: var(--ff-dark-border);
+  background: linear-gradient(145deg, rgba(34, 39, 78, 0.94), rgba(24, 28, 59, 0.95)) !important;
+  box-shadow: 0 18px 38px rgba(4, 6, 19, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.055);
+}
+
+.ff-dark-workspace .ff-card:hover {
+  border-color: rgba(159, 148, 255, 0.38);
+  box-shadow: 0 22px 44px rgba(4, 6, 19, 0.36), 0 0 22px rgba(106, 91, 231, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+
+.ff-dark-workspace .ff-card::before,
+.ff-dark-workspace .ff-widget-surface::before {
+  height: 2px;
+  background: linear-gradient(90deg, rgba(124, 108, 255, 0.86), rgba(193, 108, 255, 0.34), transparent) !important;
+}
+
+.ff-dark-workspace .ff-widget-host-analytics .ff-widget-surface {
+  background: linear-gradient(145deg, rgba(39, 43, 91, 0.98), rgba(28, 31, 67, 0.98)) !important;
+  box-shadow: 0 20px 46px rgba(4, 6, 20, 0.32), inset 0 1px 0 rgba(166, 155, 255, 0.1);
+}
+
+.ff-dark-workspace .ff-widget-host-pomodoro .ff-widget-surface {
+  background: radial-gradient(circle at 50% 55%, rgba(88, 78, 180, 0.18), transparent 38%), linear-gradient(145deg, rgba(34, 39, 80, 0.98), rgba(21, 25, 55, 0.98)) !important;
+}
+
+.ff-dark-workspace .ff-widget-host-goals .ff-widget-surface { background: linear-gradient(145deg, rgba(35, 60, 78, 0.92), rgba(24, 34, 61, 0.98)) !important; }
+.ff-dark-workspace .ff-widget-host-weather .ff-widget-surface { background: linear-gradient(145deg, rgba(31, 54, 81, 0.94), rgba(24, 31, 62, 0.98)) !important; }
+
+.ff-dark-workspace .ff-card .bg-white,
+.ff-dark-workspace .ff-card .bg-slate-50,
+.ff-dark-workspace .ff-card .bg-gray-50,
+.ff-dark-workspace .ff-card .bg-gray-100 {
+  background: rgba(47, 52, 94, 0.58) !important;
+}
+
+.ff-dark-workspace .ff-card .border-slate-100,
+.ff-dark-workspace .ff-card .border-slate-200,
+.ff-dark-workspace .ff-card .border-gray-200,
+.ff-dark-workspace .ff-card .border-gray-300 {
+  border-color: rgba(167, 157, 255, 0.16) !important;
+}
+
+.ff-dark-workspace .ff-card input,
+.ff-dark-workspace .ff-card select,
+.ff-dark-workspace .ff-card textarea {
+  border-color: rgba(167, 157, 255, 0.2) !important;
+  background: rgba(13, 17, 39, 0.42) !important;
+  color: #f6f5ff !important;
+}
+
+.ff-dark-workspace .ff-card input::placeholder,
+.ff-dark-workspace .ff-card textarea::placeholder { color: #7f86aa; }
+
+.ff-dark-workspace .ff-card input:focus,
+.ff-dark-workspace .ff-card select:focus,
+.ff-dark-workspace .ff-card textarea:focus { border-color: rgba(139, 126, 255, 0.8) !important; box-shadow: 0 0 0 3px rgba(124, 108, 255, 0.18) !important; }
+
+.ff-dark-workspace .text-slate-900,
+.ff-dark-workspace .text-slate-800,
+.ff-dark-workspace .text-gray-900,
+.ff-dark-workspace .text-gray-800 { color: #f3f1ff !important; }
+
+.ff-dark-workspace .text-slate-700,
+.ff-dark-workspace .text-slate-600,
+.ff-dark-workspace .text-gray-700,
+.ff-dark-workspace .text-gray-600 { color: #c1c4de !important; }
+
+.ff-dark-workspace .text-slate-500,
+.ff-dark-workspace .text-gray-500 { color: #8f96b8 !important; }
+
+.ff-dark-workspace .ff-empty-state { background: rgba(53, 57, 103, 0.34); border-color: rgba(167, 157, 255, 0.12); }
+.ff-dark-workspace .ff-empty-state svg { color: #9b91ff; }
+
+.ff-dark-workspace .react-grid-layout .react-grid-item.react-grid-placeholder {
+  background: rgba(124, 108, 255, 0.16);
+  border-color: rgba(170, 158, 255, 0.64);
+}
+
+@media (max-width: 720px) {
+  .ff-dark-workspace .ff-dashboard-stage { padding-top: 0.8rem; }
+  .ff-dark-workspace .ff-topbar { border-bottom-color: rgba(167, 157, 255, 0.16); }
+}
+
 .ff-btn-primary,
 .ff-btn-secondary {
   display: inline-flex;
