@@ -51,6 +51,12 @@ const getPriorityColor = (priority: string) => {
   };
 };
 
+const priorityAccentClass: Record<Task['priority'], string> = {
+  low: 'ff-semantic-accent ff-accent-green',
+  medium: 'ff-semantic-accent ff-accent-amber',
+  high: 'ff-semantic-accent ff-accent-rose',
+};
+
 const formatFocusTime = (seconds?: number) => {
   if (!seconds) return null;
   const minutes = Math.round(seconds / 60);
@@ -93,7 +99,7 @@ function TaskCard({
       draggable
       onDragStart={() => onDragStart(task, status)}
       onDragEnd={onDragEnd}
-      className="group relative rounded-lg border border-slate-200 bg-white p-2.5"
+      className={`group relative rounded-lg border border-slate-200 bg-white p-2.5 ${priorityAccentClass[task.priority]}`}
     >
       {/* Drag handle */}
       <button

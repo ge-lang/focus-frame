@@ -16,6 +16,12 @@ const priorityClassMap: Record<Priority, string> = {
   high: 'ff-goal-priority-high bg-rose-50 text-rose-700',
 };
 
+const priorityAccentClass: Record<Priority, string> = {
+  low: 'ff-semantic-accent ff-accent-green',
+  medium: 'ff-semantic-accent ff-accent-amber',
+  high: 'ff-semantic-accent ff-accent-rose',
+};
+
 export default function GoalsWidget({ title }: GoalsWidgetProps) {
   const { data: goals = [], isLoading } = useGoals();
   const { mutate: createGoal } = useCreateGoal();
@@ -68,7 +74,7 @@ export default function GoalsWidget({ title }: GoalsWidgetProps) {
         <div className="flex-1 overflow-y-auto space-y-2">
           {isLoading && <p className="text-sm text-gray-500">Loading goals…</p>}
           {goals.map((goal) => (
-            <div key={goal.id} className="group relative rounded-lg border border-slate-200 bg-white p-3 transition-colors hover:bg-slate-50">
+            <div key={goal.id} className={`group relative rounded-lg border border-slate-200 bg-white p-3 transition-colors hover:bg-slate-50 ${priorityAccentClass[goal.priority]}`}>
               <div className="flex items-center">
                 <input type="checkbox" checked={goal.completed} onChange={() => updateGoal({ id: goal.id, completed: !goal.completed })} className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500" />
                 <span className={`ml-3 flex-1 ${goal.completed ? 'line-through text-gray-500' : 'text-gray-800'}`}>{goal.title}</span>

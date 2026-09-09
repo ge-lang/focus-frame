@@ -834,6 +834,17 @@ body.ff-document-body {
 .ff-dark-workspace .ff-metric-tile:nth-child(4) .text-indigo-600 { color: var(--ff-accent-pink) !important; }
 .ff-dark-workspace .ff-metric-tile:nth-child(4) .bg-indigo-600 { background-color: #d779ae !important; }
 
+.ff-dark-workspace .ff-semantic-accent {
+  border-top-width: 1px !important;
+  border-top-style: solid !important;
+}
+
+.ff-dark-workspace .ff-accent-violet { border-top-color: rgba(141, 128, 255, 0.72) !important; }
+.ff-dark-workspace .ff-accent-cyan { border-top-color: rgba(103, 215, 229, 0.62) !important; }
+.ff-dark-workspace .ff-accent-green { border-top-color: rgba(180, 220, 114, 0.68) !important; }
+.ff-dark-workspace .ff-accent-amber { border-top-color: rgba(242, 173, 105, 0.68) !important; }
+.ff-dark-workspace .ff-accent-rose { border-top-color: rgba(233, 149, 201, 0.62) !important; }
+
 .ff-dark-workspace .ff-news-article {
   border-bottom-color: rgba(164, 166, 210, 0.22) !important;
   background: rgba(46, 52, 91, 0.42);
