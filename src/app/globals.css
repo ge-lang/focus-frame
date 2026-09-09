@@ -643,6 +643,18 @@ body.ff-document-body {
 
 /* Dark readability and accent hierarchy. Keep accents reserved for meaning and focus. */
 .ff-dark-workspace {
+  --ff-bg-page: #11152a;
+  --ff-bg-card: #1b2040;
+  --ff-bg-surface: #2f3660;
+  --ff-text-primary: #f7f7ff;
+  --ff-text-secondary: #cbd0e5;
+  --ff-text-muted: #aeb5d2;
+  --ff-accent-violet: #8d80ff;
+  --ff-accent-cyan: #67d7e5;
+  --ff-accent-green: #b4dc72;
+  --ff-accent-orange: #f2ad69;
+  --ff-accent-pink: #e995c9;
+  --ff-border-subtle: rgba(166, 158, 255, 0.24);
   --ff-dark-text: #f7f7ff;
   --ff-dark-muted: #aeb5d2;
   --ff-dark-subtle: #8d96b8;
@@ -756,7 +768,12 @@ body.ff-document-body {
 .ff-dark-workspace .text-blue-600,
 .ff-dark-workspace .text-cyan-600 { color: var(--ff-dark-cyan) !important; }
 .ff-dark-workspace .text-amber-600,
-.ff-dark-workspace .text-orange-600 { color: var(--ff-dark-orange) !important; }
+.ff-dark-workspace .text-orange-600,
+.ff-dark-workspace .text-yellow-700 { color: var(--ff-dark-orange) !important; }
+.ff-dark-workspace .text-red-600,
+.ff-dark-workspace .text-red-700 { color: #ff9f9f !important; }
+.ff-dark-workspace .text-emerald-700,
+.ff-dark-workspace .text-green-700 { color: #c7edb1 !important; }
 .ff-dark-workspace .text-pink-600 { color: var(--ff-dark-pink) !important; }
 
 .ff-dark-workspace .bg-indigo-600 { background-color: #7568f2 !important; }
@@ -766,6 +783,21 @@ body.ff-document-body {
 .ff-dark-workspace .bg-cyan-500 { background-color: #3eafc1 !important; }
 .ff-dark-workspace .bg-amber-500,
 .ff-dark-workspace .bg-orange-500 { background-color: #d88b4c !important; }
+
+.ff-dark-workspace .ff-card .bg-red-50 {
+  background: rgba(214, 92, 105, 0.18) !important;
+  color: #ffb0b0 !important;
+}
+
+.ff-dark-workspace .ff-card .bg-amber-50 {
+  background: rgba(218, 145, 61, 0.18) !important;
+  color: #ffd08b !important;
+}
+
+.ff-dark-workspace .ff-card .bg-emerald-50 {
+  background: rgba(97, 175, 116, 0.16) !important;
+  color: #c7edb1 !important;
+}
 
 .ff-dark-workspace .ff-btn-secondary {
   border-color: rgba(168, 169, 211, 0.3);
@@ -797,6 +829,10 @@ body.ff-document-body {
 .ff-dark-workspace .ff-metric-tile:nth-child(2) { border-top-color: rgba(103, 215, 229, 0.62); }
 .ff-dark-workspace .ff-metric-tile:nth-child(3) { border-top-color: rgba(180, 220, 114, 0.68); }
 .ff-dark-workspace .ff-metric-tile:nth-child(4) { border-top-color: rgba(233, 149, 201, 0.62); }
+.ff-dark-workspace .ff-metric-tile:nth-child(2) .text-indigo-600 { color: var(--ff-accent-cyan) !important; }
+.ff-dark-workspace .ff-metric-tile:nth-child(2) .bg-indigo-600 { background-color: #3eafc1 !important; }
+.ff-dark-workspace .ff-metric-tile:nth-child(4) .text-indigo-600 { color: var(--ff-accent-pink) !important; }
+.ff-dark-workspace .ff-metric-tile:nth-child(4) .bg-indigo-600 { background-color: #d779ae !important; }
 
 .ff-dark-workspace .ff-news-article {
   border-bottom-color: rgba(164, 166, 210, 0.22) !important;
@@ -877,6 +913,34 @@ body.ff-document-body {
   color: #f7f7ff;
   box-shadow: 0 22px 60px rgba(2, 4, 16, 0.5);
 }
+
+.ff-modal-panel input,
+.ff-modal-panel select,
+.ff-modal-panel textarea {
+  border-color: rgba(168, 169, 211, 0.3) !important;
+  background: rgba(13, 17, 39, 0.5) !important;
+  color: #f7f7ff !important;
+}
+
+.ff-modal-panel input::placeholder,
+.ff-modal-panel textarea::placeholder { color: #a0a8c6; opacity: 1; }
+
+.ff-modal-panel input:focus,
+.ff-modal-panel select:focus,
+.ff-modal-panel textarea:focus {
+  border-color: rgba(141, 128, 255, 0.85) !important;
+  box-shadow: 0 0 0 3px rgba(124, 108, 255, 0.2) !important;
+}
+
+.ff-modal-panel label { color: #cbd0e5; }
+.ff-modal-panel .text-slate-700,
+.ff-modal-panel .text-slate-600,
+.ff-modal-panel .text-gray-700,
+.ff-modal-panel .text-gray-600 { color: #cbd0e5 !important; }
+.ff-modal-panel .bg-white { background: rgba(47, 54, 96, 0.72) !important; }
+.ff-modal-panel .border-slate-200,
+.ff-modal-panel .border-gray-200,
+.ff-modal-panel .border-gray-300 { border-color: rgba(168, 169, 211, 0.3) !important; }
 
 .ff-widget-picker-menu {
   z-index: var(--ff-z-dialog);
