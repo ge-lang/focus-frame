@@ -9,19 +9,19 @@ interface NotesWidgetProps {
 }
 
 export default function NotesWidget({ widgetId, title }: NotesWidgetProps) {
-  const { data: note, isLoading } = useNote(widgetId);
+  const { data: note, isLoading, isFetched, isError } = useNote(widgetId);
   const { mutate: saveNote, isPending: isSaving } = useSaveNote();
   const [content, setContent] = useState('');
 
   useEffect(() => {
-    setContent(note?.content ?? '');
-  }, [note?.content]);
+    if (isFetched && !isError) setContent(note?.content ?? '');
+  }, [isError, isFetched, note?.content]);
 
   useEffect(() => {
-    if (isLoading || content === (note?.content ?? '')) return;
+    if (isLoading || !isFetched || isError || content === (note?.content ?? '')) return;
     const timeoutId = window.setTimeout(() => saveNote({ widgetId, content }), 600);
     return () => window.clearTimeout(timeoutId);
-  }, [content, isLoading, note?.content, saveNote, widgetId]);
+  }, [content, isError, isFetched, isLoading, note?.content, saveNote, widgetId]);
 
   return (
     <AnimatedWidget>

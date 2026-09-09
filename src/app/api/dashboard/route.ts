@@ -28,7 +28,7 @@ function isDashboardState(value: unknown): value is PersistedDashboardState {
     const item = widget as Record<string, unknown>;
     if (typeof item.id !== 'string' || item.id.length < 1 || item.id.length > 100 || widgetIds.has(item.id) ||
         typeof item.type !== 'string' || !widgetTypes.has(item.type) ||
-        !isIntegerBetween(item.colSpan, 1, 4) ||
+        !isIntegerBetween(item.colSpan, 1, MAX_GRID_SIZE) ||
         (item.rowSpan !== undefined && !isIntegerBetween(item.rowSpan, 1, 4))) {
       return false;
     }

@@ -66,6 +66,24 @@ describe('/api/dashboard ownership', () => {
     expect(mocks.upsert).not.toHaveBeenCalled();
   });
 
+  it('accepts the current wide widget spans used by the dashboard', async () => {
+    mocks.getServerSession.mockResolvedValue({ user: { id: 'user-a' } });
+    mocks.upsert.mockResolvedValue({});
+
+    const wideState = {
+      widgets: [{ id: 'analytics-1', type: 'analytics', colSpan: 8, rowSpan: 3 }],
+      layout: [{ i: 'analytics-1', x: 0, y: 0, w: 8, h: 3, type: 'analytics' }],
+    };
+    const response = await PUT(new Request('http://localhost/api/dashboard', {
+      method: 'PUT',
+      body: JSON.stringify({ state: wideState }),
+      headers: { 'Content-Type': 'application/json' },
+    }) as NextRequest);
+
+    expect(response.status).toBe(200);
+    expect(mocks.upsert).toHaveBeenCalled();
+  });
+
   it('returns 400 for invalid JSON', async () => {
     mocks.getServerSession.mockResolvedValue({ user: { id: 'user-a' } });
 

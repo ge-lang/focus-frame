@@ -24,7 +24,15 @@ export function WidgetRenderer({ widget }: WidgetRendererProps) {
       case 'todo':
         return <TaskWidget widgetId={widget.id} title={widget.title} />;
       case 'weather':
-        return <WeatherWidget widgetId={widget.id} title={widget.title} />;
+        return (
+          <WeatherWidget
+            key={`${widget.id}:${typeof widget.config?.city === 'string' ? widget.config.city : ''}:${typeof widget.config?.country === 'string' ? widget.config.country : ''}`}
+            widgetId={widget.id}
+            title={widget.title}
+            initialCity={typeof widget.config?.city === 'string' ? widget.config.city : ''}
+            initialCountryCode={typeof widget.config?.country === 'string' ? widget.config.country : undefined}
+          />
+        );
       case 'news':
         return <NewsWidget widgetId={widget.id} title={widget.title} />; // ← now it will work
       case 'pomodoro':

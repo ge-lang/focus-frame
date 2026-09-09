@@ -78,9 +78,9 @@ function generateEmptyWeather(): WeatherData {
   };
 }
 
-export function useWeather(initialCity = ''): UseWeatherReturn {
+export function useWeather(initialCity = '', initialCountryCode?: string): UseWeatherReturn {
   const [city, setCity] = useState(initialCity);
-  const [countryCode, setCountryCode] = useState<string | undefined>();
+  const [countryCode, setCountryCode] = useState<string | undefined>(initialCountryCode?.toUpperCase());
   const [weather, setWeather] = useState<WeatherData>(initialCity ? { ...generateDemoData(initialCity), loading: true } : generateEmptyWeather());
   const [forecast, setForecast] = useState<ForecastItem[]>([]);
   const [isLoading, setIsLoading] = useState(Boolean(initialCity));

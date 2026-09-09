@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { showToast } from '@/lib/toast';
 
 export type Priority = 'low' | 'medium' | 'high';
 
@@ -40,6 +41,7 @@ export function useSaveNote() {
         body: JSON.stringify({ content }),
       }),
     onSuccess: (_, { widgetId }) => queryClient.invalidateQueries({ queryKey: ['note', widgetId] }),
+    onError: () => showToast('Could not save notes', 'error'),
   });
 }
 

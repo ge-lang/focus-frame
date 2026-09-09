@@ -8,6 +8,7 @@ import { countries } from '@/lib/countries';
 import { findCountryForCity, getPopularCitiesForCountry, resolveCountrySelection } from '@/lib/weather-location';
 import { WeatherIcon } from '@/components/weather-icon';
 import { useState } from 'react';
+import { useDashboard } from '@/contexts/dashboard-context';
 import { 
   MapPin, 
   Settings, 
@@ -25,17 +26,21 @@ import {
 interface WeatherWidgetProps {
   widgetId: string;
   initialCity?: string;
+  initialCountryCode?: string;
   title?: string;
 }
 
 export default function WeatherWidget({ 
+  widgetId,
   initialCity = '',
+  initialCountryCode,
   title 
 }: WeatherWidgetProps) {
-  const { weather, setLocation, refresh, isDemo } = useWeather(initialCity);
+  const { updateWidgetConfig } = useDashboard();
+  const { weather, setLocation, refresh, isDemo } = useWeather(initialCity, initialCountryCode);
   const [isEditing, setIsEditing] = useState(false);
   const [inputCity, setInputCity] = useState(initialCity);
-  const [countryCode, setCountryCode] = useState(findCountryForCity(initialCity) ?? '');
+  const [countryCode, setCountryCode] = useState(initialCountryCode ?? findCountryForCity(initialCity) ?? '');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [unit, setUnit] = useState<'celsius' | 'fahrenheit'>('celsius');
@@ -48,6 +53,7 @@ export default function WeatherWidget({
 
   const handleCityChange = (newCity: string, selectedCountry = countryCode) => {
     setLocation(newCity, selectedCountry || undefined);
+    updateWidgetConfig(widgetId, { city: newCity, country: selectedCountry || '' });
     setCountryCode(selectedCountry);
     setIsEditing(false);
     setInputCity(newCity);

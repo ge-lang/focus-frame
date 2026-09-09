@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useReducer, useState, ReactNode } from 'react';
+import { useSession } from 'next-auth/react';
 import { WidgetType } from '@/types/dashboard';
 import { addWidgetToLayout, getWidgetSizing, normalizeLayout, removeWidgetFromLayout } from '@/lib/dashboard-layout';
 
@@ -32,6 +33,7 @@ type DashboardAction =
   | { type: 'ADD_WIDGET'; payload: Widget }
   | { type: 'REMOVE_WIDGET'; payload: string }
   | { type: 'UPDATE_LAYOUT'; payload: LayoutItem[] }
+  | { type: 'UPDATE_WIDGET_CONFIG'; payload: { id: string; config: Record<string, unknown> } }
   | { type: 'LOAD_STATE'; payload: DashboardState }
   | { type: 'TOGGLE_EDIT' };
 
@@ -73,6 +75,13 @@ function dashboardReducer(state: DashboardState, action: DashboardAction): Dashb
       };
     case 'UPDATE_LAYOUT':
       return { ...state, layout: action.payload };
+    case 'UPDATE_WIDGET_CONFIG':
+      return {
+        ...state,
+        widgets: state.widgets.map((widget) => widget.id === action.payload.id
+          ? { ...widget, config: { ...widget.config, ...action.payload.config } }
+          : widget),
+      };
     case 'LOAD_STATE':
       return action.payload;
     case 'TOGGLE_EDIT':
@@ -88,6 +97,7 @@ interface DashboardContextType {
   addWidget: (type: WidgetType, config?: { title?: string; colSpan?: number; rowSpan?: number }) => void;
   removeWidget: (id: string) => void;
   updateLayout: (items: LayoutItem[]) => void;
+  updateWidgetConfig: (id: string, config: Record<string, unknown>) => void;
   toggleEdit: () => void;
 }
 
@@ -95,13 +105,23 @@ const DashboardContext = createContext<DashboardContextType | null>(null);
 
 export function DashboardProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(dashboardReducer, initialState);
-  const [hasLoaded, setHasLoaded] = useState(false);
+  const [dashboardHydration, setDashboardHydration] = useState<'loading' | 'ready' | 'error'>('loading');
+  const { status: sessionStatus } = useSession();
 
   useEffect(() => {
+    if (sessionStatus !== 'authenticated') {
+      setDashboardHydration('loading');
+      return;
+    }
+
     let isMounted = true;
+    setDashboardHydration('loading');
 
     fetch('/api/dashboard')
-      .then((response) => response.ok ? response.json() : null)
+      .then((response) => {
+        if (!response.ok) throw new Error(`Dashboard load failed (${response.status})`);
+        return response.json();
+      })
       .then((data) => {
         if (isMounted && data?.state) {
           dispatch({
@@ -113,19 +133,20 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
             },
           });
         }
+        if (isMounted) setDashboardHydration('ready');
       })
-      .catch((error) => console.error('Failed to load dashboard:', error))
-      .finally(() => {
-        if (isMounted) setHasLoaded(true);
+      .catch((error) => {
+        console.error('Failed to load dashboard:', error);
+        if (isMounted) setDashboardHydration('error');
       });
 
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [sessionStatus]);
 
   useEffect(() => {
-    if (!hasLoaded) return;
+    if (dashboardHydration !== 'ready' || sessionStatus !== 'authenticated') return;
 
     const timeoutId = window.setTimeout(() => {
       fetch('/api/dashboard', {
@@ -136,7 +157,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     }, 750);
 
     return () => window.clearTimeout(timeoutId);
-  }, [hasLoaded, state.widgets, state.layout]);
+  }, [dashboardHydration, sessionStatus, state.widgets, state.layout]);
 
   const addWidget = (type: WidgetType, config?: { title?: string; colSpan?: number; rowSpan?: number }) => {
     const sizing = getWidgetSizing(type);
@@ -163,10 +184,11 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
 
   const removeWidget = (id: string) => dispatch({ type: 'REMOVE_WIDGET', payload: id });
   const updateLayout = (items: LayoutItem[]) => dispatch({ type: 'UPDATE_LAYOUT', payload: items });
+  const updateWidgetConfig = (id: string, config: Record<string, unknown>) => dispatch({ type: 'UPDATE_WIDGET_CONFIG', payload: { id, config } });
   const toggleEdit = () => dispatch({ type: 'TOGGLE_EDIT' });
 
   return (
-    <DashboardContext.Provider value={{ state, dispatch, addWidget, removeWidget, updateLayout, toggleEdit }}>
+    <DashboardContext.Provider value={{ state, dispatch, addWidget, removeWidget, updateLayout, updateWidgetConfig, toggleEdit }}>
       {children}
     </DashboardContext.Provider>
   );
