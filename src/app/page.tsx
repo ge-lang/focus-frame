@@ -25,11 +25,15 @@ import { EditToggle } from '@/components/edit-toggle';
 import { WidgetPicker } from '@/components/widget-picker';
 import { AuthButton } from '@/components/auth-button';
 import { MobileStickyActions } from '@/components/mobile-sticky-actions';
+import { ThemeControl } from '@/components/theme-control';
+import { useTheme } from '@/components/theme-provider';
 
 export default function Home() {
+  const { resolvedTheme } = useTheme();
+
   return (
     <AuthGuard>
-      <main className="ff-page-shell ff-dark-workspace min-h-screen px-4 py-5 sm:px-6 lg:px-8">
+      <main className={`ff-page-shell ${resolvedTheme === 'dark' ? 'ff-dark-workspace' : 'ff-light-workspace'} min-h-screen px-4 py-5 sm:px-6 lg:px-8`}>
         <div className="ff-app-frame mx-auto max-w-[1440px]">
           <header className="ff-topbar">
             <div className="ff-brand">
@@ -43,6 +47,7 @@ export default function Home() {
             <div className="ff-topbar-actions">
               <AuthButton />
               <div className="ff-action-divider" aria-hidden="true" />
+              <ThemeControl />
               <WidgetPicker />
               <EditToggle />
             </div>
