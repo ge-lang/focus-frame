@@ -39,13 +39,13 @@ type DashboardAction =
 
 const initialState: DashboardState = {
   widgets: [
-    { id: 'todo-1', type: 'todo', colSpan: 6, rowSpan: 3 },
+    { id: 'todo-1', type: 'todo', colSpan: 8, rowSpan: 3 },
     { id: 'weather-1', type: 'weather', colSpan: 4, rowSpan: 3 },
-    { id: 'news-1', type: 'news', colSpan: 6, rowSpan: 3 },
+    { id: 'news-1', type: 'news', colSpan: 8, rowSpan: 3 },
     { id: 'pomodoro-1', type: 'pomodoro', colSpan: 4, rowSpan: 3 },
     { id: 'calendar-1', type: 'calendar', colSpan: 4, rowSpan: 4 },
     { id: 'notes-1', type: 'notes', colSpan: 4, rowSpan: 3 },
-    { id: 'analytics-1', type: 'analytics', colSpan: 8, rowSpan: 3 },
+    { id: 'analytics-1', type: 'analytics', colSpan: 4, rowSpan: 3 },
     { id: 'bookmarks-1', type: 'bookmarks', colSpan: 4, rowSpan: 3 },
     { id: 'goals-1', type: 'goals', colSpan: 4, rowSpan: 3 },
   ],

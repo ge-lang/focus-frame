@@ -74,7 +74,7 @@ export default function AnalyticsWidget({ title }: AnalyticsWidgetProps) {
         </div>
 
         {isLoading || !data ? <div className="flex-1 grid place-items-center text-sm text-gray-500">{isError ? <div className="text-center"><p>Unable to load analytics.</p><button onClick={() => refetch()} className="mt-2 text-purple-700 underline">Try again</button></div> : 'Loading analytics…'}</div> : <>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-2 gap-4 mb-6">
             {metrics.map((metric) => <MetricCard key={metric.label} {...metric} />)}
           </div>
 

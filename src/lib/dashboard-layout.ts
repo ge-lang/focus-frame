@@ -22,13 +22,13 @@ export interface WidgetSizing {
 }
 
 const widgetSizing: Record<WidgetType, WidgetSizing> = {
-  todo: { w: 6, h: 3 },
+  todo: { w: 8, h: 3 },
   weather: { w: 4, h: 3 },
-  news: { w: 6, h: 3 },
+  news: { w: 8, h: 3 },
   pomodoro: { w: 4, h: 3 },
   calendar: { w: 4, h: 4 },
   notes: { w: 4, h: 3 },
-  analytics: { w: 8, h: 3 },
+  analytics: { w: 4, h: 3 },
   bookmarks: { w: 4, h: 3 },
   goals: { w: 4, h: 3 },
 };

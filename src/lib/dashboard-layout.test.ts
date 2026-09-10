@@ -13,9 +13,15 @@ import {
 
 describe('dashboard layout normalization', () => {
   it('defines fixed desktop dimensions for each widget type', () => {
-    expect(getWidgetSizing('todo')).toEqual({ w: 6, h: 3 });
-    expect(getWidgetSizing('analytics')).toEqual({ w: 8, h: 3 });
+    expect(getWidgetSizing('todo')).toEqual({ w: 8, h: 3 });
+    expect(getWidgetSizing('news')).toEqual({ w: 8, h: 3 });
+    expect(getWidgetSizing('analytics')).toEqual({ w: 4, h: 3 });
     expect(getWidgetSizing('weather')).toEqual({ w: 4, h: 3 });
+    expect(getWidgetSizing('pomodoro')).toEqual({ w: 4, h: 3 });
+    expect(getWidgetSizing('calendar')).toEqual({ w: 4, h: 4 });
+    expect(getWidgetSizing('notes')).toEqual({ w: 4, h: 3 });
+    expect(getWidgetSizing('bookmarks')).toEqual({ w: 4, h: 3 });
+    expect(getWidgetSizing('goals')).toEqual({ w: 4, h: 3 });
   });
 
   it('converts rendered content height into grid rows', () => {
@@ -68,16 +74,31 @@ describe('dashboard layout normalization', () => {
     ]);
 
     expect(normalized).toMatchObject([
-      { i: 'todo-1', w: 6 },
-      { i: 'analytics-1', w: 8 },
+      { i: 'todo-1', w: 8 },
+      { i: 'analytics-1', w: 4 },
     ]);
+  });
+
+  it('migrates old saved desktop widths to the new type-derived widths', () => {
+    const migrated = normalizeLayout([
+      { i: 'todo-1', x: 0, y: 0, w: 6, h: 3, type: 'todo' },
+      { i: 'news-1', x: 0, y: 3, w: 6, h: 3, type: 'news' },
+      { i: 'analytics-1', x: 8, y: 0, w: 8, h: 3, type: 'analytics' },
+    ]);
+
+    expect(migrated).toMatchObject([
+      { i: 'todo-1', w: 8 },
+      { i: 'news-1', w: 8 },
+      { i: 'analytics-1', w: 4 },
+    ]);
+    expect(migrated.every((item, index) => !hasLayoutCollision(item, migrated.slice(index + 1)))).toBe(true);
   });
 
   it('is idempotent for canonical desktop layouts after reload', () => {
     const persisted = [
-      { i: 'todo-1', x: 0, y: 0, w: 6, h: 3, type: 'todo' as const },
+      { i: 'todo-1', x: 0, y: 0, w: 8, h: 3, type: 'todo' as const },
       { i: 'weather-1', x: 8, y: 0, w: 4, h: 3, type: 'weather' as const },
-      { i: 'analytics-1', x: 0, y: 4, w: 8, h: 3, type: 'analytics' as const },
+      { i: 'analytics-1', x: 0, y: 4, w: 4, h: 3, type: 'analytics' as const },
     ];
 
     const firstLoad = normalizeLayout(persisted);
@@ -85,9 +106,9 @@ describe('dashboard layout normalization', () => {
 
     expect(reload).toEqual(firstLoad);
     expect(reload).toMatchObject([
-      { i: 'todo-1', w: 6 },
+      { i: 'todo-1', w: 8 },
       { i: 'weather-1', w: 4 },
-      { i: 'analytics-1', w: 8 },
+      { i: 'analytics-1', w: 4 },
     ]);
   });
 
@@ -125,7 +146,7 @@ describe('dashboard layout normalization', () => {
   });
 
   it('adds widgets after the occupied layout without moving existing widgets', () => {
-    const existing = [{ i: 'todo-1', x: 0, y: 0, w: 6, h: 3, type: 'todo' as const }];
+    const existing = [{ i: 'todo-1', x: 0, y: 0, w: 8, h: 3, type: 'todo' as const }];
     const next = addWidgetToLayout(existing, { i: 'weather-1', x: 0, y: 0, w: 1, h: 1, type: 'weather' });
 
     expect(next[0]).toEqual(existing[0]);
@@ -144,12 +165,13 @@ describe('dashboard layout normalization', () => {
 
   it('places a new widget on the next free row when the preferred row is full', () => {
     const existing = [
-      { i: 'todo-1', x: 0, y: 0, w: 6, h: 3, type: 'todo' as const },
-      { i: 'news-1', x: 6, y: 0, w: 6, h: 3, type: 'news' as const },
+      { i: 'weather-1', x: 0, y: 0, w: 4, h: 3, type: 'weather' as const },
+      { i: 'notes-1', x: 4, y: 0, w: 4, h: 3, type: 'notes' as const },
+      { i: 'goals-1', x: 8, y: 0, w: 4, h: 3, type: 'goals' as const },
     ];
     const next = addWidgetToLayout(existing, { i: 'weather-1', x: 0, y: 0, w: 1, h: 1, type: 'weather' });
 
-    expect(next[2]).toMatchObject({ i: 'weather-1', x: 0, y: 3, w: 4, h: 3 });
+    expect(next[3]).toMatchObject({ i: 'weather-1', x: 0, y: 3, w: 4, h: 3 });
     expect(next.every((item, index) => !hasLayoutCollision(item, next.slice(index + 1)))).toBe(true);
   });
 
@@ -163,7 +185,7 @@ describe('dashboard layout normalization', () => {
     });
 
     expect(next[0]).toMatchObject({ i: 'todo-1', x: 0, y: 0 });
-    expect(next[1]).toMatchObject({ i: 'bookmarks-1', x: 6, y: 0 });
+    expect(next[1]).toMatchObject({ i: 'bookmarks-1', x: 8, y: 0 });
     expect(next[2]).toMatchObject({ i: 'bookmarks-2', y: 3 });
     expect(next.every((item, index) => !hasLayoutCollision(item, next.slice(index + 1)))).toBe(true);
   });
