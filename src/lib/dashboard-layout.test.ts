@@ -46,7 +46,7 @@ describe('dashboard layout normalization', () => {
     const expanded = resizeWidgetInLayout(layout, 'weather-1', 5);
 
     expect(expanded[0]).toMatchObject({ i: 'weather-1', x: 0, y: 0, h: 5 });
-    expect(expanded[1]).toMatchObject({ i: 'notes-1', x: 4, y: 3 });
+    expect(expanded[1]).toMatchObject({ i: 'notes-1', x: 0, y: 5 });
     expect(expanded.every((item) => !hasLayoutCollision(item, expanded))).toBe(true);
   });
 
@@ -65,7 +65,7 @@ describe('dashboard layout normalization', () => {
       { i: 'notes-1', x: 7, y: 5, w: 4, h: 1, type: 'notes' },
     ]);
 
-    expect(layout[0]).toMatchObject({ i: 'notes-1', x: 7, y: 3, w: 4, h: 3 });
+    expect(layout[0]).toMatchObject({ i: 'notes-1', x: 7, y: 5, w: 4, h: 3 });
   });
 
   it('keeps canonical desktop widths when a responsive layout is normalized', () => {
@@ -148,14 +148,45 @@ describe('dashboard layout normalization', () => {
     ]);
   });
 
-  it('limits pathological vertical gaps without compacting normal spacing', () => {
+  it('preserves intentional vertical gaps during normalization', () => {
     const layout = normalizeLayout([
       { i: 'analytics-1', x: 0, y: 0, w: 8, h: 3, type: 'analytics' },
       { i: 'notes-1', x: 0, y: 1000, w: 4, h: 3, type: 'notes' },
     ]);
 
     expect(layout[0]).toMatchObject({ x: 0, y: 0 });
-    expect(layout[1].y).toBe(6);
+    expect(layout[1]).toMatchObject({ x: 0, y: 1000 });
+  });
+
+  it('preserves free-form x/y placement across multiple reload normalizations', () => {
+    const layout = [
+      { i: 'todo-1', x: 0, y: 0, w: 8, h: 3, type: 'todo' as const },
+      { i: 'weather-1', x: 8, y: 0, w: 4, h: 3, type: 'weather' as const },
+      { i: 'news-1', x: 0, y: 10, w: 8, h: 3, type: 'news' as const },
+      { i: 'calendar-1', x: 8, y: 10, w: 4, h: 4, type: 'calendar' as const },
+      { i: 'notes-1', x: 4, y: 20, w: 4, h: 3, type: 'notes' as const },
+      { i: 'goals-1', x: 8, y: 25, w: 4, h: 3, type: 'goals' as const },
+    ];
+
+    const first = normalizeLayout(layout);
+    const second = normalizeLayout(first);
+    const third = normalizeLayout(second);
+
+    expect(first.map(({ i, x, y }) => ({ i, x, y }))).toEqual(layout.map(({ i, x, y }) => ({ i, x, y })));
+    expect(second).toEqual(first);
+    expect(third).toEqual(second);
+  });
+
+  it('preserves a valid horizontal separation exactly', () => {
+    const layout = normalizeLayout([
+      { i: 'todo-1', x: 0, y: 0, w: 8, h: 3, type: 'todo' as const },
+      { i: 'weather-1', x: 8, y: 0, w: 4, h: 3, type: 'weather' as const },
+    ]);
+
+    expect(layout).toMatchObject([
+      { i: 'todo-1', x: 0, y: 0 },
+      { i: 'weather-1', x: 8, y: 0 },
+    ]);
   });
 
   it('clamps positions and resolves overlaps deterministically', () => {
@@ -165,7 +196,7 @@ describe('dashboard layout normalization', () => {
     ]);
 
     expect(layout[0]).toMatchObject({ x: 8, y: 0, w: 4, h: 3 });
-    expect(layout[1]).toMatchObject({ x: 4, y: 0, w: 4, h: 3 });
+    expect(layout[1]).toMatchObject({ x: 8, y: 3, w: 4, h: 3 });
     expect(hasLayoutCollision(layout[0], [layout[1]])).toBe(false);
   });
 
@@ -179,6 +210,18 @@ describe('dashboard layout normalization', () => {
 
     expect(normalized.every((item, index) => !hasLayoutCollision(item, normalized.slice(index + 1)))).toBe(true);
     expect(normalized).toEqual(normalizeLayout(persisted));
+  });
+
+  it('moves only the conflicting item while preserving a distant widget', () => {
+    const normalized = normalizeLayout([
+      { i: 'weather-1', x: 0, y: 0, w: 4, h: 3, type: 'weather' as const },
+      { i: 'notes-1', x: 0, y: 0, w: 4, h: 3, type: 'notes' as const },
+      { i: 'goals-1', x: 8, y: 20, w: 4, h: 3, type: 'goals' as const },
+    ]);
+
+    expect(normalized[0]).toMatchObject({ i: 'weather-1', x: 0, y: 0 });
+    expect(normalized[1]).toMatchObject({ i: 'notes-1', x: 0, y: 3 });
+    expect(normalized[2]).toMatchObject({ i: 'goals-1', x: 8, y: 20 });
   });
 
   it('adds widgets after the occupied layout without moving existing widgets', () => {
@@ -221,8 +264,8 @@ describe('dashboard layout normalization', () => {
     });
 
     expect(next[0]).toMatchObject({ i: 'todo-1', x: 0, y: 0 });
-    expect(next[1]).toMatchObject({ i: 'bookmarks-1', x: 8, y: 0 });
-    expect(next[2]).toMatchObject({ i: 'bookmarks-2', y: 3 });
+    expect(next[1]).toMatchObject({ i: 'bookmarks-1', x: 6, y: 3 });
+    expect(next[2]).toMatchObject({ i: 'bookmarks-2', y: 6 });
     expect(next.every((item, index) => !hasLayoutCollision(item, next.slice(index + 1)))).toBe(true);
   });
 

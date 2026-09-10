@@ -1,9 +1,6 @@
 import type { LayoutItem, Widget, WidgetType } from '@/types/dashboard';
 
 export const DESKTOP_GRID_COLUMNS = 12;
-// Keep intentional breathing room, but prevent persisted layouts from creating
-// several hundred pixels of empty space after reload or widget removal.
-const MAX_PRESERVED_EMPTY_ROWS = 3;
 const mobileWidgetHeights: Record<WidgetType, number> = {
   todo: 7,
   weather: 6,
@@ -74,15 +71,9 @@ function clampX(x: number, width: number, columns: number): number {
 function findFreePosition(item: LayoutItem, occupied: LayoutItem[], columns: number): LayoutItem {
   const preferredX = clampX(item.x, item.w, columns);
   const preferredY = Math.max(0, Math.round(item.y));
-  const maxX = Math.max(columns - item.w, 0);
-  const candidates = Array.from({ length: maxX + 1 }, (_, x) => x)
-    .sort((first, second) => Math.abs(first - preferredX) - Math.abs(second - preferredX));
-
   for (let y = preferredY; ; y += 1) {
-    for (const x of candidates) {
-      const candidate = { ...item, x, y };
-      if (!hasLayoutCollision(candidate, occupied)) return candidate;
-    }
+    const candidate = { ...item, x: preferredX, y };
+    if (!hasLayoutCollision(candidate, occupied)) return candidate;
   }
 }
 
@@ -113,14 +104,10 @@ export function normalizeLayout(layout: LayoutItem[], columns = DESKTOP_GRID_COL
 
   for (const item of layout) {
     const sized = withWidgetSizing(item);
-    const previousBottom = normalized.reduce((bottom, current) => Math.max(bottom, current.y + current.h), 0);
-    const preferredY = normalized.length === 0
-      ? Math.min(Math.max(0, Math.round(item.y)), MAX_PRESERVED_EMPTY_ROWS)
-      : Math.min(Math.max(0, Math.round(item.y)), previousBottom + MAX_PRESERVED_EMPTY_ROWS);
     const candidate = {
       ...sized,
       x: legacy ? item.x * 4 : item.x,
-      y: preferredY,
+      y: item.y,
     };
     normalized.push(findFreePosition(candidate, normalized, columns));
   }
