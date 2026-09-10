@@ -11,17 +11,17 @@ export function EditToggle() {
   return (
     <AnimatedButton
       onClick={toggleEdit}
-      className="ff-glass-control text-indigo-700 hover:bg-indigo-50/80"
+      className="ff-header-action ff-glass-control text-indigo-700 hover:bg-indigo-50/80"
     >
       {isEditing ? (
         <>
           <Eye size={18} />
-          <span>View Mode</span>
+          <span>Done</span>
         </>
       ) : (
         <>
           <Edit size={18} />
-          <span>Edit Mode</span>
+          <span>Edit</span>
         </>
       )}
     </AnimatedButton>

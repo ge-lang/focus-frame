@@ -27,6 +27,7 @@ import { AuthButton } from '@/components/auth-button';
 import { MobileStickyActions } from '@/components/mobile-sticky-actions';
 import { ThemeControl } from '@/components/theme-control';
 import { ThemeWorkspace } from '@/components/theme-workspace';
+import { EvvaMark } from '@/components/evva-mark';
 
 export default function Home() {
   return (
@@ -35,10 +36,9 @@ export default function Home() {
         <div className="ff-app-frame mx-auto max-w-[1440px]">
           <header className="ff-topbar">
             <div className="ff-brand">
-              <span className="ff-brand-mark" aria-hidden="true"><span /></span>
+              <span className="ff-brand-mark" aria-hidden="true"><EvvaMark /></span>
               <div>
                 <h1 className="ff-brand-title">FocusFrame</h1>
-                <p className="ff-brand-subtitle">Plan · Focus · Achieve</p>
               </div>
             </div>
 

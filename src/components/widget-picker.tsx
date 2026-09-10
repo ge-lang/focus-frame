@@ -107,12 +107,12 @@ export function WidgetPicker() {
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
         aria-haspopup="menu"
-        className="ff-glass-control ff-glass-control-primary inline-flex h-9 items-center gap-2 px-3.5 text-sm font-medium text-indigo-700 shadow-sm transition-colors hover:bg-indigo-50/80"
+        className="ff-header-action ff-glass-control ff-glass-control-primary inline-flex h-8 items-center gap-1.5 px-2.5 text-sm font-medium text-indigo-700 shadow-sm transition-colors hover:bg-indigo-50/80"
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
       >
         <Plus size={18} />
-        <span>Add Widget</span>
+        <span>Widget</span>
       </motion.button>
 
       {/* Dropdown menu */}
