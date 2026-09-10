@@ -1,9 +1,10 @@
 'use client';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Responsive, useContainerWidth, type Layout as GridLayout, type LayoutItem as GridLayoutItem } from 'react-grid-layout';
+import { Responsive, type Layout as GridLayout, type LayoutItem as GridLayoutItem } from 'react-grid-layout';
 import { noCompactor } from 'react-grid-layout/core';
 import 'react-grid-layout/css/styles.css';
 import { useDashboard } from '@/contexts/dashboard-context';
+import { useStableContainerWidth } from '@/hooks/use-stable-container-width';
 import { SortableWidget } from './sortable-widget';
 import { canPersistDesktopLayout, getGridHeightForContent, getWidgetSizing, normalizeLayout, resizeWidgetInLayout, stackLayoutForMobile } from '@/lib/dashboard-layout';
 import type { LayoutItem } from '@/types/dashboard';
@@ -17,7 +18,7 @@ export function DashboardGrid() {
   const { state, isHydrated, updateLayout } = useDashboard();
   const { layout, isEditing, widgets } = state;
   const [desktopLayout, setDesktopLayout] = useState(layout);
-  const { width, containerRef, mounted } = useContainerWidth({ measureBeforeMount: true });
+  const { width, containerRef, isStable } = useStableContainerWidth();
   const breakpointRef = useRef('lg');
   const autoScrollRef = useRef<AutoScrollState>({
     active: false,
@@ -111,7 +112,7 @@ export function DashboardGrid() {
   };
 
   function handleWidgetContentHeight(widgetId: string, contentHeight: number) {
-    if (!mounted || width < BREAKPOINTS.sm || breakpointRef.current !== 'lg') return;
+    if (!isStable || width < BREAKPOINTS.sm || breakpointRef.current !== 'lg') return;
 
     const currentItem = desktopLayoutRef.current.find((item) => item.i === widgetId);
     if (!currentItem) return;
@@ -144,7 +145,7 @@ export function DashboardGrid() {
       breakpointTransitionRef.current = false;
       return;
     }
-    if (!canPersistDesktopLayout(isHydrated, width, breakpointRef.current, BREAKPOINTS.lg) || isDraggingRef.current || contentSizingRef.current) return;
+    if (!isStable || !canPersistDesktopLayout(isHydrated, width, breakpointRef.current, BREAKPOINTS.lg) || isDraggingRef.current || contentSizingRef.current) return;
 
     const types = new Map(desktopLayoutRef.current.map((item) => [item.i, item.type]));
     const persistedLayout: LayoutItem[] = nextLayout.map((item: GridLayoutItem) => ({
@@ -171,11 +172,13 @@ export function DashboardGrid() {
 
   return (
     <div ref={containerRef} className="w-full min-w-0">
-      {mounted && width < BREAKPOINTS.sm ? (
+      {!isHydrated || !isStable ? (
+        <div className="min-h-24" aria-hidden="true" />
+      ) : width < BREAKPOINTS.sm ? (
         <div className="ff-mobile-widget-stack">
           {layout.map(renderWidget)}
         </div>
-      ) : mounted && (
+      ) : (
         <Responsive
           width={width}
           layouts={layouts}
