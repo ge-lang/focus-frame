@@ -3,7 +3,8 @@
 import React, { createContext, useContext, useEffect, useReducer, useState, ReactNode } from 'react';
 import { useSession } from 'next-auth/react';
 import { WidgetType } from '@/types/dashboard';
-import { addWidgetToLayout, getWidgetSizing, normalizeLayout, reconcileLayoutTypes, removeWidgetFromLayout } from '@/lib/dashboard-layout';
+import { addWidgetToLayout, getWidgetSizing, normalizeDesktopOrigin, normalizeLayout, reconcileLayoutTypes, removeWidgetFromLayout } from '@/lib/dashboard-layout';
+import { shouldPersistDashboard } from '@/lib/dashboard-persistence';
 
 export interface Widget {
   id: string;
@@ -97,7 +98,7 @@ interface DashboardContextType {
   dispatch: React.Dispatch<DashboardAction>;
   addWidget: (type: WidgetType, config?: { title?: string; colSpan?: number; rowSpan?: number }) => void;
   removeWidget: (id: string) => void;
-  updateLayout: (items: LayoutItem[]) => void;
+  updateLayout: (items: LayoutItem[], options?: { markDirty?: boolean }) => void;
   updateWidgetConfig: (id: string, config: Record<string, unknown>) => void;
   toggleEdit: () => void;
 }
@@ -108,9 +109,17 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(dashboardReducer, initialState);
   const [dashboardHydration, setDashboardHydration] = useState<'loading' | 'ready' | 'error'>('loading');
   const { status: sessionStatus } = useSession();
+  const isDirtyRef = React.useRef(false);
+  const mutationVersionRef = React.useRef(0);
+
+  const markDirty = () => {
+    isDirtyRef.current = true;
+    mutationVersionRef.current += 1;
+  };
 
   useEffect(() => {
     if (sessionStatus !== 'authenticated') {
+      isDirtyRef.current = false;
       setDashboardHydration('loading');
       return;
     }
@@ -125,16 +134,20 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       })
       .then((data) => {
         if (isMounted && data?.state) {
+          const reconciledLayout = reconcileLayoutTypes(data.state.layout, data.state.widgets);
           dispatch({
             type: 'LOAD_STATE',
             payload: {
               ...data.state,
-              layout: normalizeLayout(reconcileLayoutTypes(data.state.layout, data.state.widgets)),
+              layout: normalizeDesktopOrigin(normalizeLayout(reconciledLayout)),
               isEditing: false,
             },
           });
         }
-        if (isMounted) setDashboardHydration('ready');
+        if (isMounted) {
+          isDirtyRef.current = false;
+          setDashboardHydration('ready');
+        }
       })
       .catch((error) => {
         console.error('Failed to load dashboard:', error);
@@ -147,13 +160,18 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   }, [sessionStatus]);
 
   useEffect(() => {
-    if (dashboardHydration !== 'ready' || sessionStatus !== 'authenticated') return;
+    if (!shouldPersistDashboard(dashboardHydration, sessionStatus, isDirtyRef.current)) return;
 
+    const mutationVersion = mutationVersionRef.current;
     const timeoutId = window.setTimeout(() => {
       fetch('/api/dashboard', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ state: { widgets: state.widgets, layout: state.layout } }),
+      }).then((response) => {
+        if (response.ok && mutationVersion === mutationVersionRef.current) {
+          isDirtyRef.current = false;
+        }
       }).catch((error) => console.error('Failed to save dashboard:', error));
     }, 750);
 
@@ -161,6 +179,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   }, [dashboardHydration, sessionStatus, state.widgets, state.layout]);
 
   const addWidget = (type: WidgetType, config?: { title?: string; colSpan?: number; rowSpan?: number }) => {
+    markDirty();
     const sizing = getWidgetSizing(type);
     const newWidget: Widget = {
       id: `${type}-${Date.now()}`,
@@ -183,9 +202,18 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'UPDATE_LAYOUT', payload: addWidgetToLayout(state.layout, newLayoutItem) });
   };
 
-  const removeWidget = (id: string) => dispatch({ type: 'REMOVE_WIDGET', payload: id });
-  const updateLayout = (items: LayoutItem[]) => dispatch({ type: 'UPDATE_LAYOUT', payload: items });
-  const updateWidgetConfig = (id: string, config: Record<string, unknown>) => dispatch({ type: 'UPDATE_WIDGET_CONFIG', payload: { id, config } });
+  const removeWidget = (id: string) => {
+    markDirty();
+    dispatch({ type: 'REMOVE_WIDGET', payload: id });
+  };
+  const updateLayout = (items: LayoutItem[], options?: { markDirty?: boolean }) => {
+    if (options?.markDirty !== false) markDirty();
+    dispatch({ type: 'UPDATE_LAYOUT', payload: items });
+  };
+  const updateWidgetConfig = (id: string, config: Record<string, unknown>) => {
+    markDirty();
+    dispatch({ type: 'UPDATE_WIDGET_CONFIG', payload: { id, config } });
+  };
   const toggleEdit = () => dispatch({ type: 'TOGGLE_EDIT' });
 
   return (

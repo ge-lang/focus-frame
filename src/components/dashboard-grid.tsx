@@ -6,7 +6,7 @@ import 'react-grid-layout/css/styles.css';
 import { useDashboard } from '@/contexts/dashboard-context';
 import { useStableContainerWidth } from '@/hooks/use-stable-container-width';
 import { SortableWidget } from './sortable-widget';
-import { canPersistDesktopLayout, getGridHeightForContent, getWidgetSizing, normalizeLayout, reconcileLayoutTypes, resizeWidgetInLayout, stackLayoutForMobile } from '@/lib/dashboard-layout';
+import { canPersistDesktopLayout, getGridHeightForContent, getWidgetSizing, normalizeDesktopOrigin, normalizeLayout, reconcileLayoutTypes, resizeWidgetInLayout, stackLayoutForMobile } from '@/lib/dashboard-layout';
 import type { LayoutItem } from '@/types/dashboard';
 
 const BREAKPOINTS = { lg: 1024, md: 768, sm: 640, xs: 480, xxs: 0 } as const;
@@ -140,7 +140,7 @@ export function DashboardGrid() {
     });
   }
 
-  const handleLayoutChange = (nextLayout: GridLayout) => {
+  const handleLayoutChange = (nextLayout: GridLayout, isUserMutation = false) => {
     if (breakpointTransitionRef.current) {
       breakpointTransitionRef.current = false;
       return;
@@ -157,12 +157,12 @@ export function DashboardGrid() {
       w: getWidgetSizing(item.type).w,
       h: getWidgetSizing(item.type).h,
     }));
-    const normalized = normalizeLayout(persistedLayout);
+    const normalized = normalizeDesktopOrigin(normalizeLayout(persistedLayout));
     weatherBaseLayoutRef.current = null;
     contentSizingRef.current = true;
     desktopLayoutRef.current = normalized;
     setDesktopLayout(normalized);
-    updateLayout(normalized);
+    updateLayout(normalized, { markDirty: isUserMutation });
     window.requestAnimationFrame(() => {
       contentSizingRef.current = false;
     });
@@ -193,12 +193,16 @@ export function DashboardGrid() {
           }}
           resizeConfig={{ enabled: false }}
           onDragStart={() => { isDraggingRef.current = true; startAutoScroll(); }}
-          onDragStop={(nextLayout) => { isDraggingRef.current = false; stopAutoScroll(); handleLayoutChange(nextLayout); }}
+          onDragStop={(nextLayout) => {
+            isDraggingRef.current = false;
+            stopAutoScroll();
+            handleLayoutChange(nextLayout, true);
+          }}
           onBreakpointChange={(nextBreakpoint) => {
             breakpointRef.current = nextBreakpoint;
             breakpointTransitionRef.current = true;
           }}
-          onLayoutChange={handleLayoutChange}
+          onLayoutChange={(nextLayout) => handleLayoutChange(nextLayout)}
         >
           {layout.map(renderWidget)}
         </Responsive>

@@ -6,6 +6,7 @@ import {
   getWidgetSizing,
   hasLayoutCollision,
   normalizeLayout,
+  normalizeDesktopOrigin,
   reconcileLayoutTypes,
   removeWidgetFromLayout,
   resizeWidgetInLayout,
@@ -189,6 +190,23 @@ describe('dashboard layout normalization', () => {
     ]);
   });
 
+  it('normalizes only the global vertical origin', () => {
+    const layout = [
+      { i: 'news-1', x: 0, y: 3, w: 8, h: 3, type: 'news' as const },
+      { i: 'analytics-1', x: 8, y: 7, w: 4, h: 3, type: 'analytics' as const },
+      { i: 'todo-1', x: 0, y: 20, w: 8, h: 3, type: 'todo' as const },
+    ];
+    const normalized = normalizeDesktopOrigin(layout);
+
+    expect(normalized).toMatchObject([
+      { i: 'news-1', x: 0, y: 0 },
+      { i: 'analytics-1', x: 8, y: 4 },
+      { i: 'todo-1', x: 0, y: 17 },
+    ]);
+    expect(normalized[2].y - normalized[1].y).toBe(layout[2].y - layout[1].y);
+    expect(normalizeDesktopOrigin(normalized)).toEqual(normalized);
+  });
+
   it('clamps positions and resolves overlaps deterministically', () => {
     const layout = normalizeLayout([
       { i: 'goals-1', x: 20, y: 0, w: 1, h: 1, type: 'goals' },
@@ -237,8 +255,8 @@ describe('dashboard layout normalization', () => {
     const existing = [{ i: 'pomodoro-1', x: 4, y: 2, w: 4, h: 3, type: 'pomodoro' as const }];
     const next = addWidgetToLayout(existing, { i: 'pomodoro-2', x: 0, y: 0, w: 1, h: 1, type: 'pomodoro' });
 
-    expect(next[1]).toMatchObject({ i: 'pomodoro-2', x: 0, y: 5, w: 4, h: 3 });
-    expect(next[0]).toMatchObject({ x: 4, y: 2 });
+    expect(next[1]).toMatchObject({ i: 'pomodoro-2', x: 0, y: 3, w: 4, h: 3 });
+    expect(next[0]).toMatchObject({ x: 4, y: 0 });
     expect(hasLayoutCollision(next[1], next.slice(0, 1))).toBe(false);
   });
 

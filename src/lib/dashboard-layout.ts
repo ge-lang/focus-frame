@@ -94,6 +94,15 @@ export function reconcileLayoutTypes(
   });
 }
 
+export function normalizeDesktopOrigin(layout: LayoutItem[]): LayoutItem[] {
+  if (layout.length === 0) return layout;
+
+  const minY = Math.min(...layout.map((item) => item.y));
+  if (!Number.isFinite(minY) || minY <= 0) return layout;
+
+  return layout.map((item) => ({ ...item, y: item.y - minY }));
+}
+
 function isLegacyThreeColumnLayout(layout: LayoutItem[]): boolean {
   return layout.length > 0 && layout.every((item) => item.w <= 3 && item.x <= 3);
 }
@@ -116,7 +125,7 @@ export function normalizeLayout(layout: LayoutItem[], columns = DESKTOP_GRID_COL
 }
 
 export function removeWidgetFromLayout(layout: LayoutItem[], widgetId: string): LayoutItem[] {
-  return normalizeLayout(layout.filter((item) => item.i !== widgetId));
+  return normalizeDesktopOrigin(normalizeLayout(layout.filter((item) => item.i !== widgetId)));
 }
 
 export function stackLayoutForMobile(layout: LayoutItem[], columns: number): LayoutItem[] {
@@ -135,7 +144,7 @@ export function stackLayoutForMobile(layout: LayoutItem[], columns: number): Lay
 }
 
 export function addWidgetToLayout(layout: LayoutItem[], item: LayoutItem): LayoutItem[] {
-  const normalized = normalizeLayout(layout);
+  const normalized = normalizeDesktopOrigin(normalizeLayout(layout));
   const sized = withWidgetSizing(item);
   const nextRow = normalized.reduce((bottom, current) => Math.max(bottom, current.y + current.h), 0);
   const appended = { ...sized, x: 0, y: nextRow };
