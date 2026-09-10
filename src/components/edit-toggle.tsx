@@ -1,7 +1,6 @@
 // src/components/edit-toggle.tsx
 'use client';
 import { useDashboard } from '@/contexts/dashboard-context';
-import { AnimatedButton } from './animated-button';
 import { Edit, Eye } from 'lucide-react';
 
 export function EditToggle() {
@@ -9,21 +8,19 @@ export function EditToggle() {
   const { isEditing } = state;
 
   return (
-    <AnimatedButton
+    <button
+      type="button"
       onClick={toggleEdit}
       className="ff-header-action ff-glass-control text-indigo-700 hover:bg-indigo-50/80"
     >
+      <span className="ff-edit-icon" aria-hidden="true">
+        {isEditing ? <Eye size={16} /> : <Edit size={16} />}
+      </span>
       {isEditing ? (
-        <>
-          <Eye size={18} />
-          <span>Done</span>
-        </>
+        <span>Done</span>
       ) : (
-        <>
-          <Edit size={18} />
-          <span>Edit</span>
-        </>
+        <span>Edit</span>
       )}
-    </AnimatedButton>
+    </button>
   );
 }

@@ -77,8 +77,8 @@ body.ff-document-body {
   align-items: center;
   justify-content: space-between;
   gap: 1.25rem;
-  min-height: 3.75rem;
-  padding: 0.15rem 0.25rem 0.45rem;
+  min-height: 3.5rem;
+  padding: 0.1rem 0.25rem 0.25rem;
 }
 
 .ff-brand,
@@ -95,18 +95,18 @@ body.ff-document-body {
 .ff-brand-mark {
   position: relative;
   display: grid;
-  width: 2.4rem;
-  height: 2.5rem;
+  width: 2.7rem;
+  height: 2.85rem;
   place-items: center;
   flex: 0 0 auto;
 }
 
-.ff-evva-mark { width: 2rem; height: 2.5rem; overflow: visible; }
+.ff-evva-mark { width: 2.25rem; height: 2.85rem; overflow: visible; }
 
 .ff-brand-title {
   color: #18213b;
-  font-size: 1.12rem;
-  font-weight: 750;
+  font-size: 1.26rem;
+  font-weight: 780;
   letter-spacing: -0.035em;
   line-height: 1.1;
 }
@@ -478,16 +478,16 @@ body.ff-document-body {
   position: sticky;
   top: 0;
   z-index: var(--ff-z-sticky);
-  min-height: 3.75rem;
+  min-height: 3.5rem;
   padding-top: 0;
-  padding-bottom: 0.6rem;
-  border-bottom: 1px solid rgba(167, 157, 255, 0.12);
-  background: rgba(17, 21, 42, 0.78);
-  backdrop-filter: blur(18px);
+  padding-bottom: 0.25rem;
+  border-bottom: 0;
+  background: transparent;
+  backdrop-filter: none;
 }
 
 .ff-dark-workspace .ff-brand-mark {
-  filter: drop-shadow(0 8px 16px rgba(58, 213, 246, 0.16));
+  filter: none;
 }
 
 .ff-dark-workspace .ff-brand-title { color: #fbfaff; }
@@ -1090,9 +1090,9 @@ body.ff-document-body {
 }
 
 .ff-dark-workspace .ff-brand-mark {
-  border-radius: 0.82rem;
-  background: linear-gradient(145deg, #8175ff 0%, #5b4fd1 58%, #393476 100%);
-  box-shadow: 0 0 0 5px rgba(124, 108, 255, 0.1), 0 12px 30px rgba(48, 34, 134, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.46);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .ff-dark-workspace .ff-brand-title {
@@ -1196,6 +1196,45 @@ body.ff-document-body {
   }
 }
 
+/* Desktop header chrome stays visually merged with the workspace. */
+@media (min-width: 640px) {
+  .ff-topbar .ff-header-action,
+  .ff-topbar .ff-theme-control {
+    min-height: 2rem;
+    border: 0 !important;
+    border-radius: 0;
+    padding: 0.35rem 0.45rem;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: var(--ff-text-secondary, #cbd0e5) !important;
+    backdrop-filter: none;
+  }
+
+  .ff-topbar .ff-header-action:hover,
+  .ff-topbar .ff-header-action:focus-visible,
+  .ff-topbar .ff-theme-control:hover,
+  .ff-topbar .ff-theme-control:focus-within,
+  .ff-topbar .ff-account-trigger:hover,
+  .ff-topbar .ff-account-trigger:focus-visible {
+    background: transparent !important;
+    color: var(--ff-accent-violet, #8d80ff) !important;
+  }
+
+  .ff-topbar .ff-header-action:focus-visible,
+  .ff-topbar .ff-theme-control:focus-within,
+  .ff-topbar .ff-account-trigger:focus-visible {
+    outline: 2px solid rgba(141, 128, 255, 0.5);
+    outline-offset: 3px;
+  }
+
+       .ff-topbar .ff-theme-control select { color: transparent; }
+       .ff-topbar .ff-theme-icon,
+       .ff-topbar .ff-edit-icon,
+       .ff-topbar .ff-widget-icon { display: none; }
+       .ff-topbar .ff-account-trigger { background: transparent; }
+  .ff-topbar .ff-brand-subtitle { display: none; }
+}
+
 @media (min-width: 640px) {
   .ff-dark-workspace .ff-weather-hero {
     margin-bottom: 1rem !important;
@@ -1274,13 +1313,13 @@ html[data-ff-theme='light'] body.ff-document-body {
 }
 
 .ff-light-workspace .ff-topbar {
-  border-bottom-color: rgba(104, 112, 160, 0.12);
-  background: rgba(246, 247, 252, 0.74);
-  backdrop-filter: blur(18px);
+  border-bottom: 0;
+  background: transparent;
+  backdrop-filter: none;
 }
 
 .ff-light-workspace .ff-brand-mark {
-  filter: drop-shadow(0 8px 16px rgba(245, 49, 180, 0.14));
+  filter: none;
 }
 
 .ff-light-workspace .ff-brand-title { color: var(--ff-text-primary); }

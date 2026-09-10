@@ -1,7 +1,7 @@
 'use client';
 
-import { Monitor, Moon, Sun } from 'lucide-react';
 import { useTheme, type ThemePreference } from './theme-provider';
+import { Monitor, Moon, Sun } from 'lucide-react';
 
 export function ThemeControl() {
   const { theme, resolvedTheme, setTheme } = useTheme();
@@ -9,7 +9,9 @@ export function ThemeControl() {
   return (
     <label className="ff-theme-control" title="Choose theme">
       <span className="sr-only">Theme</span>
-      {theme === 'system' ? <Monitor size={14} aria-hidden="true" /> : theme === 'light' ? <Sun size={14} aria-hidden="true" /> : <Moon size={14} aria-hidden="true" />}
+      <span className="ff-theme-icon" aria-hidden="true">
+        {resolvedTheme === 'light' ? <Sun size={16} /> : resolvedTheme === 'dark' ? <Moon size={16} /> : <Monitor size={16} />}
+      </span>
       <span aria-hidden="true">{resolvedTheme === 'light' ? 'Light' : 'Dark'}</span>
       <select className="ff-theme-select" value={theme} onChange={(event) => setTheme(event.target.value as ThemePreference)} aria-label="Theme">
         <option value="system">System</option>
