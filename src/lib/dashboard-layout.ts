@@ -165,3 +165,21 @@ export function resizeWidgetInLayout(layout: LayoutItem[], widgetId: string, hei
 
   return layout.map((item) => resolved.find((candidate) => candidate.i === item.i) ?? item);
 }
+
+export function applyLayoutHeightOverrides(
+  layout: LayoutItem[],
+  heightOverrides: Record<string, number>,
+): LayoutItem[] {
+  let nextLayout = layout.map((item) => {
+    const height = heightOverrides[item.i];
+    return height === undefined ? item : { ...item, h: Math.max(1, Math.round(height)) };
+  });
+
+  for (const [widgetId, height] of Object.entries(heightOverrides)) {
+    if (nextLayout.some((item) => item.i === widgetId)) {
+      nextLayout = resizeWidgetInLayout(nextLayout, widgetId, height);
+    }
+  }
+
+  return nextLayout;
+}

@@ -5,6 +5,7 @@ import {
   getGridHeightForContent,
   getWidgetSizing,
   hasLayoutCollision,
+  applyLayoutHeightOverrides,
   normalizeLayout,
   normalizeDesktopOrigin,
   reconcileLayoutTypes,
@@ -216,6 +217,22 @@ describe('dashboard layout normalization', () => {
     expect(layout[0]).toMatchObject({ x: 8, y: 0, w: 4, h: 3 });
     expect(layout[1]).toMatchObject({ x: 8, y: 3, w: 4, h: 3 });
     expect(hasLayoutCollision(layout[0], [layout[1]])).toBe(false);
+  });
+
+  it('applies runtime height changes without replacing canonical positions', () => {
+    const canonical = [
+      { i: 'news-1', x: 0, y: 0, w: 8, h: 3, type: 'news' as const },
+      { i: 'weather-1', x: 8, y: 35, w: 4, h: 3, type: 'weather' as const },
+    ];
+
+    const rendered = applyLayoutHeightOverrides(canonical, { 'weather-1': 6 });
+
+    expect(rendered.find((item) => item.i === 'weather-1')).toMatchObject({
+      x: 8,
+      y: 35,
+      w: 4,
+      h: 6,
+    });
   });
 
   it('repairs several persisted intersections deterministically', () => {
