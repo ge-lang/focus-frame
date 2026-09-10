@@ -152,18 +152,15 @@ export function DashboardGrid() {
       i: item.i,
       x: item.x,
       y: item.y,
-      w: item.w,
+      w: getWidgetSizing(types.get(item.i) ?? 'notes').w,
       h: getWidgetSizing(types.get(item.i) ?? 'notes').h,
       type: types.get(item.i) ?? 'notes',
     }));
     const normalized = normalizeLayout(persistedLayout);
     weatherBaseLayoutRef.current = null;
     contentSizingRef.current = true;
-    desktopLayoutRef.current = nextLayout.map((item) => ({
-      ...item,
-      type: types.get(item.i) ?? 'notes',
-    }));
-    setDesktopLayout(desktopLayoutRef.current);
+    desktopLayoutRef.current = normalized;
+    setDesktopLayout(normalized);
     updateLayout(normalized);
     window.requestAnimationFrame(() => {
       contentSizingRef.current = false;

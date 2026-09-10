@@ -61,6 +61,36 @@ describe('dashboard layout normalization', () => {
     expect(layout[0]).toMatchObject({ i: 'notes-1', x: 7, y: 3, w: 4, h: 3 });
   });
 
+  it('keeps canonical desktop widths when a responsive layout is normalized', () => {
+    const normalized = normalizeLayout([
+      { i: 'todo-1', x: 0, y: 0, w: 10, h: 3, type: 'todo' },
+      { i: 'analytics-1', x: 0, y: 3, w: 10, h: 3, type: 'analytics' },
+    ]);
+
+    expect(normalized).toMatchObject([
+      { i: 'todo-1', w: 6 },
+      { i: 'analytics-1', w: 8 },
+    ]);
+  });
+
+  it('is idempotent for canonical desktop layouts after reload', () => {
+    const persisted = [
+      { i: 'todo-1', x: 0, y: 0, w: 6, h: 3, type: 'todo' as const },
+      { i: 'weather-1', x: 8, y: 0, w: 4, h: 3, type: 'weather' as const },
+      { i: 'analytics-1', x: 0, y: 4, w: 8, h: 3, type: 'analytics' as const },
+    ];
+
+    const firstLoad = normalizeLayout(persisted);
+    const reload = normalizeLayout(firstLoad);
+
+    expect(reload).toEqual(firstLoad);
+    expect(reload).toMatchObject([
+      { i: 'todo-1', w: 6 },
+      { i: 'weather-1', w: 4 },
+      { i: 'analytics-1', w: 8 },
+    ]);
+  });
+
   it('limits pathological vertical gaps without compacting normal spacing', () => {
     const layout = normalizeLayout([
       { i: 'analytics-1', x: 0, y: 0, w: 8, h: 3, type: 'analytics' },
