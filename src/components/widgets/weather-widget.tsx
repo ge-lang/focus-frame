@@ -1,11 +1,14 @@
 // src/components/widgets/weather-widget.tsx
 'use client';
 import { AnimatedWidget } from '@/components/animated-widget';
+import { ModalPortal } from '@/components/modal-portal';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useWeather, useWeatherSearch } from '@/hooks/useWeather';
 import { countries } from '@/lib/countries';
+import { findCountryForCity, getPopularCitiesForCountry, resolveCountrySelection } from '@/lib/weather-location';
 import { WeatherIcon } from '@/components/weather-icon';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useDashboard } from '@/contexts/dashboard-context';
 import { 
   MapPin, 
   Settings, 
@@ -23,33 +26,62 @@ import {
 interface WeatherWidgetProps {
   widgetId: string;
   initialCity?: string;
+  initialCountryCode?: string;
   title?: string;
+  onContentHeightChange?: (widgetId: string, height: number) => void;
 }
 
 export default function WeatherWidget({ 
-  initialCity = 'Amsterdam',
-  title 
+  widgetId,
+  initialCity = '',
+  initialCountryCode,
+  title,
+  onContentHeightChange,
 }: WeatherWidgetProps) {
-  const { weather, setLocation, refresh } = useWeather(initialCity);
+  const { updateWidgetConfig } = useDashboard();
+  const { weather, setLocation, refresh, isDemo } = useWeather(initialCity, initialCountryCode);
   const [isEditing, setIsEditing] = useState(false);
   const [inputCity, setInputCity] = useState(initialCity);
-  const [countryCode, setCountryCode] = useState(initialCity.toLowerCase() === 'amsterdam' ? 'NL' : '');
+  const [countryCode, setCountryCode] = useState(initialCountryCode ?? findCountryForCity(initialCity) ?? '');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [unit, setUnit] = useState<'celsius' | 'fahrenheit'>('celsius');
+  const contentRef = useRef<HTMLDivElement>(null);
   const { suggestions, isSearching } = useWeatherSearch(isEditing ? inputCity : '', countryCode || undefined);
+  const popularCities = getPopularCitiesForCountry(countryCode);
+
+  useEffect(() => {
+    const element = contentRef.current;
+    if (!element || !onContentHeightChange || typeof ResizeObserver === 'undefined') return;
+
+    const reportHeight = () => onContentHeightChange(widgetId, element.scrollHeight);
+    const observer = new ResizeObserver(reportHeight);
+    observer.observe(element);
+    const frame = window.requestAnimationFrame(reportHeight);
+    const settleTimer = window.setTimeout(reportHeight, 350);
+
+    return () => {
+      observer.disconnect();
+      window.cancelAnimationFrame(frame);
+      window.clearTimeout(settleTimer);
+    };
+  }, [isEditing, onContentHeightChange, showDetails, weather.city, weather.loading, widgetId]);
 
   // Temperature conversion
   const displayTemp = unit === 'celsius' ? weather.temp : Math.round((weather.temp * 9/5) + 32);
   const displayFeelsLike = unit === 'celsius' ? weather.feelsLike : Math.round((weather.feelsLike * 9/5) + 32);
 
-  const gradient = weather.temp ? getTemperatureGradient(weather.temp) : 'from-blue-50 to-cyan-100';
-
   const handleCityChange = (newCity: string, selectedCountry = countryCode) => {
     setLocation(newCity, selectedCountry || undefined);
+    updateWidgetConfig(widgetId, { city: newCity, country: selectedCountry || '' });
     setCountryCode(selectedCountry);
     setIsEditing(false);
     setInputCity(newCity);
+  };
+
+  const handleCountryChange = (nextCountry: string) => {
+    setCountryCode(nextCountry);
+    setInputCity(nextCountry ? resolveCountrySelection(nextCountry, inputCity) : '');
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -88,18 +120,18 @@ export default function WeatherWidget({
 
   if (weather.loading) {
     return (
-      <AnimatedWidget className={`bg-gradient-to-br ${gradient}`}>
+      <AnimatedWidget contentRef={contentRef} dataWidgetId={widgetId}>
         <div className="h-full flex flex-col justify-center">
           <div className="text-center">
-            <h3 className="font-semibold text-lg mb-4 text-gray-800 flex items-center justify-center">
+            <h3 className="widget-drag-handle flex cursor-grab select-none items-center justify-center font-semibold text-lg mb-4 text-gray-800 active:cursor-grabbing">
               <MapPin size={16} className="mr-2" />
               {title || 'Weather'}
             </h3>
             <div className="animate-pulse space-y-4">
-              <div className="h-16 w-16 bg-white/30 rounded-full mx-auto"></div>
-              <div className="h-8 bg-white/30 rounded w-24 mx-auto"></div>
-              <div className="h-4 bg-white/30 rounded w-32 mx-auto"></div>
-              <div className="h-3 bg-white/30 rounded w-20 mx-auto"></div>
+              <div className="mx-auto h-16 w-16 rounded-full bg-slate-100"></div>
+              <div className="mx-auto h-8 w-24 rounded bg-slate-100"></div>
+              <div className="mx-auto h-4 w-32 rounded bg-slate-100"></div>
+              <div className="mx-auto h-3 w-20 rounded bg-slate-100"></div>
             </div>
           </div>
         </div>
@@ -107,16 +139,36 @@ export default function WeatherWidget({
     );
   }
 
+  if (!weather.city && !isEditing) {
+    return (
+      <AnimatedWidget contentRef={contentRef} dataWidgetId={widgetId}>
+        <div className="flex min-h-40 flex-col items-center justify-center text-center">
+          <MapPin size={22} className="mb-2 text-indigo-600" />
+          <h3 className="widget-drag-handle cursor-grab select-none font-semibold text-slate-900 active:cursor-grabbing">{title || 'Weather'}</h3>
+          <p className="mt-1 text-sm text-slate-500">Choose a location to see local weather.</p>
+          <button
+            type="button"
+            onClick={() => setIsEditing(true)}
+            className="mt-4 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+          >
+            Choose location
+          </button>
+        </div>
+      </AnimatedWidget>
+    );
+  }
+
   return (
-    <AnimatedWidget className={`bg-gradient-to-br ${gradient} h-full`}>
+    <AnimatedWidget contentRef={contentRef} dataWidgetId={widgetId} className="ff-weather-widget h-full">
       <div className="h-full flex flex-col">
         {/* Header and controls */}
         <div className="flex justify-between items-center mb-4">
           <div className="flex items-center">
             <MapPin size={18} className="text-gray-600 mr-2" />
-            <h3 className="font-semibold text-lg text-gray-800">
+            <h3 className="widget-drag-handle cursor-grab select-none font-semibold text-lg text-gray-800 active:cursor-grabbing">
               {title || 'Weather'}
             </h3>
+            {isDemo && <span className="ml-2 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-500">Demo</span>}
           </div>
           
           <div className="flex space-x-1">
@@ -143,24 +195,41 @@ export default function WeatherWidget({
         {/* City editing mode */}
         <AnimatePresence>
           {isEditing && (
-            <motion.div
+            <ModalPortal>
+              <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="mb-4 overflow-hidden"
+              className="ff-modal-backdrop fixed inset-0 flex items-start justify-center overflow-y-auto overscroll-contain p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-[max(4rem,10vh)]"
+              onClick={resetLocationForm}
             >
-              <form onSubmit={handleSubmit} className="space-y-3 rounded-lg bg-white/30 p-3">
+              <form onSubmit={handleSubmit} data-no-drag onClick={(event) => event.stopPropagation()} className="ff-modal-panel w-full max-w-md max-h-[calc(100dvh-6rem)] overflow-y-auto overscroll-contain space-y-3 rounded-lg border border-slate-200 bg-slate-50 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
                 <label className="block text-xs font-medium text-gray-700">
                   Country
                   <select
                     value={countryCode}
-                    onChange={(event) => setCountryCode(event.target.value)}
+                    onChange={(event) => handleCountryChange(event.target.value)}
                     className="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="">Any country</option>
                     {countries.map((country) => <option key={country.code} value={country.code}>{country.name}</option>)}
                   </select>
                 </label>
+
+                {popularCities.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5" aria-label="Popular cities">
+                    {popularCities.map((cityOption) => (
+                      <button
+                        key={cityOption}
+                        type="button"
+                        onClick={() => setInputCity(cityOption)}
+                        className={`rounded-full border px-2.5 py-1 text-xs transition-colors ${inputCity === cityOption ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'}`}
+                      >
+                        {cityOption}
+                      </button>
+                    ))}
+                  </div>
+                )}
 
                 <label className="block text-xs font-medium text-gray-700">
                   City
@@ -181,10 +250,10 @@ export default function WeatherWidget({
                         key={`${location.name}-${location.state}-${location.country}-${location.lat}`}
                         type="button"
                         onClick={() => handleCityChange(location.name, location.country)}
-                        className="flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-blue-50"
+                        className="flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-indigo-50"
                       >
                         <span>{location.name}{location.state ? `, ${location.state}` : ''}</span>
-                        <span className="ml-3 text-xs text-gray-500">{location.country}</span>
+                        <span className="ml-3 text-xs text-gray-500">{location.country}{location.state ? ` · ${location.state}` : ''}</span>
                       </button>
                     ))}
                   </div>
@@ -193,21 +262,22 @@ export default function WeatherWidget({
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="submit"
-                    className="px-3 py-2 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 transition-colors"
+                    className="rounded-lg bg-indigo-600 px-3 py-2 text-sm text-white transition-colors hover:bg-indigo-700"
                   >
                     Apply
                   </button>
                   <button
                     type="button"
                     onClick={resetLocationForm}
-                    className="px-3 py-2 bg-gray-500 text-white text-sm rounded-lg hover:bg-gray-600 transition-colors"
+                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 transition-colors hover:bg-slate-50"
                   >
                     Cancel
                   </button>
                 </div>
 
               </form>
-            </motion.div>
+              </motion.div>
+            </ModalPortal>
           )}
         </AnimatePresence>
 
@@ -229,17 +299,17 @@ export default function WeatherWidget({
               <button
                 onClick={toggleUnit}
                 aria-label={`Switch to degrees ${unit === 'celsius' ? 'Fahrenheit' : 'Celsius'}`}
-                className="px-2 py-1 bg-white/50 text-gray-700 rounded-full text-xs hover:bg-white transition-colors"
+                className="rounded-full border border-slate-200 bg-white px-2 py-1 text-xs text-slate-700 transition-colors hover:bg-slate-50"
               >
                 °{unit === 'celsius' ? 'C' : 'F'}
               </button>
             </div>
 
             {/* Primary metrics */}
-            <div className="text-center mb-6">
-              <WeatherIcon icon={weather.icon} className="text-6xl mb-2 mx-auto" />
+            <div className="ff-weather-hero text-center mb-6">
+              <WeatherIcon icon={weather.icon} className="ff-weather-hero-icon text-5xl mb-2 mx-auto" />
               
-              <div className="text-5xl font-bold text-gray-800 mb-1">
+              <div className="ff-weather-hero-temperature text-4xl font-bold text-gray-800 mb-1">
                 {displayTemp}°{unit === 'celsius' ? 'C' : 'F'}
               </div>
               
@@ -247,21 +317,21 @@ export default function WeatherWidget({
                 {weather.description}
               </div>
               
-              <div className="text-sm text-gray-600">
+              <div className="ff-weather-feels-like text-sm text-gray-600">
                 Feels like {displayFeelsLike}°
               </div>
             </div>
 
             {/* Quick metrics */}
-            <div className="grid grid-cols-2 gap-3 mb-4">
-              <div className="bg-white/30 rounded-lg p-3 text-center">
-                <Droplets size={16} className="mx-auto mb-1 text-blue-500" />
+            <div className="ff-weather-quick-metrics grid grid-cols-2 gap-3 mb-4">
+              <div className="ff-weather-detail-block ff-semantic-accent ff-accent-violet rounded-lg border border-slate-200 bg-slate-50 p-3 text-center">
+                <Droplets size={16} className="mx-auto mb-1 text-indigo-600" />
                 <div className="text-sm font-medium">{weather.humidity}%</div>
                 <div className="text-xs text-gray-600">Humidity</div>
               </div>
               
-              <div className="bg-white/30 rounded-lg p-3 text-center">
-                <Wind size={16} className="mx-auto mb-1 text-green-500" />
+              <div className="ff-weather-detail-block ff-semantic-accent ff-accent-cyan rounded-lg border border-slate-200 bg-slate-50 p-3 text-center">
+                <Wind size={16} className="mx-auto mb-1 text-indigo-600" />
                 <div className="text-sm font-medium">{weather.windSpeed} m/s</div>
                 <div className="text-xs text-gray-600">Wind</div>
               </div>
@@ -270,7 +340,7 @@ export default function WeatherWidget({
             {/* Details button */}
             <button
               onClick={() => setShowDetails(!showDetails)}
-              className="w-full py-2 bg-white/50 rounded-lg hover:bg-white transition-colors text-sm font-medium mb-4"
+              className="ff-weather-details-toggle mb-4 w-full rounded-lg border border-slate-200 bg-white py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
             >
               {showDetails ? 'Hide Details' : 'Show Details'}
             </button>
@@ -282,40 +352,40 @@ export default function WeatherWidget({
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
-                  className="space-y-3 overflow-hidden"
+                  className="ff-weather-expanded-details space-y-3 overflow-hidden"
                 >
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-white/30 rounded-lg p-3">
+                  <div className="ff-weather-details grid grid-cols-2 gap-3">
+                    <div className="ff-weather-detail-block ff-semantic-accent ff-accent-violet rounded-lg border border-slate-200 bg-slate-50 p-3">
                       <div className="flex items-center justify-between">
                         <span className="text-xs text-gray-600">Pressure</span>
-                        <Gauge size={12} className="text-purple-500" />
+                        <Gauge size={12} className="text-indigo-600" />
                       </div>
                       <div className="text-sm font-medium">{weather.pressure} hPa</div>
                     </div>
                     
-                    <div className="bg-white/30 rounded-lg p-3">
+                    <div className="ff-weather-detail-block ff-semantic-accent ff-accent-cyan rounded-lg border border-slate-200 bg-slate-50 p-3">
                       <div className="flex items-center justify-between">
                         <span className="text-xs text-gray-600">Visibility</span>
-                        <Eye size={12} className="text-blue-500" />
+                        <Eye size={12} className="text-indigo-600" />
                       </div>
                       <div className="text-sm font-medium">{weather.visibility / 1000} km</div>
                     </div>
                   </div>
                   
-                  <div className="bg-white/30 rounded-lg p-3">
+                  <div className="ff-weather-detail-block ff-semantic-accent ff-accent-cyan rounded-lg border border-slate-200 bg-slate-50 p-3">
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-xs text-gray-600">Wind Direction</span>
-                      <Compass size={12} className="text-green-500" />
+                      <Compass size={12} className="text-indigo-600" />
                     </div>
                     <div className="text-sm font-medium">
                       {getWindDirection(weather.windDirection)} ({weather.windDirection}°)
                     </div>
                   </div>
 
-                  <div className="bg-white/30 rounded-lg p-3">
+                  <div className="ff-weather-detail-block ff-semantic-accent ff-accent-amber rounded-lg border border-slate-200 bg-slate-50 p-3">
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-xs text-gray-600">UV Index</span>
-                      <Thermometer size={12} className="text-orange-500" />
+                      <Thermometer size={12} className="text-amber-600" />
                     </div>
                     <div className="text-sm font-medium">
                       {getUVIndex(weather.temp)} - {
@@ -333,22 +403,11 @@ export default function WeatherWidget({
 
         {/* Error status */}
         {weather.error && (
-          <div className="mt-2 p-2 bg-red-100 text-red-700 rounded text-xs text-center">
-            ⚠️ {weather.error}
+          <div className="mt-2 rounded-lg border border-sky-200 bg-sky-50 p-2 text-center text-xs text-sky-700">
+            ℹ️ {weather.error}
           </div>
         )}
       </div>
     </AnimatedWidget>
   );
 }
-
-// Get a gradient based on temperature
-const getTemperatureGradient = (temp: number) => {
-  if (temp < -10) return 'from-blue-200 to-indigo-300';      // Very cold
-  if (temp < 0) return 'from-blue-100 to-blue-300';         // Cold
-  if (temp < 10) return 'from-blue-50 to-cyan-100';         // Cool
-  if (temp < 20) return 'from-green-50 to-emerald-100';     // Mild
-  if (temp < 30) return 'from-yellow-50 to-orange-100';     // Warm
-  if (temp < 35) return 'from-orange-100 to-red-200';       // Hot
-  return 'from-red-200 to-pink-300';                        // Very hot
-};

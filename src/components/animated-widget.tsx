@@ -1,27 +1,26 @@
 // src/components/animated-widget.tsx
 'use client';
 import { motion } from 'framer-motion';
-import { ReactNode } from 'react';
+import { ReactNode, Ref } from 'react';
 
 interface AnimatedWidgetProps {
   children: ReactNode;
   className?: string;
+  contentRef?: Ref<HTMLDivElement>;
+  dataWidgetId?: string;
 }
 
-export function AnimatedWidget({ children, className = '' }: AnimatedWidgetProps) {
+export function AnimatedWidget({ children, className = '', contentRef, dataWidgetId }: AnimatedWidgetProps) {
   return (
     <motion.div
+      ref={contentRef}
+      data-widget-content={dataWidgetId}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.3 }}
-      className={`
-        rounded-xl p-4 backdrop-blur-sm
-        bg-white/80 dark:bg-gray-800/80
-        border border-white/20 dark:border-gray-700/30
-        shadow-lg shadow-black/5
-        hover:shadow-xl hover:shadow-black/10
-        transition-all duration-300
+      className={`ff-card ff-widget-surface
+        p-4 transition-shadow duration-200
         ${className}
       `}
     >

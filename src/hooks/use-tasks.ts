@@ -24,20 +24,26 @@ export function useTasks() {
 export function useCreateTask() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (newTask: TaskInput) =>
-      fetch('/api/tasks', {
+    mutationFn: async (newTask: TaskInput) => {
+      const response = await fetch('/api/tasks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newTask),
-      }).then((res) => {
-        if (!res.ok) throw new Error('Failed to create task');
-        return res.json();
-      }),
-    onSuccess: () => {
+      });
+      const payload = await response.json().catch(() => null) as Task | { error?: string } | null;
+      if (!response.ok) throw new Error(payload && 'error' in payload && payload.error ? payload.error : 'Failed to create task');
+      if (!payload || !('id' in payload) || typeof payload.id !== 'string') throw new Error('Task response was invalid');
+      return payload as Task;
+    },
+    onSuccess: (createdTask) => {
+      queryClient.setQueryData<Task[]>(['tasks'], (current = []) => [createdTask, ...current.filter((task) => task.id !== createdTask.id)]);
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
       showToast('Task created', 'success');
     },
-    onError: () => showToast('Could not create task', 'error'),
+    onError: (error) => {
+      console.error('Failed to create task:', error);
+      showToast('Could not create task', 'error');
+    },
   });
 }
 

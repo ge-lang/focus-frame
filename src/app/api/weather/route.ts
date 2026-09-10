@@ -1,6 +1,7 @@
 import axios from 'axios';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
+import { deduplicateWeatherResults, type WeatherSearchResult } from '@/lib/weather-location';
 
 const WEATHER_API_URL = 'https://api.openweathermap.org/data/2.5';
 const GEO_API_URL = 'https://api.openweathermap.org/geo/1.0/direct';
@@ -20,13 +21,14 @@ export async function GET(request: NextRequest) {
       const response = await axios.get(GEO_API_URL, {
         params: { q: country ? `${search},${country}` : search, limit: 8, appid: apiKey },
       });
-      return NextResponse.json(response.data.map((location: { name: string; state?: string; country: string; lat: number; lon: number }) => ({
+      const results = response.data.map((location: { name: string; state?: string; country: string; lat: number; lon: number }): WeatherSearchResult => ({
         name: location.name,
         state: location.state ?? null,
-        country: location.country,
+        country: location.country.toUpperCase(),
         lat: location.lat,
         lon: location.lon,
-      })));
+      }));
+      return NextResponse.json(deduplicateWeatherResults(results));
     }
 
     if (!city) return NextResponse.json({ error: 'A city is required' }, { status: 400 });
@@ -68,6 +70,9 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     const status = axios.isAxiosError(error) ? error.response?.status : undefined;
-    return NextResponse.json({ error: 'Unable to fetch weather data' }, { status: status && status < 500 ? status : 502 });
+    if (status === 404) return NextResponse.json({ error: 'City not found' }, { status: 404 });
+    if (status === 429) return NextResponse.json({ error: 'Weather service rate limit reached' }, { status: 429 });
+    if (status === 401 || status === 403) return NextResponse.json({ error: 'Weather service is not configured' }, { status: 503 });
+    return NextResponse.json({ error: 'Weather service is temporarily unavailable' }, { status: 502 });
   }
 }

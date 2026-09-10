@@ -3,6 +3,10 @@ import type { Task } from '@/types/task';
 export type DueDateFilter = 'all' | 'overdue' | 'today' | 'upcoming' | 'none';
 export type PriorityFilter = 'all' | Task['priority'];
 
+export function toDateInputValue(value: string | null | undefined): string {
+  return value ? value.slice(0, 10) : '';
+}
+
 export function getDueDateMeta(dueDate: string | null, now = new Date()) {
   if (!dueDate) return null;
 

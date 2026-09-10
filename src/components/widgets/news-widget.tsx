@@ -37,6 +37,7 @@ const categoryLabels: Record<string, string> = {
 
 export default function NewsWidget({ widgetId, title }: NewsWidgetProps) {
   const [selectedCategory, setSelectedCategory] = useState('general');
+  const [showAll, setShowAll] = useState(false);
   const { articles, loading, error, isDemo } = useNews(selectedCategory);
 
   const formatTime = (dateString: string) => {
@@ -58,22 +59,22 @@ export default function NewsWidget({ widgetId, title }: NewsWidgetProps) {
   };
 
   return (
-    <AnimatedWidget className="bg-gradient-to-br from-blue-50 to-cyan-100">
+    <AnimatedWidget className="ff-card-solid">
       <div className="h-full flex flex-col">
         {/* Header and status */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3 gap-2">
           <div className="flex items-center gap-2">
-            <Newspaper size={20} className="text-blue-600" />
+            <Newspaper size={20} className="text-indigo-600" />
             <div>
-              <h3 className="font-semibold text-lg text-gray-800">
+              <h3 className="widget-drag-handle cursor-grab select-none font-semibold text-lg text-gray-800 active:cursor-grabbing">
                 {title || 'Latest News'}
               </h3>
               <div className="flex items-center gap-2 mt-1">
                 <div className="flex items-center gap-1 text-sm">
                   {isDemo ? (
-                    <WifiOff size={12} className="text-orange-500" />
+                <WifiOff size={12} className="text-amber-600" />
                   ) : (
-                    <Wifi size={12} className="text-green-500" />
+                    <Wifi size={12} className="text-emerald-600" />
                   )}
                   <span className={isDemo ? 'text-orange-600' : 'text-green-600'}>
                     {isDemo ? 'Demo Mode' : 'Live News'}
@@ -87,10 +88,10 @@ export default function NewsWidget({ widgetId, title }: NewsWidgetProps) {
           </div>
           
           {/* API status */}
-          <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs ${
+            <div className={`ff-news-status inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs ${
             isDemo 
-              ? 'bg-orange-100 text-orange-800' 
-              : 'bg-green-100 text-green-800'
+              ? 'bg-amber-50 text-amber-700' 
+              : 'bg-emerald-50 text-emerald-700'
           }`}>
             {isDemo ? '🚫 Demo Data' : '✅ Live API'}
           </div>
@@ -104,8 +105,8 @@ export default function NewsWidget({ widgetId, title }: NewsWidgetProps) {
               onClick={() => handleCategoryChange(category)}
               className={`flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium transition-all ${
                 selectedCategory === category
-                  ? 'bg-blue-500 text-white shadow-sm'
-                  : 'bg-white text-gray-600 hover:bg-gray-100 shadow-sm'
+                  ? 'bg-indigo-600 text-white'
+                  : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
               }`}
               disabled={loading}
             >
@@ -119,7 +120,7 @@ export default function NewsWidget({ widgetId, title }: NewsWidgetProps) {
         {loading && (
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center">
-              <RefreshCw size={24} className="animate-spin text-blue-500 mx-auto mb-2" />
+              <RefreshCw size={24} className="mx-auto mb-2 animate-spin text-indigo-600" />
               <p className="text-gray-600">Loading news...</p>
             </div>
           </div>
@@ -136,8 +137,8 @@ export default function NewsWidget({ widgetId, title }: NewsWidgetProps) {
 
         {/* News list */}
         {!loading && !error && (
-          <div className="flex-1 overflow-y-auto space-y-3 pr-1">
-            {articles.slice(0, 4).map((article, index) => (
+          <div className="max-h-[28rem] flex-1 space-y-3 overflow-y-auto pr-1">
+            {articles.slice(0, showAll ? articles.length : 3).map((article, index) => (
               <motion.div
                 key={`${article.title}-${index}`}
                 initial={{ opacity: 0, y: 20 }}
@@ -148,10 +149,10 @@ export default function NewsWidget({ widgetId, title }: NewsWidgetProps) {
                   href={article.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block p-3 bg-white/70 rounded-lg hover:bg-white hover:shadow-md transition-all duration-200 group border border-white/50"
+                  className="ff-news-article group block rounded-xl border-b border-slate-200 p-3 transition-colors duration-200 hover:bg-slate-50"
                 >
                   <div className="flex justify-between items-start mb-2">
-                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
+                    <span className="ff-news-category inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2 py-1 text-xs font-medium text-indigo-700">
                       <span>{categoryEmojis[article.category] || '📰'}</span>
                       <span className="capitalize">{categoryLabels[article.category] || article.category}</span>
                     </span>
@@ -161,7 +162,7 @@ export default function NewsWidget({ widgetId, title }: NewsWidgetProps) {
                     </span>
                   </div>
                   
-                  <h4 className="font-semibold text-gray-800 group-hover:text-blue-700 transition-colors mb-2 line-clamp-2 leading-tight">
+                  <h4 className="mb-2 line-clamp-2 font-semibold leading-tight text-slate-900 transition-colors group-hover:text-indigo-700">
                     {article.title}
                   </h4>
                   
@@ -170,10 +171,10 @@ export default function NewsWidget({ widgetId, title }: NewsWidgetProps) {
                   </p>
                   
                   <div className="flex justify-between items-center">
-                    <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                    <span className="ff-news-source text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded">
                       {article.source}
                     </span>
-                    <div className="flex items-center gap-1 text-blue-500 group-hover:text-blue-700 transition-colors">
+                    <div className="flex items-center gap-1 text-indigo-600 transition-colors group-hover:text-indigo-700">
                       <span className="text-xs font-medium">Read more</span>
                       <ExternalLink size={12} />
                     </div>
@@ -182,6 +183,16 @@ export default function NewsWidget({ widgetId, title }: NewsWidgetProps) {
               </motion.div>
             ))}
           </div>
+        )}
+
+        {!loading && !error && articles.length > 3 && (
+          <button
+            type="button"
+            onClick={() => setShowAll((current) => !current)}
+            className="mt-2 self-center rounded-lg px-3 py-1.5 text-xs font-medium text-indigo-700 transition-colors hover:bg-indigo-50"
+          >
+            {showAll ? 'Show less' : `Show more (${articles.length - 3})`}
+          </button>
         )}
 
         {/* Footer with API instructions */}

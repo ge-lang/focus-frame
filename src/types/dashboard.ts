@@ -16,7 +16,7 @@ export interface Widget {
   colSpan: number;
   rowSpan?: number;
   title?: string;
-  config?: Record<string, any>;
+  config?: Record<string, unknown>;
 }
 
 export interface LayoutItem {

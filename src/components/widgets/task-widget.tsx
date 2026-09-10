@@ -2,6 +2,7 @@
 'use client';
 import { useMemo, useState } from 'react';
 import { AnimatedWidget } from '@/components/animated-widget';
+import { ModalPortal } from '@/components/modal-portal';
 import { AnimatedButton } from '@/components/animated-button';
 import {
   Plus, 
@@ -9,12 +10,14 @@ import {
   Edit, 
   Calendar,
   Flag,
-  GripVertical
+  GripVertical,
+  ClipboardList
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Task, TaskStatus } from '@/types/task';
 import { useCreateTask, useDeleteTask, useTasks, useUpdateTask } from '@/hooks/use-tasks';
-import { filterTasks, getDueDateMeta, type DueDateFilter } from '@/lib/task-utils';
+import { filterTasks, getDueDateMeta, toDateInputValue, type DueDateFilter } from '@/lib/task-utils';
+import { EmptyState } from '@/components/empty-state';
 
 interface TaskWidgetProps {
   widgetId: string;
@@ -48,6 +51,12 @@ const getPriorityColor = (priority: string) => {
   };
 };
 
+const priorityAccentClass: Record<Task['priority'], string> = {
+  low: 'ff-semantic-accent ff-accent-green',
+  medium: 'ff-semantic-accent ff-accent-amber',
+  high: 'ff-semantic-accent ff-accent-rose',
+};
+
 const formatFocusTime = (seconds?: number) => {
   if (!seconds) return null;
   const minutes = Math.round(seconds / 60);
@@ -61,6 +70,8 @@ function TaskCard({
   onEdit, 
   onDelete, 
   onDragStart,
+  onDragEnd,
+  onMoveStatus,
   editState,
   onSaveEdit,
   onCancelEdit 
@@ -70,6 +81,8 @@ function TaskCard({
   onEdit: (task: Task, status: TaskStatus) => void;
   onDelete: (id: string) => void;
   onDragStart: (task: Task, status: TaskStatus) => void;
+  onDragEnd: () => void;
+  onMoveStatus: (task: Task, status: TaskStatus) => void;
   editState: EditState;
   onSaveEdit: () => void;
   onCancelEdit: () => void;
@@ -85,12 +98,18 @@ function TaskCard({
       transition={{ duration: 0.2 }}
       draggable
       onDragStart={() => onDragStart(task, status)}
-      className="bg-white rounded-lg p-3 shadow-sm border cursor-move group relative"
+      onDragEnd={onDragEnd}
+      className={`group relative rounded-lg border border-slate-200 bg-white p-2.5 ${priorityAccentClass[task.priority]}`}
     >
       {/* Drag handle */}
-      <div className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab">
+      <button
+        type="button"
+        data-no-drag
+        aria-label={`Move task: ${task.title}`}
+        className="ff-task-drag-handle absolute left-2 top-2 rounded p-1 text-gray-400 opacity-0 transition-opacity hover:text-indigo-400 focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-indigo-400/50 group-hover:opacity-100"
+      >
         <GripVertical size={12} className="text-gray-400" />
-      </div>
+      </button>
 
       {isEditing ? (
         // Edit mode
@@ -112,13 +131,13 @@ function TaskCard({
           <div className="flex space-x-1">
             <button
               onClick={onSaveEdit}
-              className="px-2 py-1 bg-green-500 text-white text-xs rounded hover:bg-green-600"
+              className="rounded-md bg-indigo-600 px-2 py-1 text-xs text-white hover:bg-indigo-700"
             >
               Save
             </button>
             <button
               onClick={onCancelEdit}
-              className="px-2 py-1 bg-gray-500 text-white text-xs rounded hover:bg-gray-600"
+              className="rounded-md border border-slate-200 bg-white px-2 py-1 text-xs text-slate-700 hover:bg-slate-50"
             >
               Cancel
             </button>
@@ -134,7 +153,7 @@ function TaskCard({
                 <p className="text-gray-600 text-xs mt-1 leading-relaxed">{task.description}</p>
               )}
             </div>
-            <div className="flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity ml-2">
+            <div className="ff-task-card-actions flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity ml-2">
               <button
                 aria-label={`Edit task: ${task.title}`}
                 onClick={() => onEdit(task, status)}
@@ -156,9 +175,9 @@ function TaskCard({
           
           <div className="flex items-center justify-between mt-2">
             <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs ${
-              getPriorityColor(task.priority) === 'red' ? 'bg-red-100 text-red-800' :
-              getPriorityColor(task.priority) === 'yellow' ? 'bg-yellow-100 text-yellow-800' :
-              'bg-green-100 text-green-800'
+              getPriorityColor(task.priority) === 'red' ? 'bg-red-50 text-red-700' :
+              getPriorityColor(task.priority) === 'yellow' ? 'bg-amber-50 text-amber-700' :
+              'bg-emerald-50 text-emerald-700'
             }`}>
               <Flag size={10} className="mr-1" />
               {task.priority}
@@ -172,8 +191,28 @@ function TaskCard({
             )}
           </div>
           {formatFocusTime(task.focusSeconds) && (
-            <p className="text-xs text-purple-600 mt-2">⏱ {formatFocusTime(task.focusSeconds)}</p>
+            <p className="mt-2 text-xs text-indigo-600">⏱ {formatFocusTime(task.focusSeconds)}</p>
           )}
+          <div className="ff-mobile-task-actions mt-2">
+            <details className="relative">
+              <summary className="inline-flex min-h-10 cursor-pointer list-none items-center rounded-md border border-slate-200 bg-white px-2.5 text-xs font-medium text-slate-700">
+                Move to…
+              </summary>
+              <div className="absolute bottom-full left-0 z-20 mb-1 w-36 rounded-lg border border-slate-200 bg-white p-1 shadow-lg">
+                {(['todo', 'in_progress', 'done'] as TaskStatus[]).map((nextStatus) => (
+                  <button
+                    key={nextStatus}
+                    type="button"
+                    disabled={nextStatus === status}
+                    onClick={() => onMoveStatus(task, nextStatus)}
+                    className="block min-h-10 w-full rounded px-2 text-left text-xs text-slate-700 hover:bg-slate-50 disabled:cursor-default disabled:opacity-40"
+                  >
+                    {getStatusLabel(nextStatus)}
+                  </button>
+                ))}
+              </div>
+            </details>
+          </div>
         </div>
       )}
     </motion.div>
@@ -189,6 +228,9 @@ function TaskColumn({
   onEdit, 
   onDelete, 
   onDragStart,
+  onDragEnd,
+  onMoveStatus,
+  isDropTarget,
   editState,
   onSaveEdit,
   onCancelEdit 
@@ -200,29 +242,31 @@ function TaskColumn({
   onEdit: (task: Task, status: TaskStatus) => void;
   onDelete: (id: string) => void;
   onDragStart: (task: Task, status: TaskStatus) => void;
+  onDragEnd: () => void;
+  onMoveStatus: (task: Task, status: TaskStatus) => void;
+  isDropTarget: boolean;
   editState: EditState;
   onSaveEdit: () => void;
   onCancelEdit: () => void;
 }) {
   return (
     <div
-      className="flex h-full min-h-0 flex-col"
+      data-task-drop-status={status}
+      className={`ff-task-column flex h-full min-h-0 flex-col rounded-lg transition-shadow ${isDropTarget ? 'ring-2 ring-indigo-400/70' : ''}`}
       onDragOver={(e) => onDragOver(e, status)}
       onDrop={(e) => onDrop(e, status)}
     >
-      <div className={`p-3 rounded-t-lg text-center font-medium ${
-        status === 'todo' ? 'bg-blue-100 text-blue-800' :
-        status === 'in_progress' ? 'bg-yellow-100 text-yellow-800' :
-        'bg-green-100 text-green-800'
+      <div className={`rounded-t-lg p-2.5 text-center font-medium ${
+        status === 'todo' ? 'bg-slate-100 text-slate-700' :
+        status === 'in_progress' ? 'bg-indigo-50 text-indigo-700' :
+        'bg-emerald-50 text-emerald-700'
       }`}>
         <div className="font-semibold text-sm">{getStatusLabel(status)}</div>
         <div className="text-xs opacity-75">{tasks.length} tasks</div>
       </div>
       
-      <div className={`min-h-0 flex-1 overflow-y-auto p-3 space-y-3 ${
-        status === 'todo' ? 'bg-blue-50' :
-        status === 'in_progress' ? 'bg-yellow-50' :
-        'bg-green-50'
+      <div className={`ff-task-items min-h-0 flex-1 space-y-3 overflow-y-auto rounded-b-lg bg-slate-50/70 p-2.5 ${
+        'bg-slate-50'
       } rounded-b-lg`}>
         <AnimatePresence>
           {tasks.map((task) => (
@@ -233,6 +277,8 @@ function TaskColumn({
               onEdit={onEdit}
               onDelete={onDelete}
               onDragStart={onDragStart}
+              onDragEnd={onDragEnd}
+              onMoveStatus={onMoveStatus}
               editState={editState}
               onSaveEdit={onSaveEdit}
               onCancelEdit={onCancelEdit}
@@ -241,9 +287,7 @@ function TaskColumn({
         </AnimatePresence>
 
         {tasks.length === 0 && (
-          <div className="text-center text-gray-400 text-sm py-8">
-            No tasks
-          </div>
+          <EmptyState icon={ClipboardList} title="No tasks in this column" />
         )}
       </div>
     </div>
@@ -253,7 +297,7 @@ function TaskColumn({
 // Main component
 export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
   const { data: tasks = [], isLoading } = useTasks();
-  const { mutateAsync: createTask } = useCreateTask();
+  const { mutateAsync: createTask, isPending: isCreating } = useCreateTask();
   const { mutateAsync: updateTask } = useUpdateTask();
   const { mutateAsync: deleteTask } = useDeleteTask();
   const [newTask, setNewTask] = useState({
@@ -271,9 +315,11 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
   });
   const [isAdding, setIsAdding] = useState(false);
   const [draggedTask, setDraggedTask] = useState<{ task: Task; status: TaskStatus } | null>(null);
+  const [dragOverStatus, setDragOverStatus] = useState<TaskStatus | null>(null);
   const [search, setSearch] = useState('');
   const [priorityFilter, setPriorityFilter] = useState<'all' | Task['priority']>('all');
   const [dueDateFilter, setDueDateFilter] = useState<DueDateFilter>('all');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const tasksByStatus = useMemo<Record<TaskStatus, Task[]>>(() => ({
     todo: tasks.filter((task) => task.status === 'todo'),
     in_progress: tasks.filter((task) => task.status === 'in_progress'),
@@ -289,7 +335,10 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (newTask.title.trim()) {
+    if (isSubmitting || !newTask.title.trim()) return;
+
+    setIsSubmitting(true);
+    try {
       await createTask({
         title: newTask.title.trim(),
         description: newTask.description.trim() || null,
@@ -300,6 +349,11 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
       
       setNewTask({ title: '', description: '', priority: 'medium', dueDate: '' });
       setIsAdding(false);
+      setSearch('');
+      setPriorityFilter('all');
+      setDueDateFilter('all');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -309,7 +363,7 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
       title: task.title, 
       description: task.description || '',
       priority: task.priority,
-      dueDate: task.dueDate || ''
+      dueDate: toDateInputValue(task.dueDate)
     });
   };
 
@@ -332,21 +386,35 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
     }
   };
 
-  // Drag and drop functions
   const handleDragStart = (task: Task, status: TaskStatus) => {
     setDraggedTask({ task, status });
+    setDragOverStatus(null);
   };
 
-  const handleDragOver = (e: React.DragEvent, status: TaskStatus) => {
-    e.preventDefault();
+  const handleDragOver = (event: React.DragEvent, status: TaskStatus) => {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+    setDragOverStatus((currentStatus) => currentStatus === status ? currentStatus : status);
   };
 
-  const handleDrop = async (e: React.DragEvent, newStatus: TaskStatus) => {
-    e.preventDefault();
-    if (draggedTask && draggedTask.status !== newStatus) {
-      await updateTask({ id: draggedTask.task.id, status: newStatus });
-    }
+  const handleDrop = async (event: React.DragEvent, newStatus: TaskStatus) => {
+    event.preventDefault();
+    const taskId = event.dataTransfer.getData('text/plain') || draggedTask?.task.id;
+    const currentTask = draggedTask;
     setDraggedTask(null);
+    setDragOverStatus(null);
+    if (currentTask && taskId && currentTask.status !== newStatus) {
+      await updateTask({ id: taskId, status: newStatus });
+    }
+  };
+
+  const handleDragEnd = () => {
+    setDraggedTask(null);
+    setDragOverStatus(null);
+  };
+
+  const handleMoveStatus = async (task: Task, newStatus: TaskStatus) => {
+    if (task.status !== newStatus) await updateTask({ id: task.id, status: newStatus });
   };
 
   const totalTasks = tasks.length;
@@ -354,12 +422,12 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
   const completionPercentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
   return (
-    <AnimatedWidget className="w-full bg-gradient-to-br from-purple-50 to-indigo-100 lg:h-[680px]">
+    <AnimatedWidget className="ff-card-solid w-full min-h-0">
       <div className="flex h-full min-h-0 flex-col">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-2">
           <div>
-            <h3 className="font-semibold text-lg text-gray-800">
+            <h3 className="widget-drag-handle cursor-grab select-none font-semibold text-lg text-gray-800 active:cursor-grabbing">
               {title || 'Tasks'}
             </h3>
             <div className="flex items-center space-x-2 mt-1">
@@ -368,7 +436,7 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
               </div>
               <div className="w-16 bg-gray-200 rounded-full h-1">
                 <div 
-                  className="bg-green-500 h-1 rounded-full transition-all duration-300"
+                  className="h-1 rounded-full bg-emerald-600 transition-all duration-300"
                   style={{ width: `${completionPercentage}%` }}
                 />
               </div>
@@ -377,7 +445,7 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
           
           <AnimatedButton
             onClick={() => setIsAdding(true)}
-            className="bg-purple-500 hover:bg-purple-600 text-white px-3 py-2 rounded-lg text-sm w-full sm:w-auto"
+            className="ff-btn-primary h-9 w-full sm:w-auto"
           >
             <Plus size={16} className="mr-1" />
             Add Task
@@ -387,13 +455,16 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
         {/* Task creation form */}
         <AnimatePresence>
           {isAdding && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="mb-4 p-3 bg-white/50 rounded-lg"
-            >
-              <form onSubmit={handleSubmit} className="space-y-2">
+            <ModalPortal>
+              <div className="ff-modal-layer fixed inset-0 z-[var(--ff-z-modal)] flex items-start justify-center overflow-y-auto overscroll-contain p-4 pt-[max(4rem,10vh)]" onClick={() => setIsAdding(false)}>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="ff-modal-backdrop ff-task-modal-backdrop absolute inset-0"
+                  aria-hidden="true"
+                />
+              <form autoComplete="off" onSubmit={handleSubmit} onClick={(event) => event.stopPropagation()} className="ff-modal-panel relative z-10 w-full max-w-md max-h-[calc(100dvh-6rem)] overflow-y-auto rounded-lg border border-slate-200 bg-slate-50 p-3 space-y-2 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
                 <label className="sr-only" htmlFor="new-task-title">Task title</label>
                 <input
                   id="new-task-title"
@@ -401,6 +472,7 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
                   value={newTask.title}
                   onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
                   placeholder="Task title"
+                  autoComplete="off"
                   className="w-full p-2 border border-gray-300 rounded text-sm"
                   autoFocus
                 />
@@ -418,7 +490,7 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
                   <select
                     id="new-task-priority"
                     value={newTask.priority}
-                    onChange={(e) => setNewTask({ ...newTask, priority: e.target.value as any })}
+                    onChange={(e) => setNewTask({ ...newTask, priority: e.target.value as Task['priority'] })}
                     className="p-2 border border-gray-300 rounded text-sm"
                   >
                     <option value="low">Low Priority</option>
@@ -437,24 +509,26 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
                 <div className="flex space-x-2">
                   <button
                     type="submit"
-                    className="flex-1 bg-green-500 text-white py-2 rounded text-sm hover:bg-green-600"
+                    disabled={isSubmitting || isCreating}
+                    className="flex-1 rounded-lg bg-indigo-600 py-2 text-sm text-white hover:bg-indigo-700"
                   >
                     Add Task
                   </button>
                   <button
                     type="button"
                     onClick={() => setIsAdding(false)}
-                    className="px-3 bg-gray-500 text-white py-2 rounded text-sm hover:bg-gray-600"
+                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
                   >
                     Cancel
                   </button>
                 </div>
               </form>
-            </motion.div>
+              </div>
+            </ModalPortal>
           )}
         </AnimatePresence>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-4">
+        <div className="mb-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
           <label className="sr-only" htmlFor="task-search">Search tasks</label>
           <input
             id="task-search"
@@ -462,15 +536,15 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Search tasks..."
-            className="sm:col-span-1 w-full p-2 border border-gray-300 rounded text-sm"
+            className="h-9 w-full rounded-lg border border-slate-200 p-2 text-sm sm:col-span-2"
           />
-          <select aria-label="Filter tasks by priority" value={priorityFilter} onChange={(event) => setPriorityFilter(event.target.value as 'all' | Task['priority'])} className="p-2 border border-gray-300 rounded text-sm">
+          <select aria-label="Filter tasks by priority" value={priorityFilter} onChange={(event) => setPriorityFilter(event.target.value as 'all' | Task['priority'])} className="h-9 rounded-lg border border-slate-200 bg-white px-2 text-sm">
             <option value="all">All priorities</option>
             <option value="high">High priority</option>
             <option value="medium">Medium priority</option>
             <option value="low">Low priority</option>
           </select>
-          <select aria-label="Filter tasks by due date" value={dueDateFilter} onChange={(event) => setDueDateFilter(event.target.value as DueDateFilter)} className="p-2 border border-gray-300 rounded text-sm">
+          <select aria-label="Filter tasks by due date" value={dueDateFilter} onChange={(event) => setDueDateFilter(event.target.value as DueDateFilter)} className="h-9 rounded-lg border border-slate-200 bg-white px-2 text-sm">
             <option value="all">All deadlines</option>
             <option value="overdue">Overdue</option>
             <option value="today">Due today</option>
@@ -495,6 +569,9 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
                 onEdit={handleEdit}
                 onDelete={handleDelete}
                 onDragStart={handleDragStart}
+                onDragEnd={handleDragEnd}
+                onMoveStatus={handleMoveStatus}
+                isDropTarget={dragOverStatus === status}
                 editState={editState}
                 onSaveEdit={handleSaveEdit}
                 onCancelEdit={() => setEditState({ id: null, title: '', description: '', priority: 'medium', dueDate: '' })}
@@ -514,6 +591,9 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
                 onEdit={handleEdit}
                 onDelete={handleDelete}
                 onDragStart={handleDragStart}
+                onDragEnd={handleDragEnd}
+                onMoveStatus={handleMoveStatus}
+                isDropTarget={dragOverStatus === status}
                 editState={editState}
                 onSaveEdit={handleSaveEdit}
                 onCancelEdit={() => setEditState({ id: null, title: '', description: '', priority: 'medium', dueDate: '' })}
@@ -521,26 +601,27 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
             ))}
           </div>
 
-          {/* Mobile: horizontal scrolling */}
-          <div className="md:hidden flex overflow-x-auto pb-4 space-x-4 h-full">
-            <div className="flex space-x-4 min-w-max">
+          {/* Mobile: stacked drop zones with natural document height */}
+          <div className="ff-mobile-task-columns md:hidden flex flex-col gap-4">
               {(Object.entries(visibleTasksByStatus) as [TaskStatus, Task[]][]).map(([status, statusTasks]) => (
-                <div key={status} className="w-64 flex-shrink-0">
+                <div key={status} className="w-full min-w-0">
                   <TaskColumn
                     status={status as TaskStatus}
                     tasks={statusTasks}
-                    onDragOver={handleDragOver}
-                    onDrop={handleDrop}
+                onDragOver={() => undefined}
+                onDrop={() => undefined}
                     onEdit={handleEdit}
                     onDelete={handleDelete}
-                    onDragStart={handleDragStart}
+                onDragStart={handleDragStart}
+                onDragEnd={handleDragEnd}
+                onMoveStatus={handleMoveStatus}
+                isDropTarget={false}
                     editState={editState}
                     onSaveEdit={handleSaveEdit}
                     onCancelEdit={() => setEditState({ id: null, title: '', description: '', priority: 'medium', dueDate: '' })}
                   />
                 </div>
               ))}
-            </div>
           </div>
         </div>
       </div>

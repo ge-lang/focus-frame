@@ -6,6 +6,7 @@ import { SessionProviderWrapper } from '@/components/session-provider-wrapper';
 import QueryProvider from '@/providers/query-provider';
 import { DashboardProvider } from '@/contexts/dashboard-context';
 import { ToastProvider } from '@/components/toast-provider';
+import { ThemeProvider } from '@/components/theme-provider';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -17,7 +18,7 @@ export const metadata: Metadata = {
 // Create a client-side wrapper component
 function ProvidersWrapper({ children }: { children: React.ReactNode }) {
   return (
-    <SessionProviderWrapper><QueryProvider><ToastProvider><DashboardProvider>{children}</DashboardProvider></ToastProvider></QueryProvider></SessionProviderWrapper>
+    <SessionProviderWrapper><ThemeProvider><QueryProvider><ToastProvider><DashboardProvider>{children}</DashboardProvider></ToastProvider></QueryProvider></ThemeProvider></SessionProviderWrapper>
   );
 }
 
@@ -28,7 +29,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={`${inter.className} ff-document-body`}>
         <ProvidersWrapper>
           {children}
         </ProvidersWrapper>

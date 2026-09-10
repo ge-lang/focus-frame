@@ -70,15 +70,31 @@ function generateDemoForecast(): ForecastItem[] {
   }));
 }
 
-export function useWeather(initialCity = 'Amsterdam'): UseWeatherReturn {
+function generateEmptyWeather(): WeatherData {
+  return {
+    temp: 0, feelsLike: 0, description: 'Choose a location', icon: '01d', city: '', country: '', humidity: 0,
+    windSpeed: 0, windDirection: 0, pressure: 0, visibility: 0, sunrise: 0, sunset: 0, cloudiness: 0, uvIndex: 0,
+    dewPoint: 0, loading: false, error: null, lastUpdated: 0,
+  };
+}
+
+export function useWeather(initialCity = '', initialCountryCode?: string): UseWeatherReturn {
   const [city, setCity] = useState(initialCity);
-  const [countryCode, setCountryCode] = useState<string | undefined>();
-  const [weather, setWeather] = useState<WeatherData>({ ...generateDemoData(initialCity), loading: true });
+  const [countryCode, setCountryCode] = useState<string | undefined>(initialCountryCode?.toUpperCase());
+  const [weather, setWeather] = useState<WeatherData>(initialCity ? { ...generateDemoData(initialCity), loading: true } : generateEmptyWeather());
   const [forecast, setForecast] = useState<ForecastItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isDemo, setIsDemo] = useState(true);
+  const [isLoading, setIsLoading] = useState(Boolean(initialCity));
+  const [isDemo, setIsDemo] = useState(false);
 
   const fetchWeatherData = useCallback(async (forceRefresh = false) => {
+    if (!city.trim()) {
+      setWeather(generateEmptyWeather());
+      setForecast([]);
+      setIsDemo(false);
+      setIsLoading(false);
+      return;
+    }
+
     const cacheKey = `${city.toLowerCase()}_${countryCode ?? ''}`;
     const cached = weatherCache.get(cacheKey);
     if (!forceRefresh && cached && Date.now() - cached.timestamp < 10 * 60 * 1000) {
@@ -95,14 +111,18 @@ export function useWeather(initialCity = 'Amsterdam'): UseWeatherReturn {
       const params = new URLSearchParams({ city });
       if (countryCode) params.set('country', countryCode);
       const response = await fetch(`/api/weather?${params}`);
-      if (!response.ok) throw new Error('Weather service is unavailable');
+      if (!response.ok) {
+        const payload = await response.json().catch(() => null) as { error?: string } | null;
+        throw new Error(payload?.error ?? 'Weather service is temporarily unavailable');
+      }
       const data = await response.json() as { weather: WeatherData; forecast: ForecastItem[] };
       weatherCache.set(cacheKey, { weather: data.weather, forecast: data.forecast, timestamp: Date.now(), isDemo: false });
       setWeather(data.weather);
       setForecast(data.forecast);
       setIsDemo(false);
-    } catch {
-      setWeather({ ...generateDemoData(city, countryCode), error: 'Showing demo data until the weather service is available.' });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Weather service is temporarily unavailable';
+      setWeather({ ...generateDemoData(city, countryCode), error: `${message}. Showing demo data instead.` });
       setForecast(generateDemoForecast());
       setIsDemo(true);
     } finally {
@@ -120,7 +140,7 @@ export function useWeather(initialCity = 'Amsterdam'): UseWeatherReturn {
     weather,
     forecast,
     setCity: (newCity) => { if (newCity.trim()) { setCity(newCity.trim()); setCountryCode(undefined); } },
-    setLocation: (newCity, newCountryCode) => { if (newCity.trim()) { setCity(newCity.trim()); setCountryCode(newCountryCode); } },
+    setLocation: (newCity, newCountryCode) => { if (newCity.trim()) { setCity(newCity.trim()); setCountryCode(newCountryCode?.toUpperCase()); } },
     city,
     refresh: () => { void fetchWeatherData(true); },
     isLoading,

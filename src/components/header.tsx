@@ -9,18 +9,18 @@ export default function Header() {
   const { data: session } = useSession();
 
   return (
-    <header className="bg-white shadow-sm border-b">
+    <header className="border-b border-white/70 bg-white/70 backdrop-blur-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">
-            <div className="text-2xl font-bold text-gray-900">FocusFrame</div>
+            <div className="text-lg font-semibold tracking-tight text-slate-900 sm:text-xl">FocusFrame</div>
           </div>
           
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center gap-3">
             {session?.user && (
               <>
-                <span className="text-gray-600">
-                  Hello, {session.user.name}
+                <span className="hidden text-sm text-slate-500 sm:inline">
+                  Welcome, {session.user.name?.split(' ')[0] ?? 'there'}
                 </span>
                 <Image
                   loader={avatarLoader}
@@ -29,11 +29,11 @@ export default function Header() {
                   alt="User avatar"
                   width={32}
                   height={32}
-                  className="w-8 h-8 rounded-full"
+                  className="h-8 w-8 rounded-full ring-1 ring-white/80"
                 />
                 <button
                   onClick={() => signOut()}
-                  className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+                  className="inline-flex h-9 items-center rounded-lg px-2 text-sm font-medium text-slate-400 transition-colors hover:bg-slate-50 hover:text-slate-600"
                 >
                   Sign out
                 </button>

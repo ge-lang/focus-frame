@@ -1,131 +1,188 @@
-// src/components/dashboard-grid.tsx
 'use client';
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  DragEndEvent,
-} from '@dnd-kit/core';
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  rectSortingStrategy,
-} from '@dnd-kit/sortable';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Responsive, type Layout as GridLayout, type LayoutItem as GridLayoutItem } from 'react-grid-layout';
+import { noCompactor } from 'react-grid-layout/core';
+import 'react-grid-layout/css/styles.css';
 import { useDashboard } from '@/contexts/dashboard-context';
+import { useStableContainerWidth } from '@/hooks/use-stable-container-width';
 import { SortableWidget } from './sortable-widget';
-import { WidgetRenderer } from './widget-renderer';
-import { motion } from 'framer-motion';
-import { easeOut } from 'framer-motion';
+import { applyLayoutHeightOverrides, canPersistDesktopLayout, getGridHeightForContent, getWidgetSizing, normalizeDesktopOrigin, normalizeLayout, reconcileLayoutTypes, stackLayoutForMobile } from '@/lib/dashboard-layout';
+import type { LayoutItem } from '@/types/dashboard';
 
-// Animations for the container and its items
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.2,
-    }
-  }
-};
-
-const itemVariants = { 
-  hidden: { opacity: 0, y: 20, scale: 0.95 },
-  visible: { 
-    opacity: 1, 
-    y: 0, 
-    scale: 1, 
-    transition: { duration: 0.4, ease: easeOut },
-  }, 
-};
+const BREAKPOINTS = { lg: 1024, md: 768, sm: 640, xs: 480, xxs: 0 } as const;
+const COLUMNS = { lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 } as const;
+const fixedGridCompactor = { ...noCompactor, preventCollision: true };
+type AutoScrollState = { active: boolean; pointerY: number; frame: number | null; cleanup?: () => void };
 
 export function DashboardGrid() {
-  const { state, updateLayout } = useDashboard();
+  const { state, isHydrated, updateLayout } = useDashboard();
   const { layout, isEditing, widgets } = state;
+  const [heightOverrides, setHeightOverrides] = useState<Record<string, number>>({});
+  const { width, containerRef, isStable } = useStableContainerWidth();
+  const breakpointRef = useRef('lg');
+  const autoScrollRef = useRef<AutoScrollState>({
+    active: false,
+    pointerY: 0,
+    frame: null,
+  });
+  const isDraggingRef = useRef(false);
 
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
+  useEffect(() => {
+    setHeightOverrides((current) => {
+      const validIds = new Set(layout.map((item) => item.i));
+      const next = Object.fromEntries(Object.entries(current).filter(([id]) => validIds.has(id)));
+      return Object.keys(next).length === Object.keys(current).length ? current : next;
+    });
+  }, [layout]);
 
-  function handleDragEnd(event: DragEndEvent) {
-    const { active, over } = event;
-
-    if (over && active.id !== over.id) {
-      const oldIndex = layout.findIndex((item) => item.i === active.id);
-      const newIndex = layout.findIndex((item) => item.i === over.id);
-
-      if (oldIndex !== -1 && newIndex !== -1) {
-        const newLayout = arrayMove(layout, oldIndex, newIndex);
-        updateLayout(newLayout);
-      }
+  const stopAutoScroll = useCallback(() => {
+    const state = autoScrollRef.current;
+    state.active = false;
+    state.cleanup?.();
+    state.cleanup = undefined;
+    if (state.frame !== null) {
+      window.cancelAnimationFrame(state.frame);
+      state.frame = null;
     }
-  }
+  }, []);
 
-  // Get a widget by ID
-  const getWidgetById = (id: string) => {
-    return widgets.find(widget => widget.id === id);
+  const startAutoScroll = useCallback(() => {
+    stopAutoScroll();
+    autoScrollRef.current.active = true;
+
+    const handlePointerMove = (event: PointerEvent) => {
+      autoScrollRef.current.pointerY = event.clientY;
+    };
+    const scrollFrame = () => {
+      const state = autoScrollRef.current;
+      if (!state.active) return;
+
+      const edgeThreshold = 80;
+      const maximumSpeed = 5;
+      const distanceFromTop = state.pointerY;
+      const distanceFromBottom = window.innerHeight - state.pointerY;
+      let scrollDelta = 0;
+
+      if (distanceFromTop >= 0 && distanceFromTop < edgeThreshold) {
+        scrollDelta = -maximumSpeed * (1 - distanceFromTop / edgeThreshold);
+      } else if (distanceFromBottom >= 0 && distanceFromBottom < edgeThreshold) {
+        scrollDelta = maximumSpeed * (1 - distanceFromBottom / edgeThreshold);
+      }
+
+      if (scrollDelta !== 0) window.scrollBy(0, scrollDelta);
+      state.frame = window.requestAnimationFrame(scrollFrame);
+    };
+
+    window.addEventListener('pointermove', handlePointerMove);
+    autoScrollRef.current.frame = window.requestAnimationFrame(scrollFrame);
+
+    const cleanup = () => {
+      window.removeEventListener('pointermove', handlePointerMove);
+    };
+    autoScrollRef.current.cleanup = cleanup;
+  }, [stopAutoScroll]);
+
+  useEffect(() => () => {
+    stopAutoScroll();
+  }, [stopAutoScroll]);
+
+  const renderDesktopLayout = useMemo(() => applyLayoutHeightOverrides(layout, heightOverrides), [layout, heightOverrides]);
+
+  const layouts = useMemo(() => ({
+    lg: renderDesktopLayout,
+    md: stackLayoutForMobile(layout, COLUMNS.md),
+    sm: stackLayoutForMobile(layout, COLUMNS.sm),
+    xs: stackLayoutForMobile(layout, COLUMNS.xs),
+    xxs: stackLayoutForMobile(layout, COLUMNS.xxs),
+  }), [renderDesktopLayout, layout]);
+
+  const getWidgetById = (id: string) => widgets.find((widget) => widget.id === id);
+
+  const renderWidget = (item: LayoutItem) => {
+    const widget = getWidgetById(item.i);
+    return widget ? (
+      <div key={item.i}>
+        <SortableWidget id={item.i} type={item.type} onContentHeightChange={handleWidgetContentHeight} />
+      </div>
+    ) : null;
   };
 
-  // View mode (without drag and drop)
-  if (!isEditing) {
-    return (
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="grid grid-cols-1 items-start gap-5 lg:grid-cols-3"
-      >
-        {layout.map((item) => {
-          const widget = getWidgetById(item.i);
-          return widget ? (
-            <motion.div
-              key={item.i}
-              variants={itemVariants}
-              className={`${item.w > 1 ? 'lg:col-span-2' : ''} self-start`}
-            >
-              <WidgetRenderer widget={widget} />
-            </motion.div>
-          ) : null;
-        })}
-      </motion.div>
-    );
+  function handleWidgetContentHeight(widgetId: string, contentHeight: number) {
+    if (!isStable || width < BREAKPOINTS.sm || breakpointRef.current !== 'lg') return;
+
+    const currentItem = renderDesktopLayout.find((item) => item.i === widgetId);
+    if (!currentItem) return;
+
+    const minimumHeight = getWidgetSizing(currentItem.type).h;
+    const requiredHeight = getGridHeightForContent(contentHeight, 72, 16, minimumHeight);
+    if (requiredHeight === currentItem.h) return;
+
+    setHeightOverrides((current) => {
+      if (requiredHeight === minimumHeight) {
+        if (current[widgetId] === undefined) return current;
+        const next = { ...current };
+        delete next[widgetId];
+        return next;
+      }
+      if (current[widgetId] === requiredHeight) return current;
+      return { ...current, [widgetId]: requiredHeight };
+    });
   }
 
-  // Edit mode (with drag and drop)
+  const handleUserLayoutChange = (nextLayout: GridLayout) => {
+    if (!isStable || !canPersistDesktopLayout(isHydrated, width, breakpointRef.current, BREAKPOINTS.lg) || isDraggingRef.current) return;
+
+    const callbackLayout: LayoutItem[] = nextLayout.flatMap((item: GridLayoutItem) => {
+      const widget = widgets.find((candidate) => candidate.id === item.i);
+      return widget ? [{ ...item, type: widget.type }] : [];
+    });
+    const reconciledLayout = reconcileLayoutTypes(callbackLayout, widgets);
+    const persistedLayout = reconciledLayout.map((item) => ({
+      ...item,
+      w: getWidgetSizing(item.type).w,
+      h: getWidgetSizing(item.type).h,
+    }));
+    const normalized = normalizeDesktopOrigin(normalizeLayout(persistedLayout));
+    updateLayout(normalized, { markDirty: true });
+  };
+
   return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCenter}
-      onDragEnd={handleDragEnd}
-    >
-      <SortableContext items={layout.map(item => item.i)} strategy={rectSortingStrategy}>
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="grid grid-cols-1 items-start gap-5 rounded-2xl border-2 border-dashed border-indigo-200 bg-indigo-50/40 p-3 lg:grid-cols-3"
+    <div ref={containerRef} className="w-full min-w-0">
+      {!isHydrated || !isStable ? (
+        <div className="min-h-24" aria-hidden="true" />
+      ) : width < BREAKPOINTS.sm ? (
+        <div className="ff-mobile-widget-stack">
+          {layout.map(renderWidget)}
+        </div>
+      ) : (
+        <Responsive
+          width={width}
+          layouts={layouts}
+          breakpoints={BREAKPOINTS}
+          cols={COLUMNS}
+          rowHeight={72}
+          margin={[16, 16]}
+          containerPadding={[0, 0]}
+          compactor={fixedGridCompactor}
+          dragConfig={{
+            enabled: true,
+            handle: '.widget-drag-handle',
+            cancel: 'button, input, textarea, select, a, [draggable], [data-no-drag]',
+          }}
+          resizeConfig={{ enabled: false }}
+          onDragStart={() => { isDraggingRef.current = true; startAutoScroll(); }}
+          onDragStop={(nextLayout) => {
+            isDraggingRef.current = false;
+            stopAutoScroll();
+            handleUserLayoutChange(nextLayout);
+          }}
+          onBreakpointChange={(nextBreakpoint) => {
+            breakpointRef.current = nextBreakpoint;
+          }}
         >
-          {layout.map((item) => {
-            const widget = getWidgetById(item.i);
-            return widget ? (
-              <motion.div
-                key={item.i}
-                variants={itemVariants}
-                className={`${item.w > 1 ? 'lg:col-span-2' : ''} self-start`}
-              >
-                <SortableWidget id={item.i} type={item.type} />
-              </motion.div>
-            ) : null;
-          })}
-        </motion.div>
-      </SortableContext>
-    </DndContext>
+          {layout.map(renderWidget)}
+        </Responsive>
+      )}
+    </div>
   );
 }

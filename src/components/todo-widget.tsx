@@ -37,7 +37,7 @@ export default function TodoWidget() {
   };
 
   return (
-    <AnimatedWidget className="bg-gradient-to-br from-purple-50 to-pink-100">
+    <AnimatedWidget>
       <div className="h-full flex flex-col">
         <h3 className="font-semibold text-lg mb-4 text-gray-800">Tasks</h3>
         
@@ -79,7 +79,7 @@ export default function TodoWidget() {
           />
           <button
             onClick={addTodo}
-            className="px-3 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors"
+            className="rounded-lg bg-indigo-600 px-3 py-2 text-white transition-colors hover:bg-indigo-700"
           >
             +
           </button>

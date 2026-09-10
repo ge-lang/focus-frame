@@ -24,21 +24,40 @@ import { DashboardGrid } from '@/components/dashboard-grid';
 import { EditToggle } from '@/components/edit-toggle';
 import { WidgetPicker } from '@/components/widget-picker';
 import { AuthButton } from '@/components/auth-button';
+import { MobileStickyActions } from '@/components/mobile-sticky-actions';
+import { ThemeControl } from '@/components/theme-control';
+import { ThemeWorkspace } from '@/components/theme-workspace';
+import { EvvaMark } from '@/components/evva-mark';
 
 export default function Home() {
   return (
     <AuthGuard>
-      <main className="container mx-auto p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">Focus Frame</h1>
-          <div className="flex items-center space-x-4">
-            <AuthButton />
-            <WidgetPicker />
-            <EditToggle />
+      <ThemeWorkspace>
+        <div className="ff-app-frame mx-auto max-w-[1440px]">
+          <header className="ff-topbar">
+            <div className="ff-brand">
+              <span className="ff-brand-mark" aria-hidden="true"><EvvaMark /></span>
+              <div>
+                <h1 className="ff-brand-title">FocusFrame</h1>
+              </div>
+            </div>
+
+            <div className="ff-topbar-actions">
+              <AuthButton />
+              <div className="ff-action-divider" aria-hidden="true" />
+              <ThemeControl />
+              <WidgetPicker />
+              <EditToggle />
+            </div>
+          </header>
+
+          <MobileStickyActions />
+
+          <div className="ff-dashboard-stage">
+            <DashboardGrid />
           </div>
         </div>
-        <DashboardGrid />
-      </main>
+      </ThemeWorkspace>
     </AuthGuard>
   );
 }

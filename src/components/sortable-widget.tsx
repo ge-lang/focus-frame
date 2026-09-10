@@ -1,64 +1,48 @@
 // src/components/sortable-widget.tsx (improved version)
 'use client';
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
 import { WidgetRenderer } from './widget-renderer';
 import { useDashboard } from '@/contexts/dashboard-context';
 import { motion } from 'framer-motion';
-import { GripVertical } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 
 interface SortableWidgetProps {
   id: string;
   type: string;
+  onContentHeightChange?: (widgetId: string, height: number) => void;
 }
 
-export function SortableWidget({ id, type }: SortableWidgetProps) {
-  const { state } = useDashboard();
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-  };
-
+export function SortableWidget({ id, type, onContentHeightChange }: SortableWidgetProps) {
+  const { state, removeWidget } = useDashboard();
   const widget = state.widgets.find(w => w.id === id);
 
   if (!widget) {
-    return (
-      <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-        <div className="p-4 border border-dashed border-gray-300 rounded-lg">
-          Widget not found: {id}
-        </div>
-      </div>
-    );
+    return <div className="rounded-lg border border-dashed border-gray-300 p-4">Widget not found: {id}</div>;
   }
+
+  const handleRemove = () => {
+    if (window.confirm(`Remove ${type} widget from your dashboard?`)) removeWidget(id);
+  };
 
   return (
     <motion.div
-      ref={setNodeRef}
-      style={style}
-      className={`relative group ${isDragging ? 'opacity-50' : ''}`}
-      whileHover={{ scale: 1.01 }}
+      className="group relative h-full"
     >
-      {/* Drag handle */}
-      <div
-        {...attributes}
-        {...listeners}
-        className="absolute -top-2 -left-2 z-10 bg-gray-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-grab shadow-lg"
-        title="Drag to rearrange"
-      >
-        <GripVertical size={14} />
-      </div>
-
       {/* Widget with a context menu */}
-      <WidgetRenderer widget={widget} />
+      <WidgetRenderer widget={widget} onContentHeightChange={onContentHeightChange} />
+
+      {state.isEditing && (
+        <button
+          type="button"
+          aria-label={`Remove ${type} widget`}
+          title="Remove widget"
+          onPointerDown={(event) => event.stopPropagation()}
+          onClick={handleRemove}
+          className="absolute right-2 top-2 z-10 rounded-md p-1.5 text-slate-400 opacity-60 transition hover:bg-red-50 hover:text-red-600 hover:opacity-100 focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-red-300"
+        >
+          <Trash2 size={14} />
+        </button>
+      )}
+
     </motion.div>
   );
 }

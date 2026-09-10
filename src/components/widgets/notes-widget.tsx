@@ -9,36 +9,36 @@ interface NotesWidgetProps {
 }
 
 export default function NotesWidget({ widgetId, title }: NotesWidgetProps) {
-  const { data: note, isLoading } = useNote(widgetId);
+  const { data: note, isLoading, isFetched, isError } = useNote(widgetId);
   const { mutate: saveNote, isPending: isSaving } = useSaveNote();
   const [content, setContent] = useState('');
 
   useEffect(() => {
-    setContent(note?.content ?? '');
-  }, [note?.content]);
+    if (isFetched && !isError) setContent(note?.content ?? '');
+  }, [isError, isFetched, note?.content]);
 
   useEffect(() => {
-    if (isLoading || content === (note?.content ?? '')) return;
+    if (isLoading || !isFetched || isError || content === (note?.content ?? '')) return;
     const timeoutId = window.setTimeout(() => saveNote({ widgetId, content }), 600);
     return () => window.clearTimeout(timeoutId);
-  }, [content, isLoading, note?.content, saveNote, widgetId]);
+  }, [content, isError, isFetched, isLoading, note?.content, saveNote, widgetId]);
 
   return (
-    <AnimatedWidget className="bg-gradient-to-br from-yellow-50 to-orange-100">
+    <AnimatedWidget>
       <div className="h-full flex flex-col">
-        <h3 className="font-semibold text-lg mb-4 text-gray-800">{title || 'Notes'}</h3>
+        <h3 className="widget-drag-handle cursor-grab select-none font-semibold text-lg mb-4 text-gray-800 active:cursor-grabbing">{title || 'Notes'}</h3>
         <textarea
           aria-label="Notes"
           value={content}
           onChange={(event) => setContent(event.target.value)}
           placeholder="Write your notes here..."
-          className="flex-1 w-full p-3 text-sm border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white/50"
+          className="w-full flex-1 resize-none rounded-lg border border-slate-100 bg-slate-50/70 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-200"
           rows={5}
           disabled={isLoading}
         />
         <div className="flex justify-between items-center mt-3">
           <span className="text-xs text-gray-500">{isSaving ? 'Saving…' : `${content.length} characters`}</span>
-          <button aria-label="Clear notes" onClick={() => setContent('')} className="px-3 py-1 bg-orange-500 text-white text-sm rounded hover:bg-orange-600 transition-colors">
+          <button aria-label="Clear notes" onClick={() => setContent('')} className="rounded-lg px-2 py-1 text-sm text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-700">
             Clear
           </button>
         </div>

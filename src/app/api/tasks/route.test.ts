@@ -42,4 +42,39 @@ describe('/api/tasks input validation', () => {
     expect(response.status).toBe(400);
     expect(mocks.create).not.toHaveBeenCalled();
   });
+
+  it('returns the created task with an optional ISO deadline', async () => {
+    mocks.getServerSession.mockResolvedValue({ user: { id: 'user-a' } });
+    const createdTask = {
+      id: 'task-1',
+      title: 'Plan release',
+      description: null,
+      priority: 'medium',
+      status: 'todo',
+      isCompleted: false,
+      dueDate: new Date('2026-09-09T00:00:00.000Z'),
+      userId: 'user-a',
+    };
+    mocks.create.mockResolvedValue(createdTask);
+
+    const response = await POST(new Request('http://localhost/api/tasks', {
+      method: 'POST',
+      body: JSON.stringify({ title: 'Plan release', dueDate: '2026-09-09' }),
+      headers: { 'Content-Type': 'application/json' },
+    }) as NextRequest);
+
+    expect(response.status).toBe(200);
+    expect(mocks.create).toHaveBeenCalledWith({
+      data: {
+        title: 'Plan release',
+        description: null,
+        priority: 'medium',
+        status: 'todo',
+        dueDate: new Date('2026-09-09T00:00:00.000Z'),
+        isCompleted: false,
+        userId: 'user-a',
+      },
+    });
+    await expect(response.json()).resolves.toMatchObject({ id: 'task-1', dueDate: '2026-09-09T00:00:00.000Z' });
+  });
 });

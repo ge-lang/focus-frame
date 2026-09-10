@@ -1,6 +1,7 @@
 // src/components/widgets/pomodoro-widget.tsx
 'use client';
 import { AnimatedWidget } from '@/components/animated-widget';
+import { ModalPortal } from '@/components/modal-portal';
 import { useState, useEffect, useRef } from 'react';
 import { Play, Pause, Square, RotateCcw, Settings, Bell, BellOff } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -237,11 +238,11 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
   };
 
   return (
-    <AnimatedWidget className="bg-gradient-to-br from-orange-50 to-red-100">
+    <AnimatedWidget>
       <div className="h-full flex flex-col">
         {/* Header and settings */}
         <div className="flex justify-between items-center mb-4">
-          <h3 className="font-semibold text-lg text-gray-800">
+          <h3 className="widget-drag-handle cursor-grab select-none font-semibold text-lg text-gray-800 active:cursor-grabbing">
             {title || 'Pomodoro Timer'}
           </h3>
           <div className="flex space-x-2">
@@ -269,13 +270,16 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
         {/* Settings */}
         <AnimatePresence>
           {showSettings && (
-            <motion.div
+            <ModalPortal>
+              <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="mb-4 p-3 bg-white/50 rounded-lg overflow-hidden"
+              className="ff-modal-backdrop fixed inset-0 flex items-start justify-center overflow-y-auto overscroll-contain p-4 pt-[max(4rem,10vh)]"
+              onClick={() => setShowSettings(false)}
             >
-              <div className="grid grid-cols-2 gap-3 text-sm">
+              <div onClick={(event) => event.stopPropagation()} className="ff-modal-panel w-full max-w-md max-h-[calc(100dvh-6rem)] overflow-y-auto rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs text-gray-600 mb-1">Work (min)</label>
                   <input
@@ -377,18 +381,20 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
               <div className="flex space-x-2 mt-3">
                 <button
                   onClick={() => setSettings(defaultSettings)}
-                  className="flex-1 px-2 py-1 bg-gray-500 text-white text-xs rounded hover:bg-gray-600"
+                  className="flex-1 rounded-md border border-slate-200 bg-white px-2 py-1 text-xs text-slate-700 hover:bg-slate-50"
                 >
                   Reset to Defaults
                 </button>
                 <button
                   onClick={() => setShowSettings(false)}
-                  className="flex-1 px-2 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600"
+                  className="flex-1 rounded-md bg-indigo-600 px-2 py-1 text-xs text-white hover:bg-indigo-700"
                 >
                   Apply
                 </button>
               </div>
-            </motion.div>
+              </div>
+              </motion.div>
+            </ModalPortal>
           )}
         </AnimatePresence>
 
@@ -396,7 +402,7 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
         <div className="flex-1 flex flex-col items-center justify-center">
           {/* Progress circle */}
           <div className="relative mb-6">
-            <div className="w-48 h-48 rounded-full bg-white/50 shadow-inner">
+              <div className="ff-pomodoro-ring-shell h-48 w-48 rounded-full bg-slate-50 shadow-inner ring-8 ring-indigo-100">
               <svg className="w-full h-full" viewBox="0 0 100 100">
                 <circle
                   cx="50"
@@ -411,7 +417,7 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
                   cy="50"
                   r="45"
                   fill="none"
-                  stroke={getModeColor() === 'red' ? '#ef4444' : getModeColor() === 'green' ? '#10b981' : '#3b82f6'}
+                  stroke={getModeColor() === 'red' ? '#6366f1' : getModeColor() === 'green' ? '#818cf8' : '#4f46e5'}
                   strokeWidth="8"
                   strokeLinecap="round"
                   strokeDasharray="283"
@@ -426,8 +432,8 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
                 {formatTime(timeLeft)}
               </div>
               <div className={`text-sm font-medium ${
-                getModeColor() === 'red' ? 'text-red-600' : 
-                getModeColor() === 'green' ? 'text-green-600' : 'text-blue-600'
+                getModeColor() === 'red' ? 'text-indigo-600' :
+                getModeColor() === 'green' ? 'text-indigo-500' : 'text-indigo-700'
               }`}>
                 {getModeLabel()}
               </div>
@@ -441,7 +447,7 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
                 key={index}
                 className={`w-3 h-3 rounded-full ${
                   index < pomodoroCount % settings.longBreakInterval 
-                    ? 'bg-red-500' 
+                    ? 'bg-indigo-500'
                     : 'bg-gray-300'
                 }`}
                 title={`Pomodoro ${index + 1}`}
@@ -453,7 +459,7 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
             <select
               value={selectedTaskId}
               onChange={(event) => setSelectedTaskId(event.target.value)}
-              className="w-full max-w-xs mb-4 p-2 text-sm border border-gray-300 rounded-lg bg-white/70"
+              className="mb-4 w-full max-w-xs rounded-lg border border-slate-200 bg-slate-50 p-2 text-sm"
               aria-label="Task for this focus session"
             >
               <option value="">No task selected</option>
@@ -469,7 +475,7 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
               <button
                 aria-label="Start focus timer"
                 onClick={startTimer}
-                className="p-3 bg-green-500 text-white rounded-full hover:bg-green-600 transition-colors shadow-lg"
+                className="rounded-full bg-indigo-600 p-3 text-white shadow-sm transition-colors hover:bg-indigo-700"
                 title="Start"
               >
                 <Play size={20} />
@@ -478,7 +484,7 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
               <button
                 aria-label="Pause focus timer"
                 onClick={pauseTimer}
-                className="p-3 bg-yellow-500 text-white rounded-full hover:bg-yellow-600 transition-colors shadow-lg"
+                className="rounded-full border border-slate-200 bg-white p-3 text-slate-700 shadow-sm transition-colors hover:bg-slate-50"
                 title="Pause"
               >
                 <Pause size={20} />
@@ -488,7 +494,7 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
             <button
               aria-label="Stop focus timer"
               onClick={stopTimer}
-              className="p-3 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors shadow-lg"
+                className="rounded-full border border-red-200 bg-white p-3 text-red-600 shadow-sm transition-colors hover:bg-red-50"
               title="Stop"
             >
               <Square size={20} />
@@ -497,7 +503,7 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
             <button
               aria-label="Reset focus timer"
               onClick={resetTimer}
-              className="p-3 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors shadow-lg"
+                className="rounded-full border border-slate-200 bg-white p-3 text-slate-700 shadow-sm transition-colors hover:bg-slate-50"
               title="Reset"
             >
               <RotateCcw size={20} />

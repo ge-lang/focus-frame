@@ -9,19 +9,15 @@ import NotesWidget from './widgets/notes-widget';
 import AnalyticsWidget from './widgets/analytics-widget';
 import BookmarksWidget from './widgets/bookmarks-widget';
 import GoalsWidget from './widgets/goals-widget';
-import { AnimatedWidget } from './animated-widget';
 
 interface WidgetRendererProps {
   widget: Widget;
+  onContentHeightChange?: (widgetId: string, height: number) => void;
 }
 
-export function WidgetRenderer({ widget }: WidgetRendererProps) {
+export function WidgetRenderer({ widget, onContentHeightChange }: WidgetRendererProps) {
   if (!widget) {
-    return (
-      <AnimatedWidget className="h-full">
-        <div className="p-4 text-center text-gray-500">Widget not found</div>
-      </AnimatedWidget>
-    );
+    return <div className="p-4 text-center text-gray-500">Widget not found</div>;
   }
 
   const renderWidget = () => {
@@ -29,7 +25,16 @@ export function WidgetRenderer({ widget }: WidgetRendererProps) {
       case 'todo':
         return <TaskWidget widgetId={widget.id} title={widget.title} />;
       case 'weather':
-        return <WeatherWidget widgetId={widget.id} title={widget.title} />;
+        return (
+          <WeatherWidget
+            key={`${widget.id}:${typeof widget.config?.city === 'string' ? widget.config.city : ''}:${typeof widget.config?.country === 'string' ? widget.config.country : ''}`}
+            widgetId={widget.id}
+            title={widget.title}
+            initialCity={typeof widget.config?.city === 'string' ? widget.config.city : ''}
+            initialCountryCode={typeof widget.config?.country === 'string' ? widget.config.country : undefined}
+            onContentHeightChange={onContentHeightChange}
+          />
+        );
       case 'news':
         return <NewsWidget widgetId={widget.id} title={widget.title} />; // ← now it will work
       case 'pomodoro':
@@ -53,9 +58,5 @@ export function WidgetRenderer({ widget }: WidgetRendererProps) {
     }
   };
 
-  return (
-    <AnimatedWidget className="h-full">
-      {renderWidget()}
-    </AnimatedWidget>
-  );
+  return renderWidget();
 }

@@ -3,16 +3,19 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { isIntegerBetween } from '@/lib/api-validation';
+import { reconcileLayoutTypes } from '@/lib/dashboard-layout';
+import type { LayoutItem, Widget } from '@/types/dashboard';
 
 type PersistedDashboardState = {
-  widgets: unknown[];
-  layout: unknown[];
+  widgets: Widget[];
+  layout: LayoutItem[];
 };
 
 const widgetTypes = new Set(['todo', 'weather', 'news', 'pomodoro', 'calendar', 'notes', 'analytics', 'bookmarks', 'goals']);
 const MAX_WIDGETS = 20;
 const MAX_LAYOUT_ITEMS = 20;
 const MAX_GRID_SIZE = 12;
+const MAX_GRID_Y = 1000;
 const MAX_BODY_BYTES = 100_000;
 
 function isDashboardState(value: unknown): value is PersistedDashboardState {
@@ -24,10 +27,10 @@ function isDashboardState(value: unknown): value is PersistedDashboardState {
   const widgetIds = new Set<string>();
   for (const widget of state.widgets) {
     if (!widget || typeof widget !== 'object') return false;
-    const item = widget as Record<string, unknown>;
+    const item = widget as unknown as Record<string, unknown>;
     if (typeof item.id !== 'string' || item.id.length < 1 || item.id.length > 100 || widgetIds.has(item.id) ||
         typeof item.type !== 'string' || !widgetTypes.has(item.type) ||
-        !isIntegerBetween(item.colSpan, 1, 4) ||
+        !isIntegerBetween(item.colSpan, 1, MAX_GRID_SIZE) ||
         (item.rowSpan !== undefined && !isIntegerBetween(item.rowSpan, 1, 4))) {
       return false;
     }
@@ -37,13 +40,13 @@ function isDashboardState(value: unknown): value is PersistedDashboardState {
   const layoutIds = new Set<string>();
   for (const layout of state.layout) {
     if (!layout || typeof layout !== 'object') return false;
-    const item = layout as Record<string, unknown>;
+    const item = layout as unknown as Record<string, unknown>;
     if (typeof item.i !== 'string' || !widgetIds.has(item.i) || layoutIds.has(item.i) ||
         typeof item.type !== 'string' || !widgetTypes.has(item.type) ||
         !isIntegerBetween(item.x, 0, MAX_GRID_SIZE) ||
-        !isIntegerBetween(item.y, 0, MAX_GRID_SIZE) ||
-        !isIntegerBetween(item.w, 1, 4) ||
-        !isIntegerBetween(item.h, 1, 4)) {
+        !isIntegerBetween(item.y, 0, MAX_GRID_Y) ||
+        !isIntegerBetween(item.w, 1, MAX_GRID_SIZE) ||
+        !isIntegerBetween(item.h, 1, 8)) {
       return false;
     }
     layoutIds.add(item.i);
@@ -98,11 +101,16 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid dashboard state' }, { status: 400 });
   }
 
+  const canonicalState = {
+    ...state,
+    layout: reconcileLayoutTypes(state.layout, state.widgets),
+  };
+
   try {
     await prisma.userLayout.upsert({
       where: { userId: session.user.id },
-      create: { userId: session.user.id, layout: JSON.stringify(state) },
-      update: { layout: JSON.stringify(state) },
+      create: { userId: session.user.id, layout: JSON.stringify(canonicalState) },
+      update: { layout: JSON.stringify(canonicalState) },
     });
 
     return NextResponse.json({ success: true });

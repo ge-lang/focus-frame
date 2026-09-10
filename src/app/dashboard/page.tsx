@@ -11,25 +11,25 @@ export default function DashboardPage() {
   const { state, toggleEdit } = useDashboard();
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="ff-page-shell min-h-screen bg-[var(--ff-background)]">
       <Header />
       
-      <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="mb-1 text-sm font-medium text-indigo-600">Your personal workspace</p>
-            <h1 className="flex items-center gap-2 text-3xl font-bold tracking-tight text-slate-900"><LayoutDashboard size={28} /> Dashboard</h1>
+            <p className="mb-1 text-xs font-medium uppercase tracking-[0.12em] text-indigo-600">Your personal workspace</p>
+            <h1 className="flex items-center gap-2 text-2xl font-semibold tracking-tight text-slate-900"><LayoutDashboard size={22} className="text-indigo-600" /> Dashboard</h1>
           </div>
           <div className="flex items-center gap-2">
             {state.isEditing && <WidgetPicker />}
-            <button onClick={toggleEdit} className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm transition-colors ${state.isEditing ? 'bg-emerald-600 text-white hover:bg-emerald-700' : 'bg-slate-900 text-white hover:bg-slate-800'}`}>
+            <button onClick={toggleEdit} className={`ff-glass-control inline-flex h-9 items-center gap-2 px-3.5 text-sm font-medium transition-colors ${state.isEditing ? 'text-indigo-700 hover:bg-indigo-50/80' : 'text-slate-700 hover:bg-white/90'}`}>
               {state.isEditing ? <Check size={18} /> : <SlidersHorizontal size={18} />}
               {state.isEditing ? 'Done editing' : 'Customize layout'}
             </button>
           </div>
         </div>
 
-        {state.isEditing && <div className="mb-6 flex items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm text-indigo-800"><SlidersHorizontal size={16} /> Drag widgets to reorder them, or add a new widget from the menu.</div>}
+        {state.isEditing && <div className="mb-6 flex items-center gap-2 rounded-lg border border-indigo-200/70 bg-indigo-50/70 px-4 py-3 text-sm text-indigo-800"><SlidersHorizontal size={16} /> Drag widgets to reposition them, or add a new widget from the menu.</div>}
         <DailySummary />
         <DashboardGrid />
       </main>

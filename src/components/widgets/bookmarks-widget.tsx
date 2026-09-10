@@ -1,6 +1,8 @@
 'use client';
 import { useState } from 'react';
 import { AnimatedWidget } from '@/components/animated-widget';
+import { EmptyState } from '@/components/empty-state';
+import { Bookmark, Plus, X } from 'lucide-react';
 import { useBookmarks, useCreateBookmark, useDeleteBookmark } from '@/hooks/use-personal-widgets';
 
 interface BookmarksWidgetProps {
@@ -23,39 +25,45 @@ export default function BookmarksWidget({ title }: BookmarksWidgetProps) {
   };
 
   return (
-    <AnimatedWidget className="bg-gradient-to-br from-green-50 to-teal-100">
+    <AnimatedWidget>
       <div className="h-full flex flex-col">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="font-semibold text-lg text-gray-800">{title || 'Bookmarks'}</h3>
-          <button aria-label={isAdding ? 'Close add bookmark form' : 'Add bookmark'} onClick={() => setIsAdding(!isAdding)} className="p-1 text-green-600 hover:text-green-800 transition-colors" title="Add bookmark">➕</button>
+          <h3 className="widget-drag-handle cursor-grab select-none font-semibold text-lg text-gray-800 active:cursor-grabbing">{title || 'Bookmarks'}</h3>
+          <button aria-label={isAdding ? 'Close add bookmark form' : 'Add bookmark'} onClick={() => setIsAdding(!isAdding)} className="rounded-lg p-1.5 text-indigo-600 transition-colors hover:bg-indigo-50 hover:text-indigo-800" title="Add bookmark">{isAdding ? <X size={16} /> : <Plus size={16} />}</button>
         </div>
 
         {isAdding && (
-          <div className="mb-4 p-3 bg-white/50 rounded-lg">
+          <div className="mb-4 rounded-lg border border-slate-200 bg-slate-50 p-3">
             <label className="sr-only" htmlFor="bookmark-title">Bookmark title</label>
             <input id="bookmark-title" type="text" placeholder="Title" value={newBookmark.title} onChange={(event) => setNewBookmark({ ...newBookmark, title: event.target.value })} className="w-full mb-2 p-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500" />
             <label className="sr-only" htmlFor="bookmark-url">Bookmark URL</label>
             <input id="bookmark-url" type="url" placeholder="URL" value={newBookmark.url} onChange={(event) => setNewBookmark({ ...newBookmark, url: event.target.value })} className="w-full mb-2 p-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500" />
             <label className="sr-only" htmlFor="bookmark-category">Bookmark category</label>
             <input id="bookmark-category" type="text" placeholder="Category (optional)" value={newBookmark.category} onChange={(event) => setNewBookmark({ ...newBookmark, category: event.target.value })} className="w-full mb-2 p-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500" />
-            <div className="flex space-x-2"><button onClick={addBookmark} className="flex-1 px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600">Add</button><button onClick={() => setIsAdding(false)} className="px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600">Cancel</button></div>
+            <div className="flex space-x-2"><button onClick={addBookmark} className="flex-1 rounded-lg bg-indigo-600 px-3 py-1 text-sm text-white hover:bg-indigo-700">Add</button><button onClick={() => setIsAdding(false)} className="rounded-lg border border-slate-200 bg-white px-3 py-1 text-sm text-slate-700 hover:bg-slate-50">Cancel</button></div>
           </div>
         )}
 
         <div className="flex-1 overflow-y-auto space-y-2">
           {isLoading && <p className="text-sm text-gray-500">Loading bookmarks…</p>}
           {bookmarks.map((bookmark) => (
-            <div key={bookmark.id} className="group relative p-3 bg-white/50 rounded-lg hover:bg-white/70 transition-colors">
+            <div key={bookmark.id} className="group relative rounded-lg border border-slate-200 bg-white p-3 transition-colors hover:bg-slate-50">
               <a href={bookmark.url} target="_blank" rel="noopener noreferrer" className="block">
-                <div className="font-medium text-gray-800 group-hover:text-green-700 transition-colors">{bookmark.title}</div>
+                <div className="font-medium text-slate-900 transition-colors group-hover:text-indigo-700">{bookmark.title}</div>
                 <div className="text-xs text-gray-600 truncate">{bookmark.url}</div>
-                {bookmark.category && <span className="inline-block mt-1 px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">{bookmark.category}</span>}
+                {bookmark.category && <span className="mt-1 inline-block rounded-full bg-slate-100 px-2 py-1 text-xs text-slate-600">{bookmark.category}</span>}
               </a>
-              <button aria-label={`Remove bookmark: ${bookmark.title}`} onClick={() => deleteBookmark(bookmark.id)} className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1 text-red-500 hover:text-red-700" title="Remove bookmark">✕</button>
+              <button aria-label={`Remove bookmark: ${bookmark.title}`} onClick={() => deleteBookmark(bookmark.id)} className="absolute right-2 top-2 rounded p-1 text-red-500 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-red-50 hover:text-red-700" title="Remove bookmark"><X size={14} /></button>
             </div>
           ))}
         </div>
-        {!isLoading && bookmarks.length === 0 && !isAdding && <div className="text-center text-gray-500 py-4">No bookmarks yet. Click + to add one.</div>}
+        {!isLoading && bookmarks.length === 0 && !isAdding && (
+          <EmptyState
+            icon={Bookmark}
+            title="No bookmarks yet"
+            action={<button onClick={() => setIsAdding(true)} className="text-sm font-medium text-indigo-700 hover:text-indigo-900">Add bookmark</button>}
+          />
+        )}
       </div>
     </AnimatedWidget>
   );
