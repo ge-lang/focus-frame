@@ -6,7 +6,7 @@ import 'react-grid-layout/css/styles.css';
 import { useDashboard } from '@/contexts/dashboard-context';
 import { useStableContainerWidth } from '@/hooks/use-stable-container-width';
 import { SortableWidget } from './sortable-widget';
-import { canPersistDesktopLayout, getGridHeightForContent, getWidgetSizing, normalizeLayout, resizeWidgetInLayout, stackLayoutForMobile } from '@/lib/dashboard-layout';
+import { canPersistDesktopLayout, getGridHeightForContent, getWidgetSizing, normalizeLayout, reconcileLayoutTypes, resizeWidgetInLayout, stackLayoutForMobile } from '@/lib/dashboard-layout';
 import type { LayoutItem } from '@/types/dashboard';
 
 const BREAKPOINTS = { lg: 1024, md: 768, sm: 640, xs: 480, xxs: 0 } as const;
@@ -147,14 +147,15 @@ export function DashboardGrid() {
     }
     if (!isStable || !canPersistDesktopLayout(isHydrated, width, breakpointRef.current, BREAKPOINTS.lg) || isDraggingRef.current || contentSizingRef.current) return;
 
-    const types = new Map(desktopLayoutRef.current.map((item) => [item.i, item.type]));
-    const persistedLayout: LayoutItem[] = nextLayout.map((item: GridLayoutItem) => ({
-      i: item.i,
-      x: item.x,
-      y: item.y,
-      w: getWidgetSizing(types.get(item.i) ?? 'notes').w,
-      h: getWidgetSizing(types.get(item.i) ?? 'notes').h,
-      type: types.get(item.i) ?? 'notes',
+    const callbackLayout: LayoutItem[] = nextLayout.flatMap((item: GridLayoutItem) => {
+      const widget = widgets.find((candidate) => candidate.id === item.i);
+      return widget ? [{ ...item, type: widget.type }] : [];
+    });
+    const reconciledLayout = reconcileLayoutTypes(callbackLayout, widgets);
+    const persistedLayout = reconciledLayout.map((item) => ({
+      ...item,
+      w: getWidgetSizing(item.type).w,
+      h: getWidgetSizing(item.type).h,
     }));
     const normalized = normalizeLayout(persistedLayout);
     weatherBaseLayoutRef.current = null;

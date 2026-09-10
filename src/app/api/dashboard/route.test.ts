@@ -84,6 +84,37 @@ describe('/api/dashboard ownership', () => {
     expect(mocks.upsert).toHaveBeenCalled();
   });
 
+  it('canonicalizes layout type from the matching widget before persistence', async () => {
+    mocks.getServerSession.mockResolvedValue({ user: { id: 'user-a' } });
+    mocks.upsert.mockResolvedValue({});
+
+    const mismatchedState = {
+      widgets: [{ id: 'todo-123', type: 'todo', colSpan: 8, rowSpan: 3 }],
+      layout: [{ i: 'todo-123', x: 0, y: 0, w: 4, h: 3, type: 'notes' }],
+    };
+    const response = await PUT(new Request('http://localhost/api/dashboard', {
+      method: 'PUT',
+      body: JSON.stringify({ state: mismatchedState }),
+      headers: { 'Content-Type': 'application/json' },
+    }) as NextRequest);
+
+    expect(response.status).toBe(200);
+    expect(mocks.upsert).toHaveBeenCalledWith(expect.objectContaining({
+      create: expect.objectContaining({
+        layout: JSON.stringify({
+          ...mismatchedState,
+          layout: [{ i: 'todo-123', x: 0, y: 0, w: 4, h: 3, type: 'todo' }],
+        }),
+      }),
+      update: expect.objectContaining({
+        layout: JSON.stringify({
+          ...mismatchedState,
+          layout: [{ i: 'todo-123', x: 0, y: 0, w: 4, h: 3, type: 'todo' }],
+        }),
+      }),
+    }));
+  });
+
   it('returns 400 for invalid JSON', async () => {
     mocks.getServerSession.mockResolvedValue({ user: { id: 'user-a' } });
 

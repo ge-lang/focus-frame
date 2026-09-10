@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useEffect, useReducer, useState, ReactNode } from 'react';
 import { useSession } from 'next-auth/react';
 import { WidgetType } from '@/types/dashboard';
-import { addWidgetToLayout, getWidgetSizing, normalizeLayout, removeWidgetFromLayout } from '@/lib/dashboard-layout';
+import { addWidgetToLayout, getWidgetSizing, normalizeLayout, reconcileLayoutTypes, removeWidgetFromLayout } from '@/lib/dashboard-layout';
 
 export interface Widget {
   id: string;
@@ -129,7 +129,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
             type: 'LOAD_STATE',
             payload: {
               ...data.state,
-              layout: normalizeLayout(data.state.layout),
+              layout: normalizeLayout(reconcileLayoutTypes(data.state.layout, data.state.widgets)),
               isEditing: false,
             },
           });

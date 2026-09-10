@@ -6,6 +6,7 @@ import {
   getWidgetSizing,
   hasLayoutCollision,
   normalizeLayout,
+  reconcileLayoutTypes,
   removeWidgetFromLayout,
   resizeWidgetInLayout,
   stackLayoutForMobile,
@@ -76,6 +77,41 @@ describe('dashboard layout normalization', () => {
     expect(normalized).toMatchObject([
       { i: 'todo-1', w: 8 },
       { i: 'analytics-1', w: 4 },
+    ]);
+  });
+
+  it('reconciles a corrupted Tasks layout item from authoritative widget metadata', () => {
+    const reconciled = reconcileLayoutTypes([
+      { i: 'todo-123', x: 0, y: 0, w: 4, h: 3, type: 'notes' },
+    ], [{ id: 'todo-123', type: 'todo' }]);
+    const normalized = normalizeLayout(reconciled);
+
+    expect(normalized[0]).toMatchObject({ i: 'todo-123', type: 'todo', w: 8 });
+  });
+
+  it('reconciles News and Analytics layout identity before sizing', () => {
+    const normalized = normalizeLayout(reconcileLayoutTypes([
+      { i: 'news-123', x: 0, y: 0, w: 4, h: 3, type: 'notes' },
+      { i: 'analytics-123', x: 8, y: 0, w: 8, h: 3, type: 'notes' },
+    ], [
+      { id: 'news-123', type: 'news' },
+      { id: 'analytics-123', type: 'analytics' },
+    ]));
+
+    expect(normalized).toMatchObject([
+      { i: 'news-123', type: 'news', w: 8 },
+      { i: 'analytics-123', type: 'analytics', w: 4 },
+    ]);
+  });
+
+  it('keeps matching types and ignores orphan layout items', () => {
+    const reconciled = reconcileLayoutTypes([
+      { i: 'weather-1', x: 0, y: 0, w: 4, h: 3, type: 'weather' },
+      { i: 'orphan', x: 4, y: 0, w: 4, h: 3, type: 'notes' },
+    ], [{ id: 'weather-1', type: 'weather' }]);
+
+    expect(reconciled).toEqual([
+      { i: 'weather-1', x: 0, y: 0, w: 4, h: 3, type: 'weather' },
     ]);
   });
 

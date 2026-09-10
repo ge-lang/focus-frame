@@ -1,4 +1,4 @@
-import type { LayoutItem, WidgetType } from '@/types/dashboard';
+import type { LayoutItem, Widget, WidgetType } from '@/types/dashboard';
 
 export const DESKTOP_GRID_COLUMNS = 12;
 // Keep intentional breathing room, but prevent persisted layouts from creating
@@ -89,6 +89,18 @@ function findFreePosition(item: LayoutItem, occupied: LayoutItem[], columns: num
 export function withWidgetSizing(item: LayoutItem): LayoutItem {
   const sizing = getWidgetSizing(item.type);
   return { ...item, w: sizing.w, h: sizing.h };
+}
+
+export function reconcileLayoutTypes(
+  layout: LayoutItem[],
+  widgets: Pick<Widget, 'id' | 'type'>[],
+): LayoutItem[] {
+  const widgetTypes = new Map(widgets.map((widget) => [widget.id, widget.type]));
+
+  return layout.flatMap((item) => {
+    const type = widgetTypes.get(item.i);
+    return type ? [{ ...item, type }] : [];
+  });
 }
 
 function isLegacyThreeColumnLayout(layout: LayoutItem[]): boolean {
