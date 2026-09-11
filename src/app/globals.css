@@ -1750,6 +1750,56 @@ body.ff-document-body {
 .ff-dark-workspace .ff-compact-news-story + .ff-compact-news-story { border-color: rgba(167, 183, 232, 0.2); }
 .ff-dark-workspace .ff-compact-note-paper { border: 0; background: rgba(29, 34, 71, 0.42); }
 .ff-dark-workspace .ff-compact-note-paper::after { background: #20264c; }
+
+/* Final lock pass: make the existing watch marks and object hierarchy read at preview scale. */
+.ff-dark-workspace .ff-compact-timer-ring-large::before {
+  inset: 0.92rem;
+  background: repeating-conic-gradient(from -2deg, rgba(218, 233, 255, 0.94) 0 1.45deg, transparent 1.45deg 6deg);
+  opacity: 1;
+  -webkit-mask: radial-gradient(transparent calc(100% - 5px), #000 calc(100% - 2px));
+  mask: radial-gradient(transparent calc(100% - 5px), #000 calc(100% - 2px));
+}
+.ff-dark-workspace .ff-compact-timer-ring-large::after {
+  inset: 0.62rem;
+  background: repeating-conic-gradient(from -2deg, rgba(248, 251, 255, 1) 0 3.4deg, transparent 3.4deg 30deg);
+  -webkit-mask: radial-gradient(transparent calc(100% - 6px), #000 calc(100% - 1px));
+  mask: radial-gradient(transparent calc(100% - 6px), #000 calc(100% - 1px));
+}
+
+.ff-dark-workspace .ff-compact-weather-main::before {
+  inset: -1.45rem -1.8rem -1.15rem -1.5rem;
+  background:
+    radial-gradient(ellipse at 42% 48%, rgba(103, 221, 247, 0.34), transparent 54%),
+    radial-gradient(ellipse at center, rgba(87, 179, 239, 0.24), rgba(104, 91, 225, 0.17) 58%, transparent 82%);
+  filter: blur(17px);
+}
+
+.ff-dark-workspace .ff-compact-kpi-icon { transform: translateY(-0.2rem); }
+
+.ff-dark-workspace .ff-compact-status-marker { width: 1.18rem; height: 1.18rem; }
+.ff-dark-workspace .ff-compact-task-body { gap: 0; }
+.ff-dark-workspace .ff-compact-task-progress-ring {
+  width: 10rem;
+  height: 10rem;
+  margin-top: 0.45rem;
+}
+.ff-dark-workspace .ff-compact-task-completion { transform: translateY(0.75rem); }
+.ff-dark-workspace .ff-compact-relevant-task { padding-top: 0.1rem; }
+
+.ff-dark-workspace .ff-compact-card-bookmarks {
+  background: linear-gradient(145deg, rgba(171, 207, 255, 1), rgba(91, 221, 239, 0.98) 52%, rgba(126, 151, 255, 1)) !important;
+}
+.ff-dark-workspace .ff-compact-card-bookmarks > .ff-compact-object {
+  height: calc(100% - 2.5px);
+  margin: 1.25px;
+}
+
+@media (min-width: 640px) {
+  .ff-topbar .ff-brand-mark { width: 3.35rem; height: 3.5rem; }
+  .ff-topbar .ff-evva-mark { width: 2.82rem; height: 3.5rem; }
+  .ff-topbar .ff-brand-title { font-weight: 480; }
+  .ff-topbar .ff-brand-subtitle { font-size: 0.5rem; letter-spacing: 0.12em; }
+}
 .ff-dark-workspace .ff-compact-kpi-value { text-shadow: none; }
 .ff-dark-workspace .ff-compact-weather-meta { border-top-color: rgba(167, 183, 232, 0.22); }
 .ff-dark-workspace .ff-compact-news-headline,
