@@ -1304,6 +1304,207 @@ body.ff-document-body {
 .ff-compact-timer-ring span { display: block; font-size: 1rem; font-weight: 700; color: var(--ff-text-primary, #18213b); }
 .ff-compact-timer-ring small { display: block; font-size: 0.55rem; color: var(--ff-text-muted, #7b849b); }
 
+.ff-compact-task-body {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.35rem;
+}
+
+.ff-compact-status-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.4rem;
+  text-align: center;
+}
+
+.ff-compact-status-summary > div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.05rem;
+}
+
+.ff-compact-status-summary span {
+  overflow: hidden;
+  color: var(--ff-text-muted, #7b849b);
+  font-size: 0.62rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ff-compact-status-summary strong {
+  color: var(--ff-text-primary, #18213b);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.ff-compact-task-completion {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+.ff-compact-task-progress-ring {
+  position: relative;
+  width: 3.9rem;
+  height: 3.9rem;
+}
+
+.ff-compact-task-progress-ring svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.ff-compact-task-progress-ring circle {
+  fill: none;
+  stroke-width: 3;
+}
+
+.ff-compact-task-progress-track { stroke: rgba(148, 163, 184, 0.2); }
+.ff-compact-task-progress-value { stroke: var(--ff-accent-violet, #6255e8); stroke-linecap: round; transition: stroke-dashoffset 200ms ease; }
+
+.ff-compact-task-progress-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  line-height: 1;
+}
+
+.ff-compact-task-progress-label strong { color: var(--ff-text-primary, #18213b); font-size: 0.72rem; }
+.ff-compact-task-progress-label span { margin-top: 0.18rem; color: var(--ff-text-muted, #7b849b); font-size: 0.46rem; }
+
+.ff-compact-relevant-task {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.35rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.16);
+  padding-top: 0.35rem;
+}
+
+.ff-compact-relevant-task time { margin-left: auto; }
+
+.ff-compact-pomodoro-body {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.ff-compact-timer-ring-large {
+  width: 5.75rem;
+  height: 5.75rem;
+}
+
+.ff-compact-timer-ring-large span { font-size: 0.92rem; }
+.ff-compact-timer-ring-large small {
+  display: block;
+  max-width: 4.2rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ff-compact-pomodoro-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.ff-compact-pomodoro-controls button {
+  display: grid;
+  width: 1.55rem;
+  height: 1.55rem;
+  place-items: center;
+  border: 0;
+  border-radius: 9999px;
+  background: transparent;
+  color: var(--ff-text-secondary, #64748b);
+}
+
+.ff-compact-pomodoro-controls button:first-child {
+  background: var(--ff-accent-violet, #6255e8);
+  color: #fff;
+}
+
+.ff-compact-pomodoro-controls button:hover,
+.ff-compact-pomodoro-controls button:focus-visible {
+  color: var(--ff-accent-violet, #6255e8);
+  outline: 2px solid rgba(99, 102, 241, 0.28);
+  outline-offset: 1px;
+}
+
+.ff-compact-pomodoro-controls button:first-child:hover,
+.ff-compact-pomodoro-controls button:first-child:focus-visible { color: #fff; }
+.ff-compact-skip { font-size: 0.6rem; line-height: 1; }
+
+.ff-compact-calendar {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.ff-compact-calendar-month {
+  color: var(--ff-text-primary, #18213b);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.ff-compact-calendar-weekdays,
+.ff-compact-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  column-gap: 0.2rem;
+}
+
+.ff-compact-calendar-weekdays {
+  color: var(--ff-text-muted, #7b849b);
+  font-size: 0.56rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.ff-compact-calendar-grid { row-gap: 0.1rem; }
+
+.ff-compact-calendar-cell {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  height: 0.95rem;
+  place-items: center;
+  border-radius: 9999px;
+  color: var(--ff-text-secondary, #64748b);
+  font-size: 0.58rem;
+  line-height: 1;
+}
+
+.ff-compact-calendar-cell-today {
+  background: var(--ff-accent-violet, #6255e8);
+  color: #fff;
+  font-weight: 700;
+}
+
+.ff-compact-calendar-cell-empty { visibility: hidden; }
+.ff-compact-calendar-dot { position: absolute; bottom: -0.08rem; width: 0.2rem; height: 0.2rem; border-radius: 9999px; }
+.ff-compact-calendar-dot-high { background: #df718b; }
+.ff-compact-calendar-dot-medium { background: #e6a84d; }
+.ff-compact-calendar-dot-low { background: #70c77a; }
+
 .ff-focus-view {
   border-radius: 1rem;
   background: var(--ff-surface, #fff);
@@ -1345,6 +1546,10 @@ body.ff-document-body {
 
 .ff-dark-workspace .ff-compact-status,
 .ff-dark-workspace .ff-compact-kpi { background: rgba(44, 49, 91, 0.72); }
+.ff-dark-workspace .ff-compact-task-progress-track { stroke: rgba(174, 184, 210, 0.2); }
+.ff-dark-workspace .ff-compact-relevant-task { border-top-color: rgba(174, 184, 210, 0.18); }
+.ff-dark-workspace .ff-compact-calendar-cell { color: #cbd0e5; }
+.ff-dark-workspace .ff-compact-calendar-weekdays { color: #8f96b8; }
 .ff-dark-workspace .ff-compact-timer-ring span,
 .ff-dark-workspace .ff-compact-card .text-slate-900,
 .ff-dark-workspace .ff-compact-card .text-slate-800,

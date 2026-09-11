@@ -14,6 +14,8 @@ import {
   Pause,
   Play,
   Plus,
+  RotateCcw,
+  SkipForward,
   Target,
   Timer,
   TrendingUp,
@@ -33,6 +35,8 @@ interface CompactWidgetProps {
   widget: Widget;
   onOpen: () => void;
 }
+
+const compactPomodoroDurations = { work: 25 * 60, break: 5 * 60, longBreak: 15 * 60 } as const;
 
 function CompactShell({ widget, onOpen, icon, children }: CompactWidgetProps & { icon: ReactNode; children: ReactNode }) {
   return (
@@ -57,10 +61,6 @@ function labelForType(type: WidgetType) {
   return type === 'todo' ? 'Tasks' : type[0].toUpperCase() + type.slice(1);
 }
 
-function priorityClass(priority: Task['priority']) {
-  return priority === 'high' ? 'ff-compact-priority-high' : priority === 'medium' ? 'ff-compact-priority-medium' : 'ff-compact-priority-low';
-}
-
 function relevantTask(tasks: Task[]) {
   return [...tasks]
     .filter((task) => !task.isCompleted && task.status !== 'done')
@@ -72,27 +72,119 @@ function relevantTask(tasks: Task[]) {
     })[0];
 }
 
+export interface CompactTaskSummary {
+  completed: number;
+  total: number;
+  counts: { todo: number; in_progress: number; done: number };
+  relevantTask?: Task;
+}
+
+export function summarizeCompactTasks(tasks: Task[]): CompactTaskSummary {
+  return {
+    completed: tasks.filter((task) => task.isCompleted || task.status === 'done').length,
+    total: tasks.length,
+    counts: {
+      todo: tasks.filter((task) => task.status === 'todo').length,
+      in_progress: tasks.filter((task) => task.status === 'in_progress').length,
+      done: tasks.filter((task) => task.status === 'done' || task.isCompleted).length,
+    },
+    relevantTask: relevantTask(tasks),
+  };
+}
+
+function compactDeadlineLabel(dueDate: string | null) {
+  if (!dueDate) return null;
+  return new Date(dueDate).toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+}
+
+export interface CompactCalendarGrid {
+  monthLabel: string;
+  weekdayLabels: string[];
+  cells: Array<number | null>;
+  year: number;
+  month: number;
+}
+
+export function getCompactCalendarGrid(date: Date, locale?: string): CompactCalendarGrid {
+  const year = date.getFullYear();
+  const month = date.getMonth();
+  const firstDayOffset = (new Date(year, month, 1).getDay() + 6) % 7;
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const cellCount = Math.ceil((firstDayOffset + daysInMonth) / 7) * 7;
+  const cells = Array.from({ length: cellCount }, (_, index) => {
+    const day = index - firstDayOffset + 1;
+    return day >= 1 && day <= daysInMonth ? day : null;
+  });
+  const weekdayLabels = Array.from({ length: 7 }, (_, index) =>
+    new Date(2021, 10, 1 + index).toLocaleDateString(locale, { weekday: 'narrow' }),
+  );
+
+  return {
+    monthLabel: date.toLocaleDateString(locale, { month: 'long', year: 'numeric' }),
+    weekdayLabels,
+    cells,
+    year,
+    month,
+  };
+}
+
+function priorityForCalendarDay(tasks: Task[], year: number, month: number, day: number) {
+  const priorities: Task['priority'][] = ['high', 'medium', 'low'];
+  const matching = tasks.filter((task) => {
+    if (!task.dueDate || task.isCompleted || task.status === 'done') return false;
+    const dueDate = new Date(`${task.dueDate.slice(0, 10)}T00:00:00`);
+    return dueDate.getFullYear() === year && dueDate.getMonth() === month && dueDate.getDate() === day;
+  });
+  return priorities.find((priority) => matching.some((task) => task.priority === priority));
+}
+
 function CompactTasks({ widget, onOpen }: CompactWidgetProps) {
   const { data: tasks = [] } = useTasks();
-  const completed = tasks.filter((task) => task.isCompleted || task.status === 'done').length;
-  const selected = relevantTask(tasks);
-  const counts = {
-    todo: tasks.filter((task) => task.status === 'todo').length,
-    in_progress: tasks.filter((task) => task.status === 'in_progress').length,
-    done: tasks.filter((task) => task.status === 'done' || task.isCompleted).length,
-  };
+  const summary = summarizeCompactTasks(tasks);
+  const completion = summary.total ? summary.completed / summary.total : 0;
+  const circumference = 2 * Math.PI * 18;
+  const allCompleted = summary.total > 0 && summary.completed === summary.total;
 
   return (
     <CompactShell widget={widget} onOpen={onOpen} icon={<CheckCircle2 size={16} className="text-indigo-600" />}>
-      <div className="flex min-h-0 flex-1 flex-col justify-between gap-2">
-        <div>
-          <div className="mb-1 flex items-center justify-between text-xs text-slate-500"><span>{completed}/{tasks.length} completed</span><span className="ff-compact-progress"><span style={{ width: `${tasks.length ? Math.round((completed / tasks.length) * 100) : 0}%` }} /></span></div>
-          <div className="grid grid-cols-3 gap-1.5 text-center text-[11px]">
-            {([['To Do', counts.todo], ['In Progress', counts.in_progress], ['Done', counts.done]] as const).map(([label, count]) => <div key={label} className="ff-compact-status"><span className="block font-medium text-slate-700">{label}</span><span className="text-slate-500">{count}</span></div>)}
-          </div>
+      <div className="ff-compact-task-body">
+        <div className="ff-compact-status-summary" aria-label="Task status summary">
+          {([['To Do', summary.counts.todo], ['In Progress', summary.counts.in_progress], ['Done', summary.counts.done]] as const).map(([label, count]) => (
+            <div key={label}>
+              <span>{label}</span>
+              <strong>{count}</strong>
+            </div>
+          ))}
         </div>
-        {selected ? <div className="min-w-0"><div className="flex items-center gap-1.5"><Flag size={12} className="shrink-0 text-slate-400" /><span className="truncate text-sm font-medium text-slate-800">{selected.title}</span><span className={`shrink-0 rounded-full px-1.5 py-0.5 text-[10px] ${priorityClass(selected.priority)}`}>{selected.priority}</span></div>{selected.dueDate && <p className="mt-0.5 text-[11px] text-slate-500">Due {new Date(selected.dueDate).toLocaleDateString()}</p>}</div> : <p className="text-xs text-slate-500">No unfinished tasks</p>}
-        <button type="button" data-no-drag onClick={onOpen} className="ff-compact-action inline-flex w-fit items-center gap-1 text-xs font-medium text-indigo-700"><Plus size={13} /> Add Task</button>
+
+        <div className="ff-compact-task-completion" aria-label={`${summary.completed} of ${summary.total} tasks completed`}>
+          <div className="ff-compact-task-progress-ring">
+            <svg viewBox="0 0 44 44" aria-hidden="true">
+              <circle className="ff-compact-task-progress-track" cx="22" cy="22" r="18" />
+              <circle
+                className="ff-compact-task-progress-value"
+                cx="22"
+                cy="22"
+                r="18"
+                strokeDasharray={circumference}
+                strokeDashoffset={circumference * (1 - completion)}
+              />
+            </svg>
+            <div className="ff-compact-task-progress-label">
+              <strong>{summary.completed}/{summary.total}</strong>
+              <span>completed</span>
+            </div>
+          </div>
+          {allCompleted && <CheckCircle2 size={16} className="text-emerald-500" aria-label="All tasks completed" />}
+        </div>
+
+        {summary.relevantTask ? (
+          <div className="ff-compact-relevant-task" title={summary.relevantTask.title}>
+            <Flag size={12} className={`shrink-0 ${summary.relevantTask.priority === 'high' ? 'text-rose-400' : summary.relevantTask.priority === 'medium' ? 'text-amber-400' : 'text-emerald-400'}`} aria-hidden="true" />
+            <span className="truncate text-xs font-medium text-slate-800">{summary.relevantTask.title}</span>
+            {compactDeadlineLabel(summary.relevantTask.dueDate) && <time className="shrink-0 text-[11px] text-slate-500">{compactDeadlineLabel(summary.relevantTask.dueDate)}</time>}
+          </div>
+        ) : <p className="text-center text-xs text-slate-500">No unfinished tasks</p>}
       </div>
     </CompactShell>
   );
@@ -111,6 +203,8 @@ function CompactNews({ widget, onOpen }: CompactWidgetProps) {
 function CompactPomodoro({ widget, onOpen }: CompactWidgetProps) {
   const [seconds, setSeconds] = useState(25 * 60);
   const [running, setRunning] = useState(false);
+  const [mode, setMode] = useState<'work' | 'break' | 'longBreak'>('work');
+  const [pomodoroCount, setPomodoroCount] = useState(0);
   const { data: tasks = [] } = useTasks();
   const { mutate: createFocusSession } = useCreateFocusSession();
   const task = tasks.find((candidate) => !candidate.isCompleted && candidate.status !== 'done');
@@ -119,16 +213,53 @@ function CompactPomodoro({ widget, onOpen }: CompactWidgetProps) {
     const id = window.setInterval(() => setSeconds((value) => {
       if (value <= 1) {
         setRunning(false);
-        createFocusSession({ duration: 25 * 60, type: 'work', ...(task ? { taskId: task.id } : {}) });
-        return 25 * 60;
+        if (mode === 'work') {
+          createFocusSession({ duration: compactPomodoroDurations.work, type: 'work', ...(task ? { taskId: task.id } : {}) });
+          const nextCount = pomodoroCount + 1;
+          setPomodoroCount(nextCount);
+          const nextMode = nextCount % 4 === 0 ? 'longBreak' : 'break';
+          setMode(nextMode);
+          return compactPomodoroDurations[nextMode];
+        }
+        setMode('work');
+        return compactPomodoroDurations.work;
       }
       return value - 1;
     }), 1000);
     return () => window.clearInterval(id);
-  }, [createFocusSession, running, task]);
+  }, [createFocusSession, mode, pomodoroCount, running, task]);
+
+  const resetTimer = () => {
+    setRunning(false);
+    setSeconds(compactPomodoroDurations[mode]);
+  };
+
+  const skipToNext = () => {
+    setRunning(false);
+    if (mode === 'work') {
+      const nextMode = pomodoroCount > 0 && pomodoroCount % 4 === 0 ? 'longBreak' : 'break';
+      setMode(nextMode);
+      setSeconds(compactPomodoroDurations[nextMode]);
+    } else {
+      setMode('work');
+      setSeconds(compactPomodoroDurations.work);
+    }
+  };
+
   const time = `${Math.floor(seconds / 60).toString().padStart(2, '0')}:${(seconds % 60).toString().padStart(2, '0')}`;
   return <CompactShell widget={widget} onOpen={onOpen} icon={<Timer size={16} className="text-indigo-600" />}>
-    <div className="flex min-h-0 flex-1 items-center gap-3"><div className="ff-compact-timer-ring"><span>{time}</span><small>Focus Time</small></div><div className="min-w-0 flex-1"><p className="truncate text-xs text-slate-500">{task?.title || 'No task selected'}</p><button type="button" data-no-drag onClick={() => setRunning((value) => !value)} className="ff-compact-primary mt-2 inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium text-white">{running ? <Pause size={12} /> : <Play size={12} />}{running ? 'Pause' : 'Start'}</button></div></div>
+    <div className="ff-compact-pomodoro-body">
+      <div className="ff-compact-timer-ring ff-compact-timer-ring-large" role="timer" aria-label={`${time}, ${task?.title || 'No task selected'}`}>
+        <span>{time}</span>
+        <small>{task?.title || 'No task selected'}</small>
+      </div>
+      <div className="ff-compact-pomodoro-controls" data-no-drag>
+        <button type="button" onClick={() => setRunning((value) => !value)} aria-label={running ? 'Pause focus timer' : 'Start focus timer'} title={running ? 'Pause' : 'Start'}>{running ? <Pause size={13} /> : <Play size={13} />}</button>
+        <button type="button" onClick={resetTimer} aria-label="Reset focus timer" title="Reset"><RotateCcw size={13} /></button>
+        <button type="button" onClick={skipToNext} aria-label={mode === 'work' ? 'Skip to break' : 'Skip to work'} title={mode === 'work' ? 'Skip to break' : 'Skip to work'}><SkipForward size={13} /></button>
+      </div>
+      <button type="button" data-no-drag onClick={skipToNext} className="ff-compact-action ff-compact-skip">Skip to {mode === 'work' ? 'break' : 'work'}</button>
+    </div>
   </CompactShell>;
 }
 
@@ -144,12 +275,21 @@ function CompactWeather({ widget, onOpen }: CompactWidgetProps) {
 function CompactCalendar({ widget, onOpen }: CompactWidgetProps) {
   const { data: tasks = [] } = useTasks();
   const now = new Date();
-  const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const end = new Date(start);
-  end.setDate(end.getDate() + 7);
-  const upcoming = tasks.filter((task) => task.dueDate && !task.isCompleted && new Date(task.dueDate) >= start && new Date(task.dueDate) <= end).sort((a, b) => (a.dueDate ?? '').localeCompare(b.dueDate ?? '')).slice(0, 3);
+  const calendar = getCompactCalendarGrid(now);
   return <CompactShell widget={widget} onOpen={onOpen} icon={<CalendarDays size={16} className="text-indigo-600" />}>
-    <div className="flex min-h-0 flex-1 flex-col justify-between"><div><strong className="block text-lg text-slate-900">{now.toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}</strong><span className="text-xs text-slate-500">{now.toLocaleDateString(undefined, { weekday: 'long' })}</span></div><div><p className="mb-1 text-[11px] font-medium text-slate-500">Next 7 days</p>{upcoming.length ? upcoming.map((task) => <div key={task.id} className="flex min-w-0 items-center justify-between gap-2 text-xs"><span className="flex min-w-0 items-center gap-1 truncate text-slate-700"><span className={`h-1.5 w-1.5 shrink-0 rounded-full ${task.priority === 'high' ? 'bg-rose-500' : task.priority === 'medium' ? 'bg-amber-500' : 'bg-emerald-500'}`} aria-label={`${task.priority} priority`} /><span className="truncate">{task.title}</span></span><span className="shrink-0 text-slate-400">{new Date(task.dueDate as string).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}</span></div>) : <span className="text-xs text-slate-500">No deadlines this week</span>}</div></div>
+    <div className="ff-compact-calendar" aria-label={calendar.monthLabel}>
+      <div className="ff-compact-calendar-month">{calendar.monthLabel}</div>
+      <div className="ff-compact-calendar-weekdays" aria-hidden="true">{calendar.weekdayLabels.map((label, index) => <span key={`${label}-${index}`}>{label}</span>)}</div>
+      <div className="ff-compact-calendar-grid">
+        {calendar.cells.map((day, index) => {
+          if (day === null) return <span key={`empty-${index}`} className="ff-compact-calendar-cell ff-compact-calendar-cell-empty" aria-hidden="true" />;
+          const priority = priorityForCalendarDay(tasks, calendar.year, calendar.month, day);
+          const isToday = day === now.getDate();
+          const label = `${calendar.monthLabel} ${day}${priority ? `, ${priority} priority deadline` : ''}${isToday ? ', today' : ''}`;
+          return <span key={day} className={`ff-compact-calendar-cell ${isToday ? 'ff-compact-calendar-cell-today' : ''}`} aria-current={isToday ? 'date' : undefined} aria-label={label} title={label}>{day}{priority && <span className={`ff-compact-calendar-dot ff-compact-calendar-dot-${priority}`} aria-hidden="true" />}</span>;
+        })}
+      </div>
+    </div>
   </CompactShell>;
 }
 
