@@ -6,12 +6,18 @@ import {
   BarChart3,
   Bookmark,
   CalendarDays,
+  Check,
   CheckCircle2,
+  ChevronLeft,
   ChevronRight,
+  Cloud,
   CloudSun,
   Clock3,
-  Droplets,
+  Droplet,
   Flag,
+  Github,
+  Bell,
+  Settings,
   Newspaper,
   Pause,
   Play,
@@ -22,6 +28,7 @@ import {
   Timer,
   TrendingUp,
   StickyNote,
+  Youtube,
   Wind,
 } from 'lucide-react';
 import { AnimatedWidget } from '@/components/animated-widget';
@@ -147,7 +154,7 @@ export interface CompactCalendarGrid {
   month: number;
 }
 
-export function getCompactCalendarGrid(date: Date, locale?: string): CompactCalendarGrid {
+export function getCompactCalendarGrid(date: Date, _locale?: string): CompactCalendarGrid {
   const year = date.getFullYear();
   const month = date.getMonth();
   const firstDayOffset = (new Date(year, month, 1).getDay() + 6) % 7;
@@ -158,11 +165,11 @@ export function getCompactCalendarGrid(date: Date, locale?: string): CompactCale
     return day >= 1 && day <= daysInMonth ? day : null;
   });
   const weekdayLabels = Array.from({ length: 7 }, (_, index) =>
-    new Date(2021, 10, 1 + index).toLocaleDateString(locale, { weekday: 'narrow' }),
+    new Date(2021, 10, 1 + index).toLocaleDateString('en-US', { weekday: 'narrow' }),
   );
 
   return {
-    monthLabel: date.toLocaleDateString(locale, { month: 'long', year: 'numeric' }),
+    monthLabel: date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
     weekdayLabels,
     cells,
     year,
@@ -191,8 +198,9 @@ function CompactTasks({ widget, onOpen }: CompactWidgetProps) {
     <CompactShell widget={widget} onOpen={onOpen} icon={<CheckCircle2 size={16} className="text-indigo-600" />}>
       <div className="ff-compact-task-body">
         <div className="ff-compact-status-summary" aria-label="Task status summary">
-          {([['To Do', summary.counts.todo], ['In Progress', summary.counts.in_progress], ['Done', summary.counts.done]] as const).map(([label, count]) => (
+          {([['To Do', summary.counts.todo, 'todo'], ['In Progress', summary.counts.in_progress, 'in-progress'], ['Done', summary.counts.done, 'done']] as const).map(([label, count, status]) => (
             <div key={label}>
+              <span className={`ff-compact-status-marker ff-compact-status-marker-${status}`} aria-hidden="true">{status === 'done' && <Check size={10} strokeWidth={3} />}</span>
               <span>{label}</span>
               <strong>{count}</strong>
             </div>
@@ -307,16 +315,20 @@ function CompactPomodoro({ widget, onOpen }: CompactWidgetProps) {
   const time = `${Math.floor(seconds / 60).toString().padStart(2, '0')}:${(seconds % 60).toString().padStart(2, '0')}`;
   return <CompactShell widget={widget} onOpen={onOpen} icon={<Timer size={16} className="text-indigo-600" />}>
     <div className="ff-compact-pomodoro-body">
+      <div className="ff-compact-pomodoro-tools" data-no-drag>
+        <button type="button" onClick={onOpen} aria-label="Open Pomodoro sound settings" title="Sound settings"><Bell size={13} /></button>
+        <button type="button" onClick={onOpen} aria-label="Open Pomodoro settings" title="Pomodoro settings"><Settings size={13} /></button>
+      </div>
       <div className="ff-compact-timer-ring ff-compact-timer-ring-large" role="timer" aria-label={`${time}, ${task?.title || 'No task selected'}`}>
         <span>{time}</span>
         <small>{task?.title || 'No task selected'}</small>
+        <button type="button" data-no-drag onClick={skipToNext} className="ff-compact-action ff-compact-skip">Skip to {mode === 'work' ? 'break' : 'work'} <ChevronRight size={11} aria-hidden="true" /></button>
       </div>
       <div className="ff-compact-pomodoro-controls" data-no-drag>
-        <button type="button" onClick={resetTimer} aria-label="Reset focus timer" title="Reset"><RotateCcw size={13} /></button>
-        <button type="button" onClick={() => setRunning((value) => !value)} aria-label={running ? 'Pause focus timer' : 'Start focus timer'} title={running ? 'Pause' : 'Start'}>{running ? <Pause size={13} /> : <Play size={13} />}</button>
-        <button type="button" onClick={stopTimer} aria-label="Stop focus timer" title="Stop"><Square size={13} /></button>
+        <button type="button" onClick={resetTimer} aria-label="Reset focus timer" title="Reset"><RotateCcw size={15} /></button>
+        <button type="button" onClick={() => setRunning((value) => !value)} aria-label={running ? 'Pause focus timer' : 'Start focus timer'} title={running ? 'Pause' : 'Start'}>{running ? <Pause size={16} /> : <Play size={16} />}</button>
+        <button type="button" onClick={stopTimer} aria-label="Stop focus timer" title="Stop"><Square size={15} /></button>
       </div>
-      <button type="button" data-no-drag onClick={skipToNext} className="ff-compact-action ff-compact-skip">Skip to {mode === 'work' ? 'break' : 'work'}</button>
     </div>
   </CompactShell>;
 }
@@ -326,7 +338,7 @@ function CompactWeather({ widget, onOpen }: CompactWidgetProps) {
   const country = typeof widget.config?.country === 'string' ? widget.config.country : undefined;
   const { weather, isLoading, isDemo } = useWeather(city, country);
   return <CompactShell widget={widget} onOpen={onOpen} icon={<CloudSun size={16} className="text-indigo-600" />}>
-    {isLoading ? <p className="text-xs text-slate-500">Loading weather…</p> : !weather.city ? <div className="ff-compact-weather-empty">Choose a location to see weather.</div> : <div className="ff-compact-weather-object"><div className="ff-compact-weather-main"><CompactWeatherVisual icon={weather.icon} /><div className="ff-compact-weather-copy min-w-0"><strong className="ff-compact-weather-temperature block leading-none text-slate-900">{Math.round(weather.temp)}°C</strong><p className="mt-1 truncate text-sm font-medium text-slate-800">{weather.city}</p><p className="truncate text-xs capitalize text-slate-500">{weather.description}{isDemo ? ' · Demo' : ''}</p></div></div><div className="ff-compact-weather-meta"><span><Droplets size={12} aria-hidden="true" />{weather.humidity}%</span><span><Wind size={12} aria-hidden="true" />{weather.windSpeed} m/s</span></div></div>}
+    {isLoading ? <p className="text-xs text-slate-500">Loading weather…</p> : !weather.city ? <div className="ff-compact-weather-empty">Choose a location to see weather.</div> : <div className="ff-compact-weather-object"><div className="ff-compact-weather-main"><CompactWeatherVisual icon={weather.icon} /><div className="ff-compact-weather-copy min-w-0"><strong className="ff-compact-weather-temperature block leading-none text-slate-900">{Math.round(weather.temp)}°C</strong><p className="mt-1 truncate text-sm font-medium text-slate-800">{weather.city}</p><p className="truncate text-xs capitalize text-slate-500">{weather.description}{isDemo ? ' · Demo' : ''}</p></div></div><div className="ff-compact-weather-meta"><span><Droplet size={15} aria-hidden="true" />{weather.humidity}%</span><span><Wind size={15} aria-hidden="true" />{weather.windSpeed} m/s</span></div></div>}
   </CompactShell>;
 }
 
@@ -346,17 +358,19 @@ function CompactWeatherVisual({ icon }: { icon: string }) {
 
 function CompactCalendar({ widget, onOpen }: CompactWidgetProps) {
   const { data: tasks = [] } = useTasks();
+  const [displayDate, setDisplayDate] = useState(() => new Date());
   const now = new Date();
-  const calendar = getCompactCalendarGrid(now);
+  const calendar = getCompactCalendarGrid(displayDate);
+  const shiftMonth = (offset: number) => setDisplayDate((date) => new Date(date.getFullYear(), date.getMonth() + offset, 1));
   return <CompactShell widget={widget} onOpen={onOpen} icon={<CalendarDays size={16} className="text-indigo-600" />}>
     <div className="ff-compact-calendar" aria-label={calendar.monthLabel}>
-      <div className="ff-compact-calendar-month">{calendar.monthLabel}</div>
+      <div className="ff-compact-calendar-month"><button type="button" data-no-drag onClick={() => shiftMonth(-1)} aria-label="Previous month"><ChevronLeft size={13} /></button><span>{calendar.monthLabel}</span><button type="button" data-no-drag onClick={() => shiftMonth(1)} aria-label="Next month"><ChevronRight size={13} /></button></div>
       <div className="ff-compact-calendar-weekdays" aria-hidden="true">{calendar.weekdayLabels.map((label, index) => <span key={`${label}-${index}`}>{label}</span>)}</div>
       <div className="ff-compact-calendar-grid">
         {calendar.cells.map((day, index) => {
           if (day === null) return <span key={`empty-${index}`} className="ff-compact-calendar-cell ff-compact-calendar-cell-empty" aria-hidden="true" />;
           const priority = priorityForCalendarDay(tasks, calendar.year, calendar.month, day);
-          const isToday = day === now.getDate();
+          const isToday = calendar.year === now.getFullYear() && calendar.month === now.getMonth() && day === now.getDate();
           const label = `${calendar.monthLabel} ${day}${priority ? `, ${priority} priority deadline` : ''}${isToday ? ', today' : ''}`;
           return <span key={day} className={`ff-compact-calendar-cell ${isToday ? 'ff-compact-calendar-cell-today' : ''}`} aria-current={isToday ? 'date' : undefined} aria-label={label} title={label}>{day}{priority && <span className={`ff-compact-calendar-dot ff-compact-calendar-dot-${priority}`} aria-hidden="true" />}</span>;
         })}
@@ -399,6 +413,15 @@ function CompactGoals({ widget, onOpen }: CompactWidgetProps) {
   </CompactShell>;
 }
 
+function bookmarkSiteIcon(url: string): ReactNode {
+  let hostname = '';
+  try { hostname = new URL(url).hostname.toLowerCase(); } catch { return null; }
+  if (hostname === 'github.com' || hostname.endsWith('.github.com')) return <Github size={15} aria-hidden="true" />;
+  if (hostname === 'youtube.com' || hostname.endsWith('.youtube.com')) return <Youtube size={15} aria-hidden="true" />;
+  if (hostname === 'cloud.google.com' || hostname.endsWith('.google.com')) return <Cloud size={15} aria-hidden="true" />;
+  return null;
+}
+
 function CompactBookmarks({ widget, onOpen }: CompactWidgetProps) {
   const { data: bookmarks = [] } = useBookmarks();
   const { mutate: createBookmark } = useCreateBookmark();
@@ -407,7 +430,7 @@ function CompactBookmarks({ widget, onOpen }: CompactWidgetProps) {
   const [url, setUrl] = useState('');
   const add = () => { if (!title.trim() || !url.trim()) return; createBookmark({ title: title.trim(), url: url.trim() }); setTitle(''); setUrl(''); setAdding(false); };
   return <CompactShell widget={widget} onOpen={onOpen} icon={<Bookmark size={16} className="text-indigo-600" />}>
-    <div className="ff-compact-bookmarks-object"><Bookmark size={18} className="ff-compact-bookmarks-mark" aria-hidden="true" />{bookmarks.length ? <div className="ff-compact-bookmark-list">{bookmarks.slice(0, compactPresentationLimits.bookmarks).map((bookmark) => <a data-no-drag key={bookmark.id} href={bookmark.url} target="_blank" rel="noopener noreferrer" className="ff-compact-bookmark-row"><span className="min-w-0 truncate"><strong>{bookmark.title}</strong><small>{(() => { try { return new URL(bookmark.url).hostname; } catch { return ''; } })()}</small></span><ChevronRight size={13} aria-hidden="true" /></a>)}</div> : <p className="text-xs text-slate-500">No bookmarks yet</p>}{adding && <form data-no-drag onSubmit={(event) => { event.preventDefault(); add(); }} className="mt-1 space-y-1"><input autoFocus value={title} onChange={(event) => setTitle(event.target.value)} aria-label="Bookmark title" placeholder="Title" className="w-full rounded border border-slate-200 px-1.5 py-1 text-xs" /><input value={url} onChange={(event) => setUrl(event.target.value)} aria-label="Bookmark URL" placeholder="URL" className="w-full rounded border border-slate-200 px-1.5 py-1 text-xs" /><button type="submit" className="ff-compact-primary rounded px-2 py-1 text-xs text-white">Add</button></form>}{!adding && <button type="button" data-no-drag onClick={() => setAdding(true)} className="ff-compact-action mt-1 text-xs font-medium text-indigo-700"><Plus size={12} className="mr-0.5 inline" /> Add</button>}</div>
+    <div className="ff-compact-bookmarks-object"><Bookmark size={18} className="ff-compact-bookmarks-mark" aria-hidden="true" />{bookmarks.length ? <div className="ff-compact-bookmark-list">{bookmarks.slice(0, compactPresentationLimits.bookmarks).map((bookmark) => <a data-no-drag key={bookmark.id} href={bookmark.url} target="_blank" rel="noopener noreferrer" className="ff-compact-bookmark-row">{bookmarkSiteIcon(bookmark.url)}<span className="min-w-0 truncate"><strong>{bookmark.title}</strong><small>{(() => { try { return new URL(bookmark.url).hostname; } catch { return ''; } })()}</small></span><ChevronRight size={13} aria-hidden="true" /></a>)}</div> : <p className="text-xs text-slate-500">No bookmarks yet</p>}{adding && <form data-no-drag onSubmit={(event) => { event.preventDefault(); add(); }} className="mt-1 space-y-1"><input autoFocus value={title} onChange={(event) => setTitle(event.target.value)} aria-label="Bookmark title" placeholder="Title" className="w-full rounded border border-slate-200 px-1.5 py-1 text-xs" /><input value={url} onChange={(event) => setUrl(event.target.value)} aria-label="Bookmark URL" placeholder="URL" className="w-full rounded border border-slate-200 px-1.5 py-1 text-xs" /><button type="submit" className="ff-compact-primary rounded px-2 py-1 text-xs text-white">Add</button></form>}{!adding && <button type="button" data-no-drag onClick={() => setAdding(true)} className="ff-compact-action mt-1 text-xs font-medium text-indigo-700"><Plus size={12} className="mr-0.5 inline" /> Add</button>}</div>
   </CompactShell>;
 }
 

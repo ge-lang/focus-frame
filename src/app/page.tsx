@@ -39,6 +39,7 @@ export default function Home() {
               <span className="ff-brand-mark" aria-hidden="true"><EvvaMark /></span>
               <div>
                 <h1 className="ff-brand-title">FocusFrame</h1>
+                <span className="ff-brand-subtitle">A MORE FOCUSED YOU</span>
               </div>
             </div>
 
@@ -56,6 +57,11 @@ export default function Home() {
           <div className="ff-dashboard-stage">
             <DashboardGrid />
           </div>
+
+          <footer className="ff-page-signature" aria-label="FocusFrame signature">
+            <span>Small steps. A calmer mind.</span>
+            <span><i aria-hidden="true">—</i> FocusFrame</span>
+          </footer>
         </div>
       </ThemeWorkspace>
     </AuthGuard>

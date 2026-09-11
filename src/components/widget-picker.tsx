@@ -11,8 +11,8 @@ import {
   Check,
   ClipboardList,
   CloudSun,
+  LayoutGrid,
   Newspaper,
-  Plus,
   StickyNote,
   Target,
   Timer,
@@ -109,7 +109,7 @@ export function WidgetPicker() {
         aria-haspopup="menu"
         className="ff-header-action ff-glass-control ff-glass-control-primary inline-flex h-8 items-center gap-1.5 px-2.5 text-sm font-medium text-indigo-700 shadow-sm transition-colors hover:bg-indigo-50/80"
       >
-        <Plus className="ff-widget-icon" size={18} aria-hidden="true" />
+        <LayoutGrid className="ff-widget-icon" size={17} aria-hidden="true" />
         <span>Widget</span>
       </motion.button>
 
