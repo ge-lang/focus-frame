@@ -1751,6 +1751,38 @@ body.ff-document-body {
 .ff-dark-workspace .ff-compact-note-paper { border: 0; background: rgba(29, 34, 71, 0.42); }
 .ff-dark-workspace .ff-compact-note-paper::after { background: #20264c; }
 
+/* Micro polish: lower the task hero and make the three object contours unmistakable. */
+.ff-dark-workspace .ff-compact-task-progress-ring {
+  margin-top: 0.65rem;
+}
+.ff-dark-workspace .ff-compact-task-completion {
+  transform: translateY(0.95rem);
+}
+
+.ff-dark-workspace .ff-compact-timer-ring-large::before {
+  inset: 0.76rem;
+  background: repeating-conic-gradient(from -2deg, rgba(225, 239, 255, 1) 0 1.7deg, transparent 1.7deg 6deg);
+  filter: drop-shadow(0 0 1px rgba(137, 206, 255, 0.62));
+  -webkit-mask: radial-gradient(transparent calc(100% - 8px), #000 calc(100% - 1px));
+  mask: radial-gradient(transparent calc(100% - 8px), #000 calc(100% - 1px));
+}
+.ff-dark-workspace .ff-compact-timer-ring-large::after {
+  inset: 0.4rem;
+  background: repeating-conic-gradient(from -2deg, rgba(255, 255, 255, 1) 0 4deg, transparent 4deg 30deg);
+  filter: drop-shadow(0 0 1px rgba(170, 151, 255, 0.7));
+  -webkit-mask: radial-gradient(transparent calc(100% - 12px), #000 calc(100% - 1px));
+  mask: radial-gradient(transparent calc(100% - 12px), #000 calc(100% - 1px));
+}
+
+.ff-dark-workspace .ff-compact-card-bookmarks {
+  background: linear-gradient(145deg, #d2e3ff 0%, #8beaf4 50%, #b6a9ff 100%) !important;
+  filter: drop-shadow(0 0 7px rgba(119, 188, 255, 0.2));
+}
+.ff-dark-workspace .ff-compact-card-bookmarks > .ff-compact-object {
+  height: calc(100% - 4px);
+  margin: 2px;
+}
+
 /* Three visible fixes: keep status content in normal flow, expose the V-edge, and clarify the watch scale. */
 .ff-dark-workspace .ff-compact-status-summary > div {
   align-items: center;
