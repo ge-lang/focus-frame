@@ -2486,49 +2486,49 @@ html[data-ff-theme='light'] .ff-modal-panel label { color: var(--ff-text-seconda
   position: relative;
   z-index: 0;
   isolation: isolate;
-  transform: translateY(0.95rem);
+  transform: translateY(1.2rem);
 }
 .ff-dark-workspace .ff-compact-weather-main::before {
   position: absolute;
   z-index: -1;
   inset: -1.2rem -1.5rem -1rem -1.25rem;
   border-radius: 50%;
-  background: radial-gradient(ellipse at center, rgba(87, 179, 239, 0.22), rgba(104, 91, 225, 0.12) 48%, transparent 74%);
+  background: radial-gradient(ellipse at center, rgba(87, 179, 239, 0.3), rgba(104, 91, 225, 0.16) 48%, transparent 76%);
   content: '';
-  filter: blur(14px);
+  filter: blur(16px);
   pointer-events: none;
 }
 .ff-dark-workspace .ff-compact-weather-main > * { position: relative; z-index: 1; }
 .ff-dark-workspace .ff-compact-weather-temperature { letter-spacing: -0.09em; font-variant-numeric: tabular-nums; }
 
 .ff-dark-workspace .ff-compact-timer-ring-large::before {
-  inset: 0.55rem;
-  background: repeating-conic-gradient(from -2deg, rgba(194, 216, 255, 0.58) 0 0.8deg, transparent 0.8deg 6deg);
-  opacity: 0.78;
-  -webkit-mask: radial-gradient(transparent calc(100% - 2px), #000 calc(100% - 1px));
-  mask: radial-gradient(transparent calc(100% - 2px), #000 calc(100% - 1px));
+  inset: 0.7rem;
+  background: repeating-conic-gradient(from -2deg, rgba(213, 230, 255, 0.82) 0 1.1deg, transparent 1.1deg 6deg);
+  opacity: 0.92;
+  -webkit-mask: radial-gradient(transparent calc(100% - 3px), #000 calc(100% - 1px));
+  mask: radial-gradient(transparent calc(100% - 3px), #000 calc(100% - 1px));
 }
 .ff-dark-workspace .ff-compact-timer-ring-large::after {
   position: absolute;
   z-index: 0;
-  inset: 0.34rem;
+  inset: 0.46rem;
   border-radius: 9999px;
-  background: repeating-conic-gradient(from -2deg, rgba(225, 235, 255, 0.82) 0 1.8deg, transparent 1.8deg 30deg);
+  background: repeating-conic-gradient(from -2deg, rgba(239, 245, 255, 0.98) 0 2.8deg, transparent 2.8deg 30deg);
   content: '';
   pointer-events: none;
-  -webkit-mask: radial-gradient(transparent calc(100% - 2px), #000 calc(100% - 1px));
-  mask: radial-gradient(transparent calc(100% - 2px), #000 calc(100% - 1px));
+  -webkit-mask: radial-gradient(transparent calc(100% - 4px), #000 calc(100% - 1px));
+  mask: radial-gradient(transparent calc(100% - 4px), #000 calc(100% - 1px));
 }
 .ff-dark-workspace .ff-compact-pomodoro-controls { margin-top: -0.2rem; }
 
 .ff-dark-workspace .ff-compact-analytics-grid { background: transparent; }
 .ff-dark-workspace .ff-compact-kpi {
   align-items: center;
-  gap: 0.25rem;
+  gap: 0.45rem;
   padding: 0.45rem 0.65rem;
   text-align: center;
 }
-.ff-dark-workspace .ff-compact-kpi-icon { margin-bottom: 0.1rem; }
+.ff-dark-workspace .ff-compact-kpi-icon { margin-bottom: 0.15rem; }
 .ff-dark-workspace .ff-compact-kpi-value { margin-top: 0.08rem; }
 .ff-dark-workspace .ff-compact-kpi-label { margin-top: 0.08rem; }
 
@@ -2537,17 +2537,22 @@ html[data-ff-theme='light'] .ff-modal-panel label { color: var(--ff-text-seconda
   border-bottom: 0 !important;
   padding-bottom: 0.1rem;
 }
+.ff-dark-workspace .ff-compact-status-summary::before,
+.ff-dark-workspace .ff-compact-status-summary::after,
+.ff-dark-workspace .ff-compact-task-completion::before,
+.ff-dark-workspace .ff-compact-task-completion::after { display: none !important; }
 .ff-dark-workspace .ff-compact-status-summary > div {
   gap: 0.04rem;
   padding-inline: 0.18rem;
 }
+.ff-dark-workspace .ff-compact-status-marker { width: 1.1rem; height: 1.1rem; }
 .ff-dark-workspace .ff-compact-status-summary > div + div { border-left: 0 !important; }
 .ff-dark-workspace .ff-compact-task-progress-ring {
-  width: 9.1rem;
-  height: 9.1rem;
-  margin-top: 0.05rem;
+  width: 9.55rem;
+  height: 9.55rem;
+  margin-top: 0.35rem;
 }
-.ff-dark-workspace .ff-compact-task-completion { transform: translateY(0.12rem); }
+.ff-dark-workspace .ff-compact-task-completion { border: 0 !important; transform: translateY(0.35rem); }
 .ff-dark-workspace .ff-compact-relevant-task { border-top: 0 !important; padding-top: 0.15rem; }
 
 .ff-dark-workspace .ff-compact-card-bookmarks {
@@ -2558,10 +2563,10 @@ html[data-ff-theme='light'] .ff-modal-panel label { color: var(--ff-text-seconda
 }
 
 @media (min-width: 640px) {
-  .ff-topbar .ff-brand-mark { width: 2.9rem; height: 2.95rem; }
-  .ff-topbar .ff-evva-mark { width: 2.38rem; height: 2.95rem; }
-  .ff-topbar .ff-brand-title { font-size: 1.3rem; font-weight: 720; }
-  .ff-topbar .ff-brand-subtitle { font-size: 0.56rem; letter-spacing: 0.12em; white-space: nowrap; }
+  .ff-topbar .ff-brand-mark { width: 3.15rem; height: 3.3rem; }
+  .ff-topbar .ff-evva-mark { width: 2.65rem; height: 3.3rem; }
+  .ff-topbar .ff-brand-title { font-size: 1.3rem; font-weight: 700; }
+  .ff-topbar .ff-brand-subtitle { font-size: 0.5rem; letter-spacing: 0.12em; white-space: nowrap; }
 }
 
 .ff-dark-workspace .ff-compact-card {
@@ -2570,9 +2575,10 @@ html[data-ff-theme='light'] .ff-modal-panel label { color: var(--ff-text-seconda
 }
 .ff-dark-workspace .ff-compact-card::before {
   box-shadow:
-    inset 0 0 0 1px rgba(224, 237, 255, 0.2),
-    inset 10px 0 22px rgba(124, 108, 255, 0.13),
-    inset -12px -6px 24px rgba(74, 190, 229, 0.11),
-    inset 0 -16px 26px rgba(3, 8, 25, 0.3);
+    inset 0 0 0 1px rgba(224, 237, 255, 0.28),
+    inset 7px 0 14px rgba(124, 108, 255, 0.18),
+    inset -8px 0 16px rgba(74, 190, 229, 0.15),
+    inset 0 8px 18px rgba(141, 128, 255, 0.08),
+    inset 0 -14px 24px rgba(3, 8, 25, 0.34);
 }
 .ff-dark-workspace .ff-compact-note-paper::after { background: #20264c; }
