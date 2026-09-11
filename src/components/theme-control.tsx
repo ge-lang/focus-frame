@@ -12,11 +12,11 @@ export function ThemeControl() {
       <span className="ff-theme-icon" aria-hidden="true">
         {resolvedTheme === 'light' ? <Sun size={16} /> : resolvedTheme === 'dark' ? <Moon size={16} /> : <Monitor size={16} />}
       </span>
-      <span aria-hidden="true">{resolvedTheme === 'light' ? 'Light' : 'Dark'}</span>
+      <span aria-hidden="true">{resolvedTheme === 'light' ? 'Hot' : 'Cool'}</span>
       <select className="ff-theme-select" value={theme} onChange={(event) => setTheme(event.target.value as ThemePreference)} aria-label="Theme">
         <option value="system">System</option>
-        <option value="light">Light</option>
-        <option value="dark">Dark</option>
+        <option value="light">Hot</option>
+        <option value="dark">Cool</option>
       </select>
     </label>
   );
