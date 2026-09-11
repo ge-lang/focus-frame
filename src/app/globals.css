@@ -49,6 +49,10 @@ body.ff-document-body {
   --ff-warning: #b45309;
   --ff-danger: #b91c1c;
   --ff-shadow-sm: 0 4px 16px rgba(15, 23, 42, 0.045);
+  --ff-z-sticky: 40;
+  --ff-z-drag: 50;
+  --ff-z-modal: 100;
+  --ff-z-dialog: 110;
 }
 
 .ff-page-shell {
@@ -1313,6 +1317,27 @@ body.ff-document-body {
 
 .ff-focus-view-close:hover,
 .ff-focus-view-close:focus-visible { color: var(--ff-accent-violet, #6255e8); outline: 2px solid rgba(99, 102, 241, 0.35); outline-offset: 2px; }
+
+/* Portals need their own theme scope so full widgets keep the active theme after leaving the app shell. */
+.ff-theme-portal {
+  position: fixed !important;
+  inset: 0;
+  z-index: var(--ff-z-modal, 100);
+  pointer-events: none;
+}
+
+.ff-theme-portal > * { pointer-events: auto; }
+
+/* Focus View owns the outer shell; the full widget keeps its meaningful inner sections without a second card frame. */
+.ff-focus-view-content > .ff-card.ff-widget-surface {
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0;
+  background: transparent !important;
+  box-shadow: none !important;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
 
 .ff-compact-priority-low { background: rgba(22, 163, 74, 0.1); color: #15803d; }
 .ff-compact-priority-medium { background: rgba(217, 119, 6, 0.12); color: #b45309; }

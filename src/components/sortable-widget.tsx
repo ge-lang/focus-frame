@@ -51,9 +51,15 @@ export function SortableWidget({ id, type, compact = false, onContentHeightChang
     {isOpen && compact && (
       <ModalPortal>
         <div className="ff-modal-backdrop fixed inset-0 z-[var(--ff-z-modal)] flex items-start justify-center overflow-y-auto p-4 pt-[max(4rem,10vh)]" onClick={() => setIsOpen(false)}>
-          <div className="ff-focus-view w-full max-w-[1020px] max-h-[85vh] overflow-y-auto" data-no-drag onClick={(event) => event.stopPropagation()}>
-            <div className="mb-2 flex justify-end"><button type="button" onClick={() => setIsOpen(false)} className="ff-focus-view-close rounded px-2 py-1 text-sm" aria-label={`Close ${type} focus view`}>Close</button></div>
-            <WidgetRenderer widget={widget} onContentHeightChange={onContentHeightChange} />
+          <div className="ff-focus-view flex w-full max-w-[1020px] max-h-[85vh] flex-col overflow-hidden" data-no-drag role="dialog" aria-modal="true" aria-labelledby={`${id}-focus-view-title`} onClick={(event) => event.stopPropagation()}>
+            <div className="mb-2 flex shrink-0 items-center justify-between">
+              <h2 id={`${id}-focus-view-title`} className="sr-only">{type} focus view</h2>
+              <span aria-hidden="true" />
+              <button type="button" onClick={() => setIsOpen(false)} className="ff-focus-view-close rounded px-2 py-1 text-sm" aria-label={`Close ${type} focus view`}>Close</button>
+            </div>
+            <div className="ff-focus-view-content min-h-0 flex-1 overflow-y-auto" data-no-drag>
+              <WidgetRenderer widget={widget} onContentHeightChange={onContentHeightChange} />
+            </div>
           </div>
         </div>
       </ModalPortal>

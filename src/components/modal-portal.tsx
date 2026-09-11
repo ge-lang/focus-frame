@@ -2,6 +2,7 @@
 
 import { createPortal } from 'react-dom';
 import { useEffect, useState, type ReactNode } from 'react';
+import { useTheme } from './theme-provider';
 
 let activeModalCount = 0;
 let previousDocumentStyles: {
@@ -50,13 +51,23 @@ function acquireScrollLock() {
   };
 }
 
+export function getThemeScopeClass(theme: 'light' | 'dark') {
+  return theme === 'dark' ? 'ff-dark-workspace' : 'ff-light-workspace';
+}
+
 export function ModalPortal({ children }: { children: ReactNode }) {
   const [mounted, setMounted] = useState(false);
+  const { resolvedTheme } = useTheme();
 
   useEffect(() => {
     setMounted(true);
     return acquireScrollLock();
   }, []);
 
-  return mounted ? createPortal(children, document.body) : null;
+  return mounted ? createPortal(
+    <div className={`ff-theme-portal ${getThemeScopeClass(resolvedTheme)}`}>
+      {children}
+    </div>,
+    document.body,
+  ) : null;
 }
