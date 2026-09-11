@@ -17,7 +17,7 @@ import {
   Play,
   Plus,
   RotateCcw,
-  SkipForward,
+  Square,
   Target,
   Timer,
   TrendingUp,
@@ -203,7 +203,6 @@ function CompactTasks({ widget, onOpen }: CompactWidgetProps) {
           <div className="ff-compact-task-progress-ring">
             <svg viewBox="0 0 44 44" aria-hidden="true">
               <circle className="ff-compact-task-progress-track" cx="22" cy="22" r="18" />
-              <circle className="ff-compact-task-progress-halo" cx="22" cy="22" r="20" />
               <circle
                 className="ff-compact-task-progress-value"
                 cx="22"
@@ -287,6 +286,12 @@ function CompactPomodoro({ widget, onOpen }: CompactWidgetProps) {
     setSeconds(compactPomodoroDurations[mode]);
   };
 
+  const stopTimer = () => {
+    setRunning(false);
+    setSeconds(compactPomodoroDurations.work);
+    setMode('work');
+  };
+
   const skipToNext = () => {
     setRunning(false);
     if (mode === 'work') {
@@ -307,9 +312,9 @@ function CompactPomodoro({ widget, onOpen }: CompactWidgetProps) {
         <small>{task?.title || 'No task selected'}</small>
       </div>
       <div className="ff-compact-pomodoro-controls" data-no-drag>
-        <button type="button" onClick={() => setRunning((value) => !value)} aria-label={running ? 'Pause focus timer' : 'Start focus timer'} title={running ? 'Pause' : 'Start'}>{running ? <Pause size={13} /> : <Play size={13} />}</button>
         <button type="button" onClick={resetTimer} aria-label="Reset focus timer" title="Reset"><RotateCcw size={13} /></button>
-        <button type="button" onClick={skipToNext} aria-label={mode === 'work' ? 'Skip to break' : 'Skip to work'} title={mode === 'work' ? 'Skip to break' : 'Skip to work'}><SkipForward size={13} /></button>
+        <button type="button" onClick={() => setRunning((value) => !value)} aria-label={running ? 'Pause focus timer' : 'Start focus timer'} title={running ? 'Pause' : 'Start'}>{running ? <Pause size={13} /> : <Play size={13} />}</button>
+        <button type="button" onClick={stopTimer} aria-label="Stop focus timer" title="Stop"><Square size={13} /></button>
       </div>
       <button type="button" data-no-drag onClick={skipToNext} className="ff-compact-action ff-compact-skip">Skip to {mode === 'work' ? 'break' : 'work'}</button>
     </div>
@@ -388,9 +393,9 @@ function CompactGoals({ widget, onOpen }: CompactWidgetProps) {
   const { data: goals = [] } = useGoals();
   const completed = goals.filter((goal) => goal.completed).length;
   const completion = goals.length ? Math.round((completed / goals.length) * 100) : 0;
-  const circumference = 2 * Math.PI * 32;
+  const arcs = [34, 28, 22].map((radius) => 2 * Math.PI * radius);
   return <CompactShell widget={widget} onOpen={onOpen} icon={<Target size={16} className="text-indigo-600" />}>
-    <div className="ff-compact-goals-object"><div className="ff-compact-goals-ring"><svg viewBox="0 0 76 76" aria-hidden="true"><circle className="ff-compact-goals-halo" cx="38" cy="38" r="35" /><circle className="ff-compact-goals-track" cx="38" cy="38" r="32" /><circle className="ff-compact-goals-value" cx="38" cy="38" r="32" strokeDasharray={circumference} strokeDashoffset={circumference * (1 - completion / 100)} /><circle className="ff-compact-goals-inner" cx="38" cy="38" r="25" strokeDasharray="72 85" strokeDashoffset="12" /><circle className="ff-compact-goals-core" cx="38" cy="38" r="19" /></svg><span className="ff-compact-goals-center"><Flag size={11} aria-hidden="true" /><strong>{completion}%</strong></span></div><div className="ff-compact-goals-list">{goals.length ? goals.filter((goal) => !goal.completed).slice(0, compactPresentationLimits.goals).map((goal) => <div key={goal.id} className="ff-compact-goal-row"><span className={`ff-compact-goal-dot ff-compact-goal-${goal.priority}`} aria-hidden="true" /><span className="ff-compact-goal-copy"><span className="truncate">{goal.title}</span><small>Active</small></span></div>) : <p>No goals yet</p>}</div></div>
+    <div className="ff-compact-goals-object"><div className="ff-compact-goals-ring"><svg viewBox="0 0 76 76" aria-hidden="true"><circle className="ff-compact-goals-outer" cx="38" cy="38" r="34" strokeDasharray={arcs[0]} strokeDashoffset={arcs[0] * (1 - completion / 100)} /><circle className="ff-compact-goals-middle" cx="38" cy="38" r="28" strokeDasharray={arcs[1]} strokeDashoffset={arcs[1] * (1 - (completion / 100) * 0.86)} /><circle className="ff-compact-goals-inner" cx="38" cy="38" r="22" strokeDasharray={arcs[2]} strokeDashoffset={arcs[2] * (1 - (completion / 100) * 0.68)} /></svg><span className="ff-compact-goals-center"><strong>{completion}%</strong></span></div><div className="ff-compact-goals-list">{goals.length ? goals.filter((goal) => !goal.completed).slice(0, compactPresentationLimits.goals).map((goal) => <div key={goal.id} className="ff-compact-goal-row"><span className={`ff-compact-goal-dot ff-compact-goal-${goal.priority}`} aria-hidden="true" /><span className="ff-compact-goal-copy"><span className="truncate">{goal.title}</span><small>Active</small></span></div>) : <p>No goals yet</p>}</div></div>
   </CompactShell>;
 }
 

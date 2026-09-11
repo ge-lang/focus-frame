@@ -1331,8 +1331,9 @@ body.ff-document-body {
 .ff-compact-goals-ring { position: relative; width: min(34%, 8.5rem); aspect-ratio: 1; flex: 0 0 auto; }
 .ff-compact-goals-ring svg { display: block; width: 100%; height: 100%; transform: rotate(-90deg); }
 .ff-compact-goals-ring circle { fill: none; stroke-width: 4; }
-.ff-compact-goals-track { stroke: rgba(148, 163, 184, 0.2); }
-.ff-compact-goals-value { stroke: var(--ff-accent-violet, #6255e8); stroke-linecap: round; }
+.ff-compact-goals-outer { stroke: var(--ff-accent-violet, #6255e8); stroke-linecap: round; }
+.ff-compact-goals-middle { stroke: #7c6cff; stroke-linecap: round; }
+.ff-compact-goals-inner { stroke: var(--ff-accent-cyan, #22d3ee); stroke-linecap: round; }
 .ff-compact-goals-ring strong { position: absolute; inset: 0; display: grid; place-items: center; color: var(--ff-text-primary, #18213b); font-size: 1rem; }
 .ff-compact-goals-list { display: flex; min-width: 0; flex: 1; flex-direction: column; gap: 0.65rem; color: var(--ff-text-secondary, #64748b); font-size: 0.75rem; }
 .ff-compact-goal-row { display: flex; min-width: 0; align-items: center; gap: 0.45rem; }
@@ -1531,10 +1532,7 @@ body.ff-document-body {
   color: var(--ff-text-secondary, #64748b);
 }
 
-.ff-compact-pomodoro-controls button:first-child {
-  background: var(--ff-accent-violet, #6255e8);
-  color: #fff;
-}
+.ff-compact-pomodoro-controls button:nth-child(2) { background: var(--ff-accent-violet, #6255e8); color: #fff; }
 
 .ff-compact-pomodoro-controls button:hover,
 .ff-compact-pomodoro-controls button:focus-visible {
@@ -1543,8 +1541,8 @@ body.ff-document-body {
   outline-offset: 1px;
 }
 
-.ff-compact-pomodoro-controls button:first-child:hover,
-.ff-compact-pomodoro-controls button:first-child:focus-visible { color: #fff; }
+.ff-compact-pomodoro-controls button:nth-child(2):hover,
+.ff-compact-pomodoro-controls button:nth-child(2):focus-visible { color: #fff; }
 .ff-compact-skip { font-size: 0.6rem; line-height: 1; }
 
 .ff-compact-calendar {
@@ -1817,7 +1815,6 @@ body.ff-document-body {
 .ff-dark-workspace .ff-compact-note-paper::after { border-color: rgba(167, 183, 232, 0.18); background: #20264c; }
 .ff-dark-workspace .ff-compact-weather-meta { border-top-color: rgba(167, 183, 232, 0.2); }
 .ff-dark-workspace .ff-compact-goals-ring strong { color: #f4f3ff; }
-.ff-dark-workspace .ff-compact-goals-track { stroke: rgba(174, 184, 210, 0.2); }
 .ff-dark-workspace .ff-focus-view { background: #1a1d3a; }
 
 @media (min-width: 640px) {
@@ -2120,7 +2117,6 @@ html[data-ff-theme='light'] .ff-modal-panel label { color: var(--ff-text-seconda
 
 .ff-dark-workspace .ff-compact-task-progress-ring {
   filter: drop-shadow(0 0 10px rgba(124, 108, 255, 0.18));
-  box-shadow: 0 0 0 4px rgba(91, 119, 231, 0.08), 0 0 0 7px rgba(103, 215, 229, 0.035);
 }
 
 .ff-dark-workspace .ff-compact-timer-ring-large {
@@ -2176,7 +2172,6 @@ html[data-ff-theme='light'] .ff-modal-panel label { color: var(--ff-text-seconda
 }
 
 .ff-dark-workspace .ff-compact-note-paper::after { background: #2a4a84; box-shadow: -1px 1px 0 rgba(191, 220, 255, 0.18); }
-.ff-dark-workspace .ff-compact-bookmarks-object::after { width: 3.1rem; height: 0.72rem; background: linear-gradient(90deg, rgba(103, 215, 229, 0.62), rgba(141, 128, 255, 0.78)); opacity: 0.7; }
 
 .ff-compact-news-image {
   width: 3.4rem;
@@ -2193,13 +2188,6 @@ html[data-ff-theme='light'] .ff-modal-panel label { color: var(--ff-text-seconda
 .ff-dark-workspace .ff-compact-card-pomodoro { box-shadow: 0 18px 38px rgba(3, 8, 25, 0.44), 0 0 30px rgba(87, 105, 242, 0.2), inset 0 1px 0 rgba(194, 220, 255, 0.16) !important; }
 .ff-dark-workspace .ff-compact-card-weather { box-shadow: 0 18px 38px rgba(3, 8, 25, 0.44), 0 0 28px rgba(47, 154, 224, 0.18), inset 0 1px 0 rgba(194, 220, 255, 0.16) !important; }
 .ff-dark-workspace .ff-compact-card-goals { box-shadow: 0 18px 38px rgba(3, 8, 25, 0.44), 0 0 26px rgba(121, 95, 241, 0.17), inset 0 1px 0 rgba(194, 220, 255, 0.16) !important; }
-
-.ff-dark-workspace .ff-compact-task-progress-halo {
-  fill: none;
-  stroke: rgba(103, 215, 229, 0.32);
-  stroke-dasharray: 1.5 2.5;
-  stroke-width: 1.1;
-}
 
 .ff-dark-workspace .ff-compact-weather-visual {
   position: relative;
@@ -2241,12 +2229,11 @@ html[data-ff-theme='light'] .ff-modal-panel label { color: var(--ff-text-seconda
 .ff-dark-workspace .ff-weather-cloud-snow { fill: none; stroke: #a8dcff; stroke-linecap: round; stroke-width: 3; }
 
 .ff-dark-workspace .ff-compact-card-bookmarks {
-  clip-path: polygon(0 0, 100% 0, 100% 88%, 50% 100%, 0 88%);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 82%, 0 100%);
   border-radius: 1rem 1rem 0.8rem 0.8rem;
 }
 
 .ff-dark-workspace .ff-compact-card-bookmarks .ff-compact-object { padding-bottom: 1.75rem; }
-.ff-dark-workspace .ff-compact-card-bookmarks .ff-compact-bookmarks-object::after { display: none; }
 
 .ff-dark-workspace .ff-compact-card-notes {
   background:
@@ -2259,13 +2246,14 @@ html[data-ff-theme='light'] .ff-modal-panel label { color: var(--ff-text-seconda
 .ff-dark-workspace .ff-compact-card-notes .ff-compact-note-paper { padding: 1rem; background: transparent !important; box-shadow: none; }
 .ff-dark-workspace .ff-compact-card-notes .ff-compact-note-paper::after { background: #4a72b6; }
 
-.ff-dark-workspace .ff-compact-goals-halo,
-.ff-dark-workspace .ff-compact-goals-inner,
-.ff-dark-workspace .ff-compact-goals-core { fill: none; }
-.ff-dark-workspace .ff-compact-goals-halo { stroke: rgba(103, 215, 229, 0.44); stroke-width: 1.4; }
-.ff-dark-workspace .ff-compact-goals-inner { stroke: rgba(141, 128, 255, 0.72); stroke-width: 2.6; stroke-linecap: round; }
-.ff-dark-workspace .ff-compact-goals-core { stroke: rgba(103, 215, 229, 0.22); stroke-width: 1; }
-.ff-dark-workspace .ff-compact-goals-center { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 0.05rem; color: #b9d4ff; }
+.ff-dark-workspace .ff-compact-goals-outer,
+.ff-dark-workspace .ff-compact-goals-middle,
+.ff-dark-workspace .ff-compact-goals-inner { fill: none; stroke-width: 2.3; stroke-linecap: round; }
+.ff-dark-workspace .ff-compact-goals-outer { stroke: #7c6cff; }
+.ff-dark-workspace .ff-compact-goals-middle { stroke: #9c8cff; }
+.ff-dark-workspace .ff-compact-goals-inner { stroke: #6bd7e5; }
+.ff-dark-workspace .ff-compact-goals-ring { filter: drop-shadow(0 0 12px rgba(124, 108, 255, 0.2)); }
+.ff-dark-workspace .ff-compact-goals-center { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #f4f3ff; }
 .ff-dark-workspace .ff-compact-goals-center strong { position: static; font-size: 1.1rem; }
 
 .ff-dark-workspace .ff-compact-kpi-icon { opacity: 0.96; }
@@ -2273,7 +2261,7 @@ html[data-ff-theme='light'] .ff-modal-panel label { color: var(--ff-text-seconda
 
 .ff-dark-workspace .ff-compact-news-story { align-items: center; padding-top: 0.5rem; padding-bottom: 0.5rem; }
 .ff-dark-workspace .ff-compact-news-story > .min-w-0 { flex: 1; }
-.ff-dark-workspace .ff-compact-news-image { width: 36%; height: 7rem; max-width: 9rem; }
+.ff-dark-workspace .ff-compact-news-image { width: clamp(6rem, 28%, 11rem); height: 4.6rem; max-width: 11rem; }
 .ff-dark-workspace .ff-compact-news-chevron { flex: 0 0 auto; color: #9bbcff; opacity: 0.8; }
 .ff-dark-workspace .ff-compact-news-story:hover .ff-compact-news-chevron { color: #e0eaff; opacity: 1; }
 
@@ -2298,18 +2286,6 @@ html[data-ff-theme='light'] .ff-modal-panel label { color: var(--ff-text-seconda
   padding-bottom: 1rem;
 }
 
-.ff-compact-bookmarks-object::after {
-  position: absolute;
-  bottom: 0.05rem;
-  left: 0.05rem;
-  width: 2.3rem;
-  height: 0.48rem;
-  background: var(--ff-accent-violet, #6255e8);
-  clip-path: polygon(0 0, 100% 0, 50% 100%);
-  content: '';
-  opacity: 0.42;
-}
-
 .ff-compact-weather-icon { width: 4.35rem !important; height: 4.35rem !important; }
 .ff-compact-weather-temperature { font-size: 2.2rem; }
 .ff-compact-goals-object { gap: 0.8rem; }
@@ -2317,4 +2293,3 @@ html[data-ff-theme='light'] .ff-modal-panel label { color: var(--ff-text-seconda
 
 .ff-dark-workspace .ff-compact-note-paper { background: transparent; }
 .ff-dark-workspace .ff-compact-note-paper::after { background: #20264c; }
-.ff-dark-workspace .ff-compact-bookmarks-object::after { background: var(--ff-accent-violet); opacity: 0.5; }

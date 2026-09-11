@@ -1,7 +1,7 @@
 import type { LayoutItem, Widget, WidgetType } from '@/types/dashboard';
 
 export const DESKTOP_GRID_COLUMNS = 12;
-export const OBJECT_LAYOUT_VERSION = 4;
+export const OBJECT_LAYOUT_VERSION = 5;
 export const COMPACT_LAYOUT_VERSION = OBJECT_LAYOUT_VERSION;
 export const OBJECT_GRID_MARGIN = 16;
 const mobileWidgetHeights: Record<WidgetType, number> = {
@@ -24,7 +24,7 @@ export interface WidgetSizing {
 const widgetSizing: Record<WidgetType, WidgetSizing> = {
   todo: { w: 4, h: 2 },
   weather: { w: 2, h: 2 },
-  news: { w: 8, h: 2 },
+  news: { w: 12, h: 1 },
   pomodoro: { w: 2, h: 2 },
   calendar: { w: 2, h: 2 },
   notes: { w: 2, h: 2 },
@@ -35,14 +35,14 @@ const widgetSizing: Record<WidgetType, WidgetSizing> = {
 
 const compactDefaultPositions: Record<WidgetType, { x: number; y: number }> = {
   news: { x: 0, y: 0 },
-  goals: { x: 8, y: 0 },
-  todo: { x: 0, y: 2 },
-  pomodoro: { x: 4, y: 2 },
-  calendar: { x: 6, y: 2 },
-  weather: { x: 8, y: 2 },
-  analytics: { x: 10, y: 2 },
-  notes: { x: 0, y: 4 },
-  bookmarks: { x: 2, y: 4 },
+  todo: { x: 0, y: 1 },
+  goals: { x: 4, y: 1 },
+  pomodoro: { x: 8, y: 1 },
+  calendar: { x: 10, y: 1 },
+  weather: { x: 0, y: 3 },
+  analytics: { x: 2, y: 3 },
+  notes: { x: 4, y: 3 },
+  bookmarks: { x: 6, y: 3 },
 };
 
 export function getWidgetSizing(type: WidgetType): WidgetSizing {
@@ -142,8 +142,8 @@ export function migrateToCompactLayout(
     };
   }
 
-  // Version 3 already used object coordinates. Re-size News in place and only
-  // move items that now intersect its wider canonical footprint.
+  // Version 4 already used object coordinates. Turn News into a full-width
+  // strip in place and only move items that now intersect its footprint.
   if (layoutVersion === OBJECT_LAYOUT_VERSION - 1 && layout.length > 0) {
     const reconciled = reconcileLayoutTypes(layout, canonicalWidgets);
     return {

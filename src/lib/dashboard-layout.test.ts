@@ -21,9 +21,9 @@ import {
 
 describe('dashboard layout normalization', () => {
   it('defines fixed desktop dimensions for each widget type', () => {
-    expect(OBJECT_LAYOUT_VERSION).toBe(4);
+    expect(OBJECT_LAYOUT_VERSION).toBe(5);
     for (const type of ['todo', 'goals'] as const) expect(getWidgetSizing(type)).toEqual({ w: 4, h: 2 });
-    expect(getWidgetSizing('news')).toEqual({ w: 8, h: 2 });
+    expect(getWidgetSizing('news')).toEqual({ w: 12, h: 1 });
     for (const type of ['analytics', 'weather', 'pomodoro', 'calendar', 'notes', 'bookmarks'] as const) expect(getWidgetSizing(type)).toEqual({ w: 2, h: 2 });
   });
 
@@ -32,7 +32,7 @@ describe('dashboard layout normalization', () => {
     expect(getSquareGridUnit(0, 12, 16)).toBe(1);
   });
 
-  it('migrates every existing widget to the exact version-4 arrangement once', () => {
+  it('migrates every existing widget to the exact version-5 arrangement once', () => {
     const types = ['todo', 'news', 'pomodoro', 'weather', 'calendar', 'analytics', 'notes', 'goals', 'bookmarks'] as const;
     const widgets = types.map((type, index) => ({ id: `${type}-${index}`, type, colSpan: 8, rowSpan: 4 }));
     const oldLayout = widgets.map((widget, index) => ({ i: widget.id, x: index, y: index * 7, w: 8, h: 4, type: widget.type }));
@@ -40,25 +40,25 @@ describe('dashboard layout normalization', () => {
 
     expect(migrated.migrated).toBe(true);
     expect(migrated.layout.map(({ i, x, y, w, h }) => ({ i, x, y, w, h }))).toEqual([
-      { i: 'todo-0', x: 0, y: 2, w: 4, h: 2 },
-      { i: 'news-1', x: 0, y: 0, w: 8, h: 2 },
-      { i: 'pomodoro-2', x: 4, y: 2, w: 2, h: 2 },
-      { i: 'weather-3', x: 8, y: 2, w: 2, h: 2 },
-      { i: 'calendar-4', x: 6, y: 2, w: 2, h: 2 },
-      { i: 'analytics-5', x: 10, y: 2, w: 2, h: 2 },
-      { i: 'notes-6', x: 0, y: 4, w: 2, h: 2 },
-      { i: 'goals-7', x: 8, y: 0, w: 4, h: 2 },
-      { i: 'bookmarks-8', x: 2, y: 4, w: 2, h: 2 },
+      { i: 'todo-0', x: 0, y: 1, w: 4, h: 2 },
+      { i: 'news-1', x: 0, y: 0, w: 12, h: 1 },
+      { i: 'pomodoro-2', x: 8, y: 1, w: 2, h: 2 },
+      { i: 'weather-3', x: 0, y: 3, w: 2, h: 2 },
+      { i: 'calendar-4', x: 10, y: 1, w: 2, h: 2 },
+      { i: 'analytics-5', x: 2, y: 3, w: 2, h: 2 },
+      { i: 'notes-6', x: 4, y: 3, w: 2, h: 2 },
+      { i: 'goals-7', x: 4, y: 1, w: 4, h: 2 },
+      { i: 'bookmarks-8', x: 6, y: 3, w: 2, h: 2 },
     ]);
-    expect(migrated.widgets.every((widget) => widget.colSpan === getWidgetSizing(widget.type).w && widget.rowSpan === 2)).toBe(true);
+    expect(migrated.widgets.every((widget) => widget.colSpan === getWidgetSizing(widget.type).w && widget.rowSpan === getWidgetSizing(widget.type).h)).toBe(true);
   });
 
-  it.each([undefined, 0, 1, 2, 3])('migrates legacy layoutVersion %s to version 4', (version) => {
+  it.each([undefined, 0, 1, 2, 3, 4])('migrates legacy layoutVersion %s to version 5', (version) => {
     const widgets = [{ id: 'weather-1', type: 'weather' as const, colSpan: 3, rowSpan: 3 }];
     const result = migrateToCompactLayout([], widgets, version);
 
     expect(result.migrated).toBe(true);
-    expect(result.layout).toEqual([{ i: 'weather-1', x: 8, y: 2, w: 2, h: 2, type: 'weather' }]);
+    expect(result.layout).toEqual([{ i: 'weather-1', x: 0, y: 3, w: 2, h: 2, type: 'weather' }]);
     expect(result.widgets[0]).toMatchObject({ colSpan: 2, rowSpan: 2 });
   });
 
@@ -79,28 +79,28 @@ describe('dashboard layout normalization', () => {
     const result = migrateToCompactLayout([], widgets, 0);
 
     expect(result.layout).toEqual([
-      { i: 'todo-1', x: 0, y: 2, w: 4, h: 2, type: 'todo' },
-      { i: 'goals-1', x: 8, y: 0, w: 4, h: 2, type: 'goals' },
+      { i: 'todo-1', x: 0, y: 1, w: 4, h: 2, type: 'todo' },
+      { i: 'goals-1', x: 4, y: 1, w: 4, h: 2, type: 'goals' },
     ]);
   });
 
-  it('migrates version-3 object layouts to wider News without resetting positions', () => {
+  it('migrates version-4 object layouts to a full-width News strip without resetting positions', () => {
     const widgets = [
-      { id: 'news-1', type: 'news' as const, colSpan: 4, rowSpan: 2 },
+      { id: 'news-1', type: 'news' as const, colSpan: 8, rowSpan: 2 },
       { id: 'weather-1', type: 'weather' as const, colSpan: 2, rowSpan: 2 },
     ];
     const result = migrateToCompactLayout([
-      { i: 'news-1', x: 0, y: 5, w: 4, h: 2, type: 'news' },
-      { i: 'weather-1', x: 8, y: 5, w: 2, h: 2, type: 'weather' },
-    ], widgets, 3);
+      { i: 'news-1', x: 0, y: 5, w: 8, h: 2, type: 'news' },
+      { i: 'weather-1', x: 8, y: 6, w: 2, h: 2, type: 'weather' },
+    ], widgets, 4);
 
     expect(result.migrated).toBe(true);
     expect(result.layout).toEqual([
-      { i: 'news-1', x: 0, y: 5, w: 8, h: 2, type: 'news' },
-      { i: 'weather-1', x: 8, y: 5, w: 2, h: 2, type: 'weather' },
+      { i: 'news-1', x: 0, y: 5, w: 12, h: 1, type: 'news' },
+      { i: 'weather-1', x: 8, y: 6, w: 2, h: 2, type: 'weather' },
     ]);
     expect(result.widgets).toEqual([
-      { ...widgets[0], colSpan: 8, rowSpan: 2 },
+      { ...widgets[0], colSpan: 12, rowSpan: 1 },
       { ...widgets[1], colSpan: 2, rowSpan: 2 },
     ]);
   });
@@ -179,7 +179,7 @@ describe('dashboard layout normalization', () => {
     ]));
 
     expect(normalized).toMatchObject([
-      { i: 'news-123', type: 'news', w: 8 },
+      { i: 'news-123', type: 'news', w: 12, h: 1 },
       { i: 'analytics-123', type: 'analytics', w: 2 },
     ]);
   });
@@ -204,7 +204,7 @@ describe('dashboard layout normalization', () => {
 
     expect(migrated).toMatchObject([
       { i: 'todo-1', w: 4 },
-      { i: 'news-1', w: 8 },
+      { i: 'news-1', w: 12, h: 1 },
       { i: 'analytics-1', w: 2 },
     ]);
     expect(migrated.every((item, index) => !hasLayoutCollision(item, migrated.slice(index + 1)))).toBe(true);
@@ -243,7 +243,7 @@ describe('dashboard layout normalization', () => {
       { i: 'todo-1', x: 0, y: 0, w: 8, h: 3, type: 'todo' as const },
       { i: 'weather-1', x: 8, y: 0, w: 4, h: 3, type: 'weather' as const },
       { i: 'news-1', x: 0, y: 10, w: 8, h: 3, type: 'news' as const },
-      { i: 'calendar-1', x: 8, y: 10, w: 4, h: 4, type: 'calendar' as const },
+      { i: 'calendar-1', x: 8, y: 11, w: 4, h: 4, type: 'calendar' as const },
       { i: 'notes-1', x: 4, y: 20, w: 4, h: 3, type: 'notes' as const },
       { i: 'goals-1', x: 8, y: 25, w: 4, h: 3, type: 'goals' as const },
     ];
@@ -256,7 +256,7 @@ describe('dashboard layout normalization', () => {
       { i: 'todo-1', x: 0, y: 0 },
       { i: 'weather-1', x: 8, y: 0 },
       { i: 'news-1', x: 0, y: 10 },
-      { i: 'calendar-1', x: 8, y: 10 },
+      { i: 'calendar-1', x: 8, y: 11 },
       { i: 'notes-1', x: 4, y: 20 },
       { i: 'goals-1', x: 8, y: 25 },
     ]);
@@ -427,7 +427,7 @@ describe('dashboard layout normalization', () => {
     expect(tablet).toMatchObject([
       { i: 'todo-1', x: 0, y: 0, w: 4, h: 2 },
       { i: 'weather-1', x: 4, y: 0, w: 2, h: 2 },
-      { i: 'news-1', x: 0, y: 3, w: 6, h: 2 },
+      { i: 'news-1', x: 0, y: 3, w: 6, h: 1 },
     ]);
     expect(desktop[2]).toMatchObject({ x: 6, y: 3, w: 3, h: 3 });
   });

@@ -48,8 +48,8 @@ describe('/api/dashboard ownership', () => {
     expect(response.status).toBe(200);
     expect(mocks.upsert).toHaveBeenCalledWith({
       where: { userId: 'user-a' },
-      create: { userId: 'user-a', layout: JSON.stringify({ ...state, layoutVersion: 4 }) },
-      update: { layout: JSON.stringify({ ...state, layoutVersion: 4 }) },
+      create: { userId: 'user-a', layout: JSON.stringify({ ...state, layoutVersion: 5 }) },
+      update: { layout: JSON.stringify({ ...state, layoutVersion: 5 }) },
     });
   });
 
@@ -103,7 +103,7 @@ describe('/api/dashboard ownership', () => {
       create: expect.objectContaining({
         layout: JSON.stringify({
           ...mismatchedState,
-          layoutVersion: 4,
+          layoutVersion: 5,
           widgets: [{ id: 'todo-123', type: 'todo', colSpan: 4, rowSpan: 2 }],
           layout: [{ i: 'todo-123', x: 0, y: 0, w: 4, h: 2, type: 'todo' }],
         }),
@@ -111,9 +111,36 @@ describe('/api/dashboard ownership', () => {
       update: expect.objectContaining({
         layout: JSON.stringify({
           ...mismatchedState,
-          layoutVersion: 4,
+          layoutVersion: 5,
           widgets: [{ id: 'todo-123', type: 'todo', colSpan: 4, rowSpan: 2 }],
           layout: [{ i: 'todo-123', x: 0, y: 0, w: 4, h: 2, type: 'todo' }],
+        }),
+      }),
+    }));
+  });
+
+  it('canonicalizes the editorial News geometry without changing its position', async () => {
+    mocks.getServerSession.mockResolvedValue({ user: { id: 'user-a' } });
+    mocks.upsert.mockResolvedValue({});
+
+    const newsState = {
+      widgets: [{ id: 'news-123', type: 'news', colSpan: 8, rowSpan: 2 }],
+      layout: [{ i: 'news-123', x: 0, y: 7, w: 8, h: 2, type: 'news' }],
+    };
+    const response = await PUT(new Request('http://localhost/api/dashboard', {
+      method: 'PUT',
+      body: JSON.stringify({ state: newsState }),
+      headers: { 'Content-Type': 'application/json' },
+    }) as NextRequest);
+
+    expect(response.status).toBe(200);
+    expect(mocks.upsert).toHaveBeenCalledWith(expect.objectContaining({
+      create: expect.objectContaining({
+        layout: JSON.stringify({
+          ...newsState,
+          layoutVersion: 5,
+          widgets: [{ id: 'news-123', type: 'news', colSpan: 12, rowSpan: 1 }],
+          layout: [{ i: 'news-123', x: 0, y: 7, w: 12, h: 1, type: 'news' }],
         }),
       }),
     }));
