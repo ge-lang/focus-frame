@@ -1750,7 +1750,7 @@ body.ff-document-body {
 .ff-dark-workspace .ff-compact-news-story + .ff-compact-news-story { border-color: rgba(167, 183, 232, 0.2); }
 .ff-dark-workspace .ff-compact-note-paper { border: 0; background: rgba(29, 34, 71, 0.42); }
 .ff-dark-workspace .ff-compact-note-paper::after { background: #20264c; }
-.ff-dark-workspace .ff-compact-kpi-value { text-shadow: 0 0 14px rgba(141, 128, 255, 0.12); }
+.ff-dark-workspace .ff-compact-kpi-value { text-shadow: none; }
 .ff-dark-workspace .ff-compact-weather-meta { border-top-color: rgba(167, 183, 232, 0.22); }
 .ff-dark-workspace .ff-compact-news-headline,
 .ff-dark-workspace .ff-compact-bookmark-row strong { color: #f4f3ff; }
@@ -2105,8 +2105,8 @@ html[data-ff-theme='light'] .ff-modal-panel label { color: var(--ff-text-seconda
 
 .ff-dark-workspace .ff-compact-status-summary > div { position: relative; }
 .ff-dark-workspace .ff-compact-status-summary > div::before {
-  width: 0.34rem;
-  height: 0.34rem;
+  width: 0.42rem;
+  height: 0.42rem;
   margin: 0 auto 0.22rem;
   border-radius: 9999px;
   content: '';
@@ -2257,13 +2257,39 @@ html[data-ff-theme='light'] .ff-modal-panel label { color: var(--ff-text-seconda
 .ff-dark-workspace .ff-compact-goals-center strong { position: static; font-size: 1.1rem; }
 
 .ff-dark-workspace .ff-compact-kpi-icon { opacity: 0.96; }
-.ff-dark-workspace .ff-compact-kpi-value { filter: drop-shadow(0 0 7px currentColor); }
+.ff-dark-workspace .ff-compact-kpi-value { filter: none; text-shadow: none; }
 
 .ff-dark-workspace .ff-compact-news-story { align-items: center; padding-top: 0.5rem; padding-bottom: 0.5rem; }
 .ff-dark-workspace .ff-compact-news-story > .min-w-0 { flex: 1; }
 .ff-dark-workspace .ff-compact-news-image { width: clamp(6rem, 28%, 11rem); height: 4.6rem; max-width: 11rem; }
 .ff-dark-workspace .ff-compact-news-chevron { flex: 0 0 auto; color: #9bbcff; opacity: 0.8; }
 .ff-dark-workspace .ff-compact-news-story:hover .ff-compact-news-chevron { color: #e0eaff; opacity: 1; }
+
+/* Dark tile edge light: a directional inner rim keeps the center calm. */
+.ff-dark-workspace .ff-compact-card {
+  position: relative;
+  isolation: isolate;
+  background: linear-gradient(145deg, rgba(39, 56, 108, 0.96), rgba(16, 28, 63, 0.98) 48%, rgba(9, 17, 42, 1)) !important;
+}
+
+.ff-dark-workspace .ff-compact-card::before {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  box-shadow:
+    inset 0 1px 0 rgba(205, 228, 255, 0.16),
+    inset 15px 0 28px rgba(124, 108, 255, 0.08),
+    inset -16px -8px 30px rgba(74, 190, 229, 0.07),
+    inset 0 -18px 30px rgba(3, 8, 25, 0.2);
+  content: '';
+  pointer-events: none;
+}
+
+.ff-dark-workspace .ff-compact-card > * { position: relative; z-index: 1; }
+
+.ff-dark-workspace .ff-compact-weather-main { transform: translateY(0.3rem); }
+.ff-dark-workspace .ff-compact-weather-temperature { letter-spacing: -0.06em; }
 
 /* Final compact object balance: preserve the fixed square while giving each object a clear resting zone. */
 .ff-compact-task-body { gap: 0.15rem; }
