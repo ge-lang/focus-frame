@@ -3749,6 +3749,74 @@ html[data-ff-theme='light'] .ff-modal-panel label { color: #e5c5d5 !important; }
 .ff-light-workspace .ff-compact-weather-meta span { display: inline-flex; align-items: center; gap: 0.3rem; }
 
 .ff-light-workspace .ff-compact-analytics-grid { background: transparent; }
+
+/* Desktop geometry parity: both themes share the same composition and differ only in paint. */
+@media (min-width: 640px) {
+  .ff-dark-workspace .ff-dashboard-stage,
+  .ff-light-workspace .ff-dashboard-stage {
+    padding-top: 0;
+  }
+
+  .ff-dark-workspace .ff-compact-status-summary > div,
+  .ff-light-workspace .ff-compact-status-summary > div {
+    align-items: center;
+  }
+
+  .ff-dark-workspace .ff-compact-status-marker,
+  .ff-light-workspace .ff-compact-status-marker {
+    display: grid;
+    width: 1.1rem;
+    height: 1.1rem;
+    margin: 0 auto 0.12rem;
+    flex: 0 0 auto;
+    place-items: center;
+  }
+
+  .ff-dark-workspace .ff-compact-calendar-month,
+  .ff-light-workspace .ff-compact-calendar-month {
+    display: grid;
+    grid-template-columns: 1.5rem minmax(0, 1fr) 1.5rem;
+    align-items: center;
+    gap: 0.15rem;
+  }
+
+  .ff-dark-workspace .ff-compact-calendar-month > span,
+  .ff-light-workspace .ff-compact-calendar-month > span {
+    min-width: 0;
+  }
+
+  .ff-dark-workspace .ff-compact-calendar-month button,
+  .ff-light-workspace .ff-compact-calendar-month button {
+    display: grid;
+    width: 1.45rem;
+    height: 1.45rem;
+    place-items: center;
+  }
+
+  .ff-dark-workspace .ff-compact-news-story,
+  .ff-light-workspace .ff-compact-news-story {
+    align-items: center;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .ff-dark-workspace .ff-compact-news-story > .min-w-0,
+  .ff-light-workspace .ff-compact-news-story > .min-w-0 {
+    flex: 1;
+  }
+
+  .ff-dark-workspace .ff-compact-news-image,
+  .ff-light-workspace .ff-compact-news-image {
+    width: clamp(6rem, 28%, 11rem);
+    height: 4.6rem;
+    max-width: 11rem;
+  }
+
+  .ff-dark-workspace .ff-compact-news-chevron,
+  .ff-light-workspace .ff-compact-news-chevron {
+    flex: 0 0 auto;
+  }
+}
 .ff-light-workspace .ff-compact-kpi {
   align-items: center;
   gap: 0.45rem;
