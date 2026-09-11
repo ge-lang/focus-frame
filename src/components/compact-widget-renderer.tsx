@@ -8,22 +8,16 @@ import {
   CalendarDays,
   CheckCircle2,
   ChevronRight,
-  Cloud,
-  CloudLightning,
-  CloudRain,
   CloudSun,
   Clock3,
   Droplets,
   Flag,
-  Moon,
   Newspaper,
   Pause,
   Play,
   Plus,
   RotateCcw,
   SkipForward,
-  Snowflake,
-  Sun,
   Target,
   Timer,
   TrendingUp,
@@ -332,13 +326,17 @@ function CompactWeather({ widget, onOpen }: CompactWidgetProps) {
 }
 
 function CompactWeatherVisual({ icon }: { icon: string }) {
-  if (icon === '01d') return <div className="ff-compact-weather-visual" aria-hidden="true"><Sun /></div>;
-  if (icon === '01n') return <div className="ff-compact-weather-visual" aria-hidden="true"><Moon /></div>;
-  if (icon === '02d') return <div className="ff-compact-weather-visual" aria-hidden="true"><CloudSun /></div>;
-  if (icon === '09d' || icon === '09n' || icon === '10d' || icon === '10n') return <div className="ff-compact-weather-visual" aria-hidden="true"><CloudRain /></div>;
-  if (icon === '11d' || icon === '11n') return <div className="ff-compact-weather-visual" aria-hidden="true"><CloudLightning /></div>;
-  if (icon === '13d' || icon === '13n') return <div className="ff-compact-weather-visual" aria-hidden="true"><Snowflake /></div>;
-  return <div className="ff-compact-weather-visual" aria-hidden="true"><Cloud /></div>;
+  const isRain = icon.startsWith('09') || icon.startsWith('10');
+  const isSnow = icon.startsWith('13');
+  return <div className="ff-compact-weather-visual" aria-hidden="true">
+    <svg viewBox="0 0 120 86" role="img">
+      <path className="ff-weather-cloud-shadow" d="M19 61c0-10 8-18 18-18 3 0 6 1 9 2 4-11 14-18 26-18 15 0 27 10 29 24 8 1 14 7 14 15 0 9-7 16-16 16H35c-9 0-16-7-16-16Z" />
+      <path className="ff-weather-cloud-body" d="M14 58c0-9 7-16 16-16 3 0 6 1 8 2 4-10 13-16 24-16 14 0 25 9 27 22 7 1 12 6 12 13 0 8-6 14-14 14H29c-8 0-15-6-15-14Z" />
+      <path className="ff-weather-cloud-highlight" d="M29 48c3-3 7-4 11-4 4-9 12-13 21-13 9 0 17 4 21 11-4-2-8-3-13-3-10 0-18 4-23 11-5-3-11-3-17-2Z" />
+      {isRain && <path className="ff-weather-cloud-rain" d="m40 76-4 8m17-8-4 8m18-8-4 8" />}
+      {isSnow && <path className="ff-weather-cloud-snow" d="M41 78h0m13 0h0m13 0h0" />}
+    </svg>
+  </div>;
 }
 
 function CompactCalendar({ widget, onOpen }: CompactWidgetProps) {
@@ -392,7 +390,7 @@ function CompactGoals({ widget, onOpen }: CompactWidgetProps) {
   const completion = goals.length ? Math.round((completed / goals.length) * 100) : 0;
   const circumference = 2 * Math.PI * 32;
   return <CompactShell widget={widget} onOpen={onOpen} icon={<Target size={16} className="text-indigo-600" />}>
-    <div className="ff-compact-goals-object"><div className="ff-compact-goals-ring"><svg viewBox="0 0 76 76" aria-hidden="true"><circle className="ff-compact-goals-halo" cx="38" cy="38" r="35" /><circle className="ff-compact-goals-track" cx="38" cy="38" r="32" /><circle className="ff-compact-goals-value" cx="38" cy="38" r="32" strokeDasharray={circumference} strokeDashoffset={circumference * (1 - completion / 100)} /><circle className="ff-compact-goals-inner" cx="38" cy="38" r="25" /><circle className="ff-compact-goals-core" cx="38" cy="38" r="19" /></svg><strong>{completion}%</strong></div><div className="ff-compact-goals-list">{goals.length ? goals.filter((goal) => !goal.completed).slice(0, compactPresentationLimits.goals).map((goal) => <div key={goal.id} className="ff-compact-goal-row"><span className={`ff-compact-goal-dot ff-compact-goal-${goal.priority}`} aria-hidden="true" /><span className="ff-compact-goal-copy"><span className="truncate">{goal.title}</span><small>Active</small></span></div>) : <p>No goals yet</p>}</div></div>
+    <div className="ff-compact-goals-object"><div className="ff-compact-goals-ring"><svg viewBox="0 0 76 76" aria-hidden="true"><circle className="ff-compact-goals-halo" cx="38" cy="38" r="35" /><circle className="ff-compact-goals-track" cx="38" cy="38" r="32" /><circle className="ff-compact-goals-value" cx="38" cy="38" r="32" strokeDasharray={circumference} strokeDashoffset={circumference * (1 - completion / 100)} /><circle className="ff-compact-goals-inner" cx="38" cy="38" r="25" strokeDasharray="72 85" strokeDashoffset="12" /><circle className="ff-compact-goals-core" cx="38" cy="38" r="19" /></svg><span className="ff-compact-goals-center"><Flag size={11} aria-hidden="true" /><strong>{completion}%</strong></span></div><div className="ff-compact-goals-list">{goals.length ? goals.filter((goal) => !goal.completed).slice(0, compactPresentationLimits.goals).map((goal) => <div key={goal.id} className="ff-compact-goal-row"><span className={`ff-compact-goal-dot ff-compact-goal-${goal.priority}`} aria-hidden="true" /><span className="ff-compact-goal-copy"><span className="truncate">{goal.title}</span><small>Active</small></span></div>) : <p>No goals yet</p>}</div></div>
   </CompactShell>;
 }
 
@@ -404,7 +402,7 @@ function CompactBookmarks({ widget, onOpen }: CompactWidgetProps) {
   const [url, setUrl] = useState('');
   const add = () => { if (!title.trim() || !url.trim()) return; createBookmark({ title: title.trim(), url: url.trim() }); setTitle(''); setUrl(''); setAdding(false); };
   return <CompactShell widget={widget} onOpen={onOpen} icon={<Bookmark size={16} className="text-indigo-600" />}>
-    <div className="ff-compact-bookmarks-object"><Bookmark size={18} className="ff-compact-bookmarks-mark" aria-hidden="true" />{bookmarks.length ? <div className="ff-compact-bookmark-list">{bookmarks.slice(0, compactPresentationLimits.bookmarks).map((bookmark) => <a data-no-drag key={bookmark.id} href={bookmark.url} target="_blank" rel="noopener noreferrer" className="ff-compact-bookmark-row"><Bookmark size={12} aria-hidden="true" /><span className="min-w-0 truncate"><strong>{bookmark.title}</strong><small>{(() => { try { return new URL(bookmark.url).hostname; } catch { return ''; } })()}</small></span></a>)}</div> : <p className="text-xs text-slate-500">No bookmarks yet</p>}{adding && <form data-no-drag onSubmit={(event) => { event.preventDefault(); add(); }} className="mt-1 space-y-1"><input autoFocus value={title} onChange={(event) => setTitle(event.target.value)} aria-label="Bookmark title" placeholder="Title" className="w-full rounded border border-slate-200 px-1.5 py-1 text-xs" /><input value={url} onChange={(event) => setUrl(event.target.value)} aria-label="Bookmark URL" placeholder="URL" className="w-full rounded border border-slate-200 px-1.5 py-1 text-xs" /><button type="submit" className="ff-compact-primary rounded px-2 py-1 text-xs text-white">Add</button></form>}{!adding && <button type="button" data-no-drag onClick={() => setAdding(true)} className="ff-compact-action mt-1 text-xs font-medium text-indigo-700"><Plus size={12} className="mr-0.5 inline" /> Add</button>}</div>
+    <div className="ff-compact-bookmarks-object"><Bookmark size={18} className="ff-compact-bookmarks-mark" aria-hidden="true" />{bookmarks.length ? <div className="ff-compact-bookmark-list">{bookmarks.slice(0, compactPresentationLimits.bookmarks).map((bookmark) => <a data-no-drag key={bookmark.id} href={bookmark.url} target="_blank" rel="noopener noreferrer" className="ff-compact-bookmark-row"><span className="min-w-0 truncate"><strong>{bookmark.title}</strong><small>{(() => { try { return new URL(bookmark.url).hostname; } catch { return ''; } })()}</small></span><ChevronRight size={13} aria-hidden="true" /></a>)}</div> : <p className="text-xs text-slate-500">No bookmarks yet</p>}{adding && <form data-no-drag onSubmit={(event) => { event.preventDefault(); add(); }} className="mt-1 space-y-1"><input autoFocus value={title} onChange={(event) => setTitle(event.target.value)} aria-label="Bookmark title" placeholder="Title" className="w-full rounded border border-slate-200 px-1.5 py-1 text-xs" /><input value={url} onChange={(event) => setUrl(event.target.value)} aria-label="Bookmark URL" placeholder="URL" className="w-full rounded border border-slate-200 px-1.5 py-1 text-xs" /><button type="submit" className="ff-compact-primary rounded px-2 py-1 text-xs text-white">Add</button></form>}{!adding && <button type="button" data-no-drag onClick={() => setAdding(true)} className="ff-compact-action mt-1 text-xs font-medium text-indigo-700"><Plus size={12} className="mr-0.5 inline" /> Add</button>}</div>
   </CompactShell>;
 }
 

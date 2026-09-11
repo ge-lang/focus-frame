@@ -48,8 +48,8 @@ describe('/api/dashboard ownership', () => {
     expect(response.status).toBe(200);
     expect(mocks.upsert).toHaveBeenCalledWith({
       where: { userId: 'user-a' },
-      create: { userId: 'user-a', layout: JSON.stringify({ ...state, layoutVersion: 3 }) },
-      update: { layout: JSON.stringify({ ...state, layoutVersion: 3 }) },
+      create: { userId: 'user-a', layout: JSON.stringify({ ...state, layoutVersion: 4 }) },
+      update: { layout: JSON.stringify({ ...state, layoutVersion: 4 }) },
     });
   });
 
@@ -103,7 +103,7 @@ describe('/api/dashboard ownership', () => {
       create: expect.objectContaining({
         layout: JSON.stringify({
           ...mismatchedState,
-          layoutVersion: 3,
+          layoutVersion: 4,
           widgets: [{ id: 'todo-123', type: 'todo', colSpan: 4, rowSpan: 2 }],
           layout: [{ i: 'todo-123', x: 0, y: 0, w: 4, h: 2, type: 'todo' }],
         }),
@@ -111,7 +111,7 @@ describe('/api/dashboard ownership', () => {
       update: expect.objectContaining({
         layout: JSON.stringify({
           ...mismatchedState,
-          layoutVersion: 3,
+          layoutVersion: 4,
           widgets: [{ id: 'todo-123', type: 'todo', colSpan: 4, rowSpan: 2 }],
           layout: [{ i: 'todo-123', x: 0, y: 0, w: 4, h: 2, type: 'todo' }],
         }),
