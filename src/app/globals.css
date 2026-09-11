@@ -1601,6 +1601,164 @@ body.ff-document-body {
 .ff-compact-calendar-dot-medium { background: #e6a84d; }
 .ff-compact-calendar-dot-low { background: #70c77a; }
 
+/* Object tiles: composed instruments rather than miniature card stacks. */
+.ff-compact-object {
+  padding: 1rem;
+  color: var(--ff-text-primary, #18213b);
+  transition: background-color 180ms ease, box-shadow 180ms ease;
+}
+
+.ff-compact-object:hover {
+  background: rgba(99, 102, 241, 0.035);
+}
+
+.ff-compact-status-summary {
+  align-items: center;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+  padding-bottom: 0.55rem;
+}
+
+.ff-compact-status-summary > div + div {
+  border-left: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+.ff-compact-status-summary span { font-size: 0.67rem; }
+.ff-compact-status-summary strong { font-size: 1.05rem; }
+
+.ff-compact-task-progress-ring {
+  width: 7.5rem;
+  height: 7.5rem;
+}
+
+.ff-compact-task-progress-ring circle { stroke-width: 2.5; }
+.ff-compact-task-progress-label strong { font-size: 1.05rem; }
+.ff-compact-task-progress-label span { font-size: 0.55rem; }
+
+.ff-compact-relevant-task {
+  min-height: 1.6rem;
+  border-top-color: rgba(148, 163, 184, 0.2);
+  padding-top: 0.45rem;
+}
+
+.ff-compact-news-object {
+  display: grid;
+  min-height: 0;
+  height: 100%;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ff-compact-news-story {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  gap: 0.7rem;
+  padding: 0.3rem 0.75rem 0.3rem 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+.ff-compact-news-story + .ff-compact-news-story {
+  border-left: 1px solid rgba(148, 163, 184, 0.18);
+  padding-right: 0;
+  padding-left: 0.75rem;
+}
+
+.ff-compact-news-story:hover .ff-compact-news-headline,
+.ff-compact-news-story:focus-visible .ff-compact-news-headline { color: var(--ff-accent-violet, #6255e8); }
+.ff-compact-news-index { color: var(--ff-accent-cyan, #22d3ee); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.08em; }
+.ff-compact-news-headline { display: -webkit-box; overflow: hidden; color: var(--ff-text-primary, #18213b); font-size: 0.8rem; line-height: 1.35; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.ff-compact-news-meta { display: block; margin-top: 0.45rem; overflow: hidden; color: var(--ff-text-muted, #7b849b); font-size: 0.61rem; text-overflow: ellipsis; white-space: nowrap; }
+
+.ff-compact-analytics-grid {
+  display: grid;
+  min-height: 0;
+  flex: 1;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+}
+
+.ff-compact-kpi {
+  position: relative;
+  min-height: 0;
+  justify-content: center;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 0.55rem 0.75rem;
+}
+
+.ff-compact-kpi:nth-child(odd) { border-right: 1px solid rgba(148, 163, 184, 0.16); }
+.ff-compact-kpi:nth-child(-n + 2) { border-bottom: 1px solid rgba(148, 163, 184, 0.16); }
+.ff-compact-kpi-value { display: block; font-size: 1.6rem; font-weight: 700; line-height: 1; }
+.ff-compact-kpi-label { margin-top: 0.3rem; letter-spacing: 0.01em; }
+
+.ff-compact-note-paper {
+  border: 0;
+  border-radius: 0.35rem;
+  background: rgba(248, 250, 252, 0.28);
+  padding: 0.7rem;
+}
+
+.ff-compact-note-editor { position: relative; z-index: 1; line-height: 1.6; }
+.ff-compact-note-editor::placeholder { color: var(--ff-text-muted, #7b849b); }
+
+.ff-compact-goals-ring { width: min(38%, 9.25rem); }
+.ff-compact-goals-ring strong { font-size: 1.2rem; }
+.ff-compact-goals-list { gap: 0.75rem; }
+.ff-compact-goal-copy { display: grid; min-width: 0; flex: 1; gap: 0.2rem; }
+.ff-compact-goal-copy small { color: var(--ff-text-muted, #7b849b); font-size: 0.58rem; }
+
+.ff-compact-bookmarks-object { align-items: flex-start; justify-content: flex-start; gap: 0.45rem; }
+.ff-compact-bookmarks-mark { color: var(--ff-accent-violet, #6255e8); }
+.ff-compact-bookmark-list { display: grid; width: 100%; gap: 0.35rem; }
+.ff-compact-bookmark-row { display: flex; min-width: 0; align-items: center; gap: 0.45rem; color: var(--ff-text-secondary, #64748b); text-decoration: none; }
+.ff-compact-bookmark-row > svg { flex: 0 0 auto; color: var(--ff-accent-cyan, #22d3ee); }
+.ff-compact-bookmark-row span { display: grid; min-width: 0; gap: 0.08rem; }
+.ff-compact-bookmark-row strong { overflow: hidden; color: var(--ff-text-primary, #18213b); font-size: 0.69rem; text-overflow: ellipsis; white-space: nowrap; }
+.ff-compact-bookmark-row small { overflow: hidden; color: var(--ff-text-muted, #7b849b); font-size: 0.58rem; text-overflow: ellipsis; white-space: nowrap; }
+
+.ff-compact-weather-object { gap: 0.55rem; }
+.ff-compact-weather-main { justify-content: center; gap: 0.85rem; }
+.ff-compact-weather-icon { width: 4rem !important; height: 4rem !important; flex: 0 0 auto; }
+.ff-compact-weather-temperature { font-size: 2rem; font-weight: 700; }
+.ff-compact-weather-copy { display: grid; gap: 0.15rem; }
+.ff-compact-weather-meta { padding-top: 0.45rem; }
+
+.ff-compact-timer-ring-large {
+  width: 9.5rem;
+  height: 9.5rem;
+  border-width: 0.4rem;
+  box-shadow: inset 0 0 0 1px rgba(103, 215, 229, 0.12), 0 0 22px rgba(124, 108, 255, 0.12);
+}
+
+.ff-compact-timer-ring-large span { font-size: 1.45rem; }
+.ff-compact-timer-ring-large small { max-width: 7rem; font-size: 0.62rem; }
+.ff-compact-pomodoro-body { gap: 0.15rem; }
+
+.ff-compact-calendar { gap: 0.3rem; }
+.ff-compact-calendar-month { font-size: 0.98rem; }
+.ff-compact-calendar-weekdays { font-size: 0.68rem; }
+.ff-compact-calendar-grid { flex: 1; align-content: stretch; grid-auto-rows: minmax(1.2rem, 1fr); row-gap: 0.18rem; }
+.ff-compact-calendar-cell { height: auto; min-height: 1.2rem; font-size: 0.72rem; }
+.ff-compact-calendar-dot { width: 0.22rem; height: 0.22rem; }
+
+/* Keep the cool object language legible on the dark workspace. */
+.ff-dark-workspace .ff-compact-object:hover { background: rgba(124, 108, 255, 0.055); }
+.ff-dark-workspace .ff-compact-status-summary,
+.ff-dark-workspace .ff-compact-status-summary > div + div,
+.ff-dark-workspace .ff-compact-kpi:nth-child(odd),
+.ff-dark-workspace .ff-compact-kpi:nth-child(-n + 2),
+.ff-dark-workspace .ff-compact-news-story + .ff-compact-news-story { border-color: rgba(167, 183, 232, 0.2); }
+.ff-dark-workspace .ff-compact-note-paper { border: 0; background: rgba(29, 34, 71, 0.42); }
+.ff-dark-workspace .ff-compact-note-paper::after { background: #20264c; }
+.ff-dark-workspace .ff-compact-kpi-value { text-shadow: 0 0 14px rgba(141, 128, 255, 0.12); }
+.ff-dark-workspace .ff-compact-weather-meta { border-top-color: rgba(167, 183, 232, 0.22); }
+.ff-dark-workspace .ff-compact-news-headline,
+.ff-dark-workspace .ff-compact-bookmark-row strong { color: #f4f3ff; }
+.ff-dark-workspace .ff-compact-news-meta,
+.ff-dark-workspace .ff-compact-bookmark-row small,
+.ff-dark-workspace .ff-compact-goal-copy small { color: #aeb8d2; }
+
 .ff-focus-view {
   border-radius: 1rem;
   background: var(--ff-surface, #fff);
