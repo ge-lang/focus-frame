@@ -7,22 +7,30 @@ import {
   Bookmark,
   CalendarDays,
   CheckCircle2,
-  Clock3,
+  ChevronRight,
+  Cloud,
+  CloudLightning,
+  CloudRain,
   CloudSun,
+  Clock3,
+  Droplets,
   Flag,
+  Moon,
   Newspaper,
   Pause,
   Play,
   Plus,
   RotateCcw,
   SkipForward,
+  Snowflake,
+  Sun,
   Target,
   Timer,
   TrendingUp,
   StickyNote,
+  Wind,
 } from 'lucide-react';
 import { AnimatedWidget } from '@/components/animated-widget';
-import { WeatherIcon } from '@/components/weather-icon';
 import { useAnalytics, useCreateFocusSession } from '@/hooks/use-analytics';
 import { useNews } from '@/hooks/use-news';
 import { useTasks } from '@/hooks/use-tasks';
@@ -76,7 +84,7 @@ function CompactShell({ widget, onOpen, icon, children }: CompactWidgetProps & {
   };
 
   return (
-    <AnimatedWidget className="ff-compact-card">
+    <AnimatedWidget className={`ff-compact-card ff-compact-card-${widget.type}`}>
       <div
         className="ff-compact-object ff-compact-drag-surface flex h-full min-h-0 flex-col"
         aria-label={`Open ${label} Focus View`}
@@ -201,6 +209,7 @@ function CompactTasks({ widget, onOpen }: CompactWidgetProps) {
           <div className="ff-compact-task-progress-ring">
             <svg viewBox="0 0 44 44" aria-hidden="true">
               <circle className="ff-compact-task-progress-track" cx="22" cy="22" r="18" />
+              <circle className="ff-compact-task-progress-halo" cx="22" cy="22" r="20" />
               <circle
                 className="ff-compact-task-progress-value"
                 cx="22"
@@ -244,6 +253,7 @@ function CompactNews({ widget, onOpen }: CompactWidgetProps) {
           <strong className="ff-compact-news-headline">{article.title}</strong>
           <span className="ff-compact-news-meta">{article.source} · {new Date(article.publishedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
         </span>
+        <ChevronRight className="ff-compact-news-chevron" size={15} aria-hidden="true" />
       </a>)}
     </div>
   </CompactShell>;
@@ -317,8 +327,18 @@ function CompactWeather({ widget, onOpen }: CompactWidgetProps) {
   const country = typeof widget.config?.country === 'string' ? widget.config.country : undefined;
   const { weather, isLoading, isDemo } = useWeather(city, country);
   return <CompactShell widget={widget} onOpen={onOpen} icon={<CloudSun size={16} className="text-indigo-600" />}>
-    {isLoading ? <p className="text-xs text-slate-500">Loading weather…</p> : !weather.city ? <div className="ff-compact-weather-empty">Choose a location to see weather.</div> : <div className="ff-compact-weather-object"><div className="ff-compact-weather-main"><WeatherIcon icon={weather.icon} className="ff-compact-weather-icon" /><div className="ff-compact-weather-copy min-w-0"><strong className="ff-compact-weather-temperature block leading-none text-slate-900">{Math.round(weather.temp)}°C</strong><p className="mt-1 truncate text-sm font-medium text-slate-800">{weather.city}</p><p className="truncate text-xs capitalize text-slate-500">{weather.description}{isDemo ? ' · Demo' : ''}</p></div></div><div className="ff-compact-weather-meta"><span>{weather.humidity}% humidity</span><span>{weather.windSpeed} m/s wind</span></div></div>}
+    {isLoading ? <p className="text-xs text-slate-500">Loading weather…</p> : !weather.city ? <div className="ff-compact-weather-empty">Choose a location to see weather.</div> : <div className="ff-compact-weather-object"><div className="ff-compact-weather-main"><CompactWeatherVisual icon={weather.icon} /><div className="ff-compact-weather-copy min-w-0"><strong className="ff-compact-weather-temperature block leading-none text-slate-900">{Math.round(weather.temp)}°C</strong><p className="mt-1 truncate text-sm font-medium text-slate-800">{weather.city}</p><p className="truncate text-xs capitalize text-slate-500">{weather.description}{isDemo ? ' · Demo' : ''}</p></div></div><div className="ff-compact-weather-meta"><span><Droplets size={12} aria-hidden="true" />{weather.humidity}%</span><span><Wind size={12} aria-hidden="true" />{weather.windSpeed} m/s</span></div></div>}
   </CompactShell>;
+}
+
+function CompactWeatherVisual({ icon }: { icon: string }) {
+  if (icon === '01d') return <div className="ff-compact-weather-visual" aria-hidden="true"><Sun /></div>;
+  if (icon === '01n') return <div className="ff-compact-weather-visual" aria-hidden="true"><Moon /></div>;
+  if (icon === '02d') return <div className="ff-compact-weather-visual" aria-hidden="true"><CloudSun /></div>;
+  if (icon === '09d' || icon === '09n' || icon === '10d' || icon === '10n') return <div className="ff-compact-weather-visual" aria-hidden="true"><CloudRain /></div>;
+  if (icon === '11d' || icon === '11n') return <div className="ff-compact-weather-visual" aria-hidden="true"><CloudLightning /></div>;
+  if (icon === '13d' || icon === '13n') return <div className="ff-compact-weather-visual" aria-hidden="true"><Snowflake /></div>;
+  return <div className="ff-compact-weather-visual" aria-hidden="true"><Cloud /></div>;
 }
 
 function CompactCalendar({ widget, onOpen }: CompactWidgetProps) {
@@ -372,7 +392,7 @@ function CompactGoals({ widget, onOpen }: CompactWidgetProps) {
   const completion = goals.length ? Math.round((completed / goals.length) * 100) : 0;
   const circumference = 2 * Math.PI * 32;
   return <CompactShell widget={widget} onOpen={onOpen} icon={<Target size={16} className="text-indigo-600" />}>
-    <div className="ff-compact-goals-object"><div className="ff-compact-goals-ring"><svg viewBox="0 0 76 76" aria-hidden="true"><circle className="ff-compact-goals-track" cx="38" cy="38" r="32" /><circle className="ff-compact-goals-value" cx="38" cy="38" r="32" strokeDasharray={circumference} strokeDashoffset={circumference * (1 - completion / 100)} /></svg><strong>{completion}%</strong></div><div className="ff-compact-goals-list">{goals.length ? goals.filter((goal) => !goal.completed).slice(0, compactPresentationLimits.goals).map((goal) => <div key={goal.id} className="ff-compact-goal-row"><span className={`ff-compact-goal-dot ff-compact-goal-${goal.priority}`} aria-hidden="true" /><span className="ff-compact-goal-copy"><span className="truncate">{goal.title}</span><small>Active</small></span></div>) : <p>No goals yet</p>}</div></div>
+    <div className="ff-compact-goals-object"><div className="ff-compact-goals-ring"><svg viewBox="0 0 76 76" aria-hidden="true"><circle className="ff-compact-goals-halo" cx="38" cy="38" r="35" /><circle className="ff-compact-goals-track" cx="38" cy="38" r="32" /><circle className="ff-compact-goals-value" cx="38" cy="38" r="32" strokeDasharray={circumference} strokeDashoffset={circumference * (1 - completion / 100)} /><circle className="ff-compact-goals-inner" cx="38" cy="38" r="25" /><circle className="ff-compact-goals-core" cx="38" cy="38" r="19" /></svg><strong>{completion}%</strong></div><div className="ff-compact-goals-list">{goals.length ? goals.filter((goal) => !goal.completed).slice(0, compactPresentationLimits.goals).map((goal) => <div key={goal.id} className="ff-compact-goal-row"><span className={`ff-compact-goal-dot ff-compact-goal-${goal.priority}`} aria-hidden="true" /><span className="ff-compact-goal-copy"><span className="truncate">{goal.title}</span><small>Active</small></span></div>) : <p>No goals yet</p>}</div></div>
   </CompactShell>;
 }
 

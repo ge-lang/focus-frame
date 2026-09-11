@@ -2189,6 +2189,85 @@ html[data-ff-theme='light'] .ff-modal-panel label { color: var(--ff-text-seconda
 
 .ff-dark-workspace .ff-compact-news-image { border: 1px solid rgba(167, 203, 255, 0.22); box-shadow: 0 0 14px rgba(76, 117, 231, 0.12); }
 
+/* Reference reconstruction: hero objects receive the strongest local light. */
+.ff-dark-workspace .ff-compact-card-pomodoro { box-shadow: 0 18px 38px rgba(3, 8, 25, 0.44), 0 0 30px rgba(87, 105, 242, 0.2), inset 0 1px 0 rgba(194, 220, 255, 0.16) !important; }
+.ff-dark-workspace .ff-compact-card-weather { box-shadow: 0 18px 38px rgba(3, 8, 25, 0.44), 0 0 28px rgba(47, 154, 224, 0.18), inset 0 1px 0 rgba(194, 220, 255, 0.16) !important; }
+.ff-dark-workspace .ff-compact-card-goals { box-shadow: 0 18px 38px rgba(3, 8, 25, 0.44), 0 0 26px rgba(121, 95, 241, 0.17), inset 0 1px 0 rgba(194, 220, 255, 0.16) !important; }
+
+.ff-dark-workspace .ff-compact-task-progress-halo {
+  fill: none;
+  stroke: rgba(103, 215, 229, 0.32);
+  stroke-dasharray: 1.5 2.5;
+  stroke-width: 1.1;
+}
+
+.ff-dark-workspace .ff-compact-weather-visual {
+  position: relative;
+  display: grid;
+  width: 4.5rem;
+  height: 4.5rem;
+  flex: 0 0 auto;
+  place-items: center;
+  color: #d9ebff;
+}
+
+.ff-dark-workspace .ff-compact-weather-visual::before {
+  position: absolute;
+  inset: 0.2rem;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(124, 180, 255, 0.38), rgba(80, 116, 232, 0.16) 46%, transparent 72%);
+  content: '';
+  filter: blur(8px);
+}
+
+.ff-dark-workspace .ff-compact-weather-visual svg {
+  position: relative;
+  z-index: 1;
+  width: 4rem;
+  height: 4rem;
+  stroke-width: 1.25;
+  filter: drop-shadow(0 0 9px rgba(193, 220, 255, 0.38));
+}
+
+.ff-dark-workspace .ff-compact-weather-meta span { display: inline-flex; align-items: center; gap: 0.3rem; }
+.ff-dark-workspace .ff-compact-weather-meta span:first-child svg { color: #9fd6ff; }
+.ff-dark-workspace .ff-compact-weather-meta span:last-child svg { color: var(--ff-accent-cyan); }
+
+.ff-dark-workspace .ff-compact-card-bookmarks {
+  clip-path: polygon(0 0, 100% 0, 100% 91%, 50% 100%, 0 91%);
+  border-radius: 1rem 1rem 0.8rem 0.8rem;
+}
+
+.ff-dark-workspace .ff-compact-card-bookmarks .ff-compact-object { padding-bottom: 1.75rem; }
+.ff-dark-workspace .ff-compact-card-bookmarks .ff-compact-bookmarks-object::after { display: none; }
+
+.ff-dark-workspace .ff-compact-card-notes {
+  background:
+    repeating-linear-gradient(to bottom, transparent 0 1.25rem, rgba(148, 196, 255, 0.1) 1.25rem 1.3rem),
+    linear-gradient(145deg, rgba(37, 70, 125, 0.92), rgba(16, 31, 67, 0.98)) !important;
+  box-shadow: 0 18px 38px rgba(3, 8, 25, 0.42), 0 0 22px rgba(76, 117, 231, 0.14), inset 0 1px 0 rgba(205, 228, 255, 0.16) !important;
+}
+
+.ff-dark-workspace .ff-compact-card-notes .ff-compact-object { padding: 0; }
+.ff-dark-workspace .ff-compact-card-notes .ff-compact-note-paper { padding: 1rem; background: transparent !important; box-shadow: none; }
+.ff-dark-workspace .ff-compact-card-notes .ff-compact-note-paper::after { background: #4a72b6; }
+
+.ff-dark-workspace .ff-compact-goals-halo,
+.ff-dark-workspace .ff-compact-goals-inner,
+.ff-dark-workspace .ff-compact-goals-core { fill: none; }
+.ff-dark-workspace .ff-compact-goals-halo { stroke: rgba(103, 215, 229, 0.44); stroke-dasharray: 1 4; stroke-width: 1.4; }
+.ff-dark-workspace .ff-compact-goals-inner { stroke: rgba(141, 128, 255, 0.64); stroke-dasharray: 3 4; stroke-width: 2; }
+.ff-dark-workspace .ff-compact-goals-core { stroke: rgba(103, 215, 229, 0.22); stroke-width: 1; }
+
+.ff-dark-workspace .ff-compact-kpi-icon { opacity: 0.96; }
+.ff-dark-workspace .ff-compact-kpi-value { filter: drop-shadow(0 0 7px currentColor); }
+
+.ff-dark-workspace .ff-compact-news-story { align-items: center; padding-top: 0.5rem; padding-bottom: 0.5rem; }
+.ff-dark-workspace .ff-compact-news-story > .min-w-0 { flex: 1; }
+.ff-dark-workspace .ff-compact-news-image { width: 34%; height: 5.5rem; max-width: 4.5rem; }
+.ff-dark-workspace .ff-compact-news-chevron { flex: 0 0 auto; color: #9bbcff; opacity: 0.8; }
+.ff-dark-workspace .ff-compact-news-story:hover .ff-compact-news-chevron { color: #e0eaff; opacity: 1; }
+
 /* Final compact object balance: preserve the fixed square while giving each object a clear resting zone. */
 .ff-compact-task-body { gap: 0.15rem; }
 .ff-compact-status-summary { padding-bottom: 0.35rem; }
