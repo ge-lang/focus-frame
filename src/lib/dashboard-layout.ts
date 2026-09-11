@@ -1,6 +1,7 @@
 import type { LayoutItem, Widget, WidgetType } from '@/types/dashboard';
 
 export const DESKTOP_GRID_COLUMNS = 12;
+export const COMPACT_LAYOUT_VERSION = 1;
 const mobileWidgetHeights: Record<WidgetType, number> = {
   todo: 7,
   weather: 6,
@@ -19,19 +20,38 @@ export interface WidgetSizing {
 }
 
 const widgetSizing: Record<WidgetType, WidgetSizing> = {
-  todo: { w: 8, h: 3 },
-  weather: { w: 4, h: 3 },
-  news: { w: 8, h: 3 },
-  pomodoro: { w: 4, h: 3 },
-  calendar: { w: 4, h: 4 },
-  notes: { w: 4, h: 3 },
-  analytics: { w: 4, h: 3 },
-  bookmarks: { w: 4, h: 3 },
-  goals: { w: 4, h: 3 },
+  todo: { w: 4, h: 2 },
+  weather: { w: 4, h: 2 },
+  news: { w: 4, h: 2 },
+  pomodoro: { w: 4, h: 2 },
+  calendar: { w: 4, h: 2 },
+  notes: { w: 4, h: 2 },
+  analytics: { w: 4, h: 2 },
+  bookmarks: { w: 4, h: 2 },
+  goals: { w: 4, h: 2 },
+};
+
+const compactDefaultPositions: Record<WidgetType, { x: number; y: number }> = {
+  todo: { x: 0, y: 0 },
+  news: { x: 4, y: 0 },
+  pomodoro: { x: 8, y: 0 },
+  weather: { x: 0, y: 2 },
+  calendar: { x: 4, y: 2 },
+  analytics: { x: 8, y: 2 },
+  notes: { x: 0, y: 4 },
+  goals: { x: 4, y: 4 },
+  bookmarks: { x: 8, y: 4 },
 };
 
 export function getWidgetSizing(type: WidgetType): WidgetSizing {
   return widgetSizing[type];
+}
+
+export function canonicalizeWidgetMetadata(widgets: Widget[]): Widget[] {
+  return widgets.map((widget) => {
+    const sizing = getWidgetSizing(widget.type);
+    return { ...widget, colSpan: sizing.w, rowSpan: sizing.h };
+  });
 }
 
 export function getGridHeightForContent(
@@ -94,6 +114,47 @@ export function reconcileLayoutTypes(
   });
 }
 
+export interface CompactMigrationResult {
+  layout: LayoutItem[];
+  widgets: Widget[];
+  migrated: boolean;
+}
+
+export function migrateToCompactLayout(
+  layout: LayoutItem[],
+  widgets: Widget[],
+  layoutVersion = 0,
+): CompactMigrationResult {
+  const canonicalWidgets = canonicalizeWidgetMetadata(widgets);
+  if (layoutVersion >= COMPACT_LAYOUT_VERSION) {
+    const reconciled = reconcileLayoutTypes(layout, canonicalWidgets);
+    return {
+      widgets: canonicalWidgets,
+      layout: normalizeLayout(reconciled),
+      migrated: false,
+    };
+  }
+
+  const occupied: LayoutItem[] = [];
+  const migratedLayout = canonicalWidgets.flatMap((widget) => {
+    const sizing = getWidgetSizing(widget.type);
+    const position = compactDefaultPositions[widget.type];
+    const candidate: LayoutItem = {
+      i: widget.id,
+      x: position.x,
+      y: position.y,
+      w: sizing.w,
+      h: sizing.h,
+      type: widget.type,
+    };
+    const placed = findFreePosition(candidate, occupied, DESKTOP_GRID_COLUMNS);
+    occupied.push(placed);
+    return [placed];
+  });
+
+  return { widgets: canonicalWidgets, layout: migratedLayout, migrated: true };
+}
+
 export function normalizeDesktopOrigin(layout: LayoutItem[]): LayoutItem[] {
   if (layout.length === 0) return layout;
 
@@ -103,19 +164,14 @@ export function normalizeDesktopOrigin(layout: LayoutItem[]): LayoutItem[] {
   return layout.map((item) => ({ ...item, y: item.y - minY }));
 }
 
-function isLegacyThreeColumnLayout(layout: LayoutItem[]): boolean {
-  return layout.length > 0 && layout.every((item) => item.w <= 3 && item.x <= 3);
-}
-
 export function normalizeLayout(layout: LayoutItem[], columns = DESKTOP_GRID_COLUMNS): LayoutItem[] {
-  const legacy = columns === DESKTOP_GRID_COLUMNS && isLegacyThreeColumnLayout(layout);
   const normalized: LayoutItem[] = [];
 
   for (const item of layout) {
     const sized = withWidgetSizing(item);
     const candidate = {
       ...sized,
-      x: legacy ? item.x * 4 : item.x,
+      x: item.x,
       y: item.y,
     };
     normalized.push(findFreePosition(candidate, normalized, columns));
@@ -125,7 +181,7 @@ export function normalizeLayout(layout: LayoutItem[], columns = DESKTOP_GRID_COL
 }
 
 export function removeWidgetFromLayout(layout: LayoutItem[], widgetId: string): LayoutItem[] {
-  return normalizeDesktopOrigin(normalizeLayout(layout.filter((item) => item.i !== widgetId)));
+  return normalizeLayout(layout.filter((item) => item.i !== widgetId));
 }
 
 export function stackLayoutForMobile(layout: LayoutItem[], columns: number): LayoutItem[] {
@@ -143,8 +199,21 @@ export function stackLayoutForMobile(layout: LayoutItem[], columns: number): Lay
   });
 }
 
+export function compactLayoutForColumns(layout: LayoutItem[], columns: number): LayoutItem[] {
+  const width = Math.max(1, Math.floor(columns / 2));
+  return [...layout]
+    .sort((first, second) => first.y - second.y || first.x - second.x)
+    .map((item, index) => ({
+      ...item,
+      x: (index % 2) * width,
+      y: Math.floor(index / 2) * 2,
+      w: width,
+      h: 2,
+    }));
+}
+
 export function addWidgetToLayout(layout: LayoutItem[], item: LayoutItem): LayoutItem[] {
-  const normalized = normalizeDesktopOrigin(normalizeLayout(layout));
+  const normalized = normalizeLayout(layout);
   const sized = withWidgetSizing(item);
   const nextRow = normalized.reduce((bottom, current) => Math.max(bottom, current.y + current.h), 0);
   const appended = { ...sized, x: 0, y: nextRow };

@@ -4,15 +4,19 @@ import { WidgetRenderer } from './widget-renderer';
 import { useDashboard } from '@/contexts/dashboard-context';
 import { motion } from 'framer-motion';
 import { Trash2 } from 'lucide-react';
+import { ModalPortal } from './modal-portal';
+import { useState } from 'react';
 
 interface SortableWidgetProps {
   id: string;
   type: string;
+  compact?: boolean;
   onContentHeightChange?: (widgetId: string, height: number) => void;
 }
 
-export function SortableWidget({ id, type, onContentHeightChange }: SortableWidgetProps) {
+export function SortableWidget({ id, type, compact = false, onContentHeightChange }: SortableWidgetProps) {
   const { state, removeWidget } = useDashboard();
+  const [isOpen, setIsOpen] = useState(false);
   const widget = state.widgets.find(w => w.id === id);
 
   if (!widget) {
@@ -24,11 +28,10 @@ export function SortableWidget({ id, type, onContentHeightChange }: SortableWidg
   };
 
   return (
-    <motion.div
-      className="group relative h-full"
-    >
+    <>
+      <motion.div className="group relative h-full">
       {/* Widget with a context menu */}
-      <WidgetRenderer widget={widget} onContentHeightChange={onContentHeightChange} />
+      <WidgetRenderer widget={widget} variant={compact ? 'compact' : 'full'} onOpen={() => setIsOpen(true)} onContentHeightChange={onContentHeightChange} />
 
       {state.isEditing && (
         <button
@@ -43,6 +46,18 @@ export function SortableWidget({ id, type, onContentHeightChange }: SortableWidg
         </button>
       )}
 
-    </motion.div>
+      </motion.div>
+
+    {isOpen && compact && (
+      <ModalPortal>
+        <div className="ff-modal-backdrop fixed inset-0 z-[var(--ff-z-modal)] flex items-start justify-center overflow-y-auto p-4 pt-[max(4rem,10vh)]" onClick={() => setIsOpen(false)}>
+          <div className="ff-focus-view w-full max-w-[1020px] max-h-[85vh] overflow-y-auto" data-no-drag onClick={(event) => event.stopPropagation()}>
+            <div className="mb-2 flex justify-end"><button type="button" onClick={() => setIsOpen(false)} className="ff-focus-view-close rounded px-2 py-1 text-sm" aria-label={`Close ${type} focus view`}>Close</button></div>
+            <WidgetRenderer widget={widget} onContentHeightChange={onContentHeightChange} />
+          </div>
+        </div>
+      </ModalPortal>
+    )}
+    </>
   );
 }

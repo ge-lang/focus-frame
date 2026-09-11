@@ -9,15 +9,22 @@ import NotesWidget from './widgets/notes-widget';
 import AnalyticsWidget from './widgets/analytics-widget';
 import BookmarksWidget from './widgets/bookmarks-widget';
 import GoalsWidget from './widgets/goals-widget';
+import { CompactWidgetRenderer } from './compact-widget-renderer';
 
 interface WidgetRendererProps {
   widget: Widget;
   onContentHeightChange?: (widgetId: string, height: number) => void;
+  variant?: 'full' | 'compact';
+  onOpen?: () => void;
 }
 
-export function WidgetRenderer({ widget, onContentHeightChange }: WidgetRendererProps) {
+export function WidgetRenderer({ widget, onContentHeightChange, variant = 'full', onOpen }: WidgetRendererProps) {
   if (!widget) {
     return <div className="p-4 text-center text-gray-500">Widget not found</div>;
+  }
+
+  if (variant === 'compact') {
+    return <CompactWidgetRenderer widget={widget} onOpen={onOpen ?? (() => undefined)} />;
   }
 
   const renderWidget = () => {

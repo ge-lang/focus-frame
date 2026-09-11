@@ -3,8 +3,8 @@
 import React, { createContext, useContext, useEffect, useReducer, useState, ReactNode } from 'react';
 import { useSession } from 'next-auth/react';
 import { WidgetType } from '@/types/dashboard';
-import { addWidgetToLayout, getWidgetSizing, normalizeDesktopOrigin, normalizeLayout, reconcileLayoutTypes, removeWidgetFromLayout } from '@/lib/dashboard-layout';
-import { shouldPersistDashboard } from '@/lib/dashboard-persistence';
+import { addWidgetToLayout, COMPACT_LAYOUT_VERSION, getWidgetSizing, migrateToCompactLayout, normalizeLayout, removeWidgetFromLayout } from '@/lib/dashboard-layout';
+import { resolveHydrationPersistence, shouldPersistDashboard } from '@/lib/dashboard-persistence';
 
 export interface Widget {
   id: string;
@@ -27,6 +27,7 @@ export interface LayoutItem {
 export interface DashboardState {
   widgets: Widget[];
   layout: LayoutItem[];
+  layoutVersion: number;
   isEditing: boolean;
 }
 
@@ -40,27 +41,28 @@ type DashboardAction =
 
 const initialState: DashboardState = {
   widgets: [
-    { id: 'todo-1', type: 'todo', colSpan: 8, rowSpan: 3 },
-    { id: 'weather-1', type: 'weather', colSpan: 4, rowSpan: 3 },
-    { id: 'news-1', type: 'news', colSpan: 8, rowSpan: 3 },
-    { id: 'pomodoro-1', type: 'pomodoro', colSpan: 4, rowSpan: 3 },
-    { id: 'calendar-1', type: 'calendar', colSpan: 4, rowSpan: 4 },
-    { id: 'notes-1', type: 'notes', colSpan: 4, rowSpan: 3 },
-    { id: 'analytics-1', type: 'analytics', colSpan: 4, rowSpan: 3 },
-    { id: 'bookmarks-1', type: 'bookmarks', colSpan: 4, rowSpan: 3 },
-    { id: 'goals-1', type: 'goals', colSpan: 4, rowSpan: 3 },
+    { id: 'todo-1', type: 'todo', colSpan: 4, rowSpan: 2 },
+    { id: 'weather-1', type: 'weather', colSpan: 4, rowSpan: 2 },
+    { id: 'news-1', type: 'news', colSpan: 4, rowSpan: 2 },
+    { id: 'pomodoro-1', type: 'pomodoro', colSpan: 4, rowSpan: 2 },
+    { id: 'calendar-1', type: 'calendar', colSpan: 4, rowSpan: 2 },
+    { id: 'notes-1', type: 'notes', colSpan: 4, rowSpan: 2 },
+    { id: 'analytics-1', type: 'analytics', colSpan: 4, rowSpan: 2 },
+    { id: 'bookmarks-1', type: 'bookmarks', colSpan: 4, rowSpan: 2 },
+    { id: 'goals-1', type: 'goals', colSpan: 4, rowSpan: 2 },
   ],
-  layout: normalizeLayout([
-    { i: 'todo-1', x: 0, y: 0, w: 2, h: 2, type: 'todo' },
-    { i: 'weather-1', x: 2, y: 0, w: 1, h: 1, type: 'weather' },
-    { i: 'news-1', x: 0, y: 2, w: 2, h: 1, type: 'news' },
-    { i: 'pomodoro-1', x: 2, y: 1, w: 1, h: 1, type: 'pomodoro' },
-    { i: 'calendar-1', x: 3, y: 0, w: 1, h: 2, type: 'calendar' },
-    { i: 'notes-1', x: 3, y: 2, w: 1, h: 1, type: 'notes' },
-    { i: 'analytics-1', x: 0, y: 3, w: 2, h: 2, type: 'analytics' },
-    { i: 'bookmarks-1', x: 2, y: 3, w: 1, h: 1, type: 'bookmarks' },
-    { i: 'goals-1', x: 3, y: 3, w: 1, h: 1, type: 'goals' },
-  ]),
+  layout: [
+    { i: 'todo-1', x: 0, y: 0, w: 4, h: 2, type: 'todo' },
+    { i: 'news-1', x: 4, y: 0, w: 4, h: 2, type: 'news' },
+    { i: 'pomodoro-1', x: 8, y: 0, w: 4, h: 2, type: 'pomodoro' },
+    { i: 'weather-1', x: 0, y: 2, w: 4, h: 2, type: 'weather' },
+    { i: 'calendar-1', x: 4, y: 2, w: 4, h: 2, type: 'calendar' },
+    { i: 'analytics-1', x: 8, y: 2, w: 4, h: 2, type: 'analytics' },
+    { i: 'notes-1', x: 0, y: 4, w: 4, h: 2, type: 'notes' },
+    { i: 'goals-1', x: 4, y: 4, w: 4, h: 2, type: 'goals' },
+    { i: 'bookmarks-1', x: 8, y: 4, w: 4, h: 2, type: 'bookmarks' },
+  ],
+  layoutVersion: COMPACT_LAYOUT_VERSION,
   isEditing: false,
 };
 
@@ -134,18 +136,23 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       })
       .then((data) => {
         if (isMounted && data?.state) {
-          const reconciledLayout = reconcileLayoutTypes(data.state.layout, data.state.widgets);
+          const migrated = migrateToCompactLayout(data.state.layout, data.state.widgets, data.state.layoutVersion ?? 0);
           dispatch({
             type: 'LOAD_STATE',
             payload: {
               ...data.state,
-              layout: normalizeDesktopOrigin(normalizeLayout(reconciledLayout)),
+              widgets: migrated.widgets,
+              layout: migrated.layout,
+              layoutVersion: COMPACT_LAYOUT_VERSION,
               isEditing: false,
             },
           });
+          const hydrationPersistence = resolveHydrationPersistence(migrated.migrated, mutationVersionRef.current);
+          mutationVersionRef.current = hydrationPersistence.mutationVersion;
+          isDirtyRef.current = hydrationPersistence.isDirty;
         }
         if (isMounted) {
-          isDirtyRef.current = false;
+          if (!data?.state) isDirtyRef.current = false;
           setDashboardHydration('ready');
         }
       })
@@ -167,7 +174,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       fetch('/api/dashboard', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ state: { widgets: state.widgets, layout: state.layout } }),
+        body: JSON.stringify({ state: { widgets: state.widgets, layout: state.layout, layoutVersion: state.layoutVersion } }),
       }).then((response) => {
         if (response.ok && mutationVersion === mutationVersionRef.current) {
           isDirtyRef.current = false;
@@ -176,7 +183,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     }, 750);
 
     return () => window.clearTimeout(timeoutId);
-  }, [dashboardHydration, sessionStatus, state.widgets, state.layout]);
+  }, [dashboardHydration, sessionStatus, state.widgets, state.layout, state.layoutVersion]);
 
   const addWidget = (type: WidgetType, config?: { title?: string; colSpan?: number; rowSpan?: number }) => {
     markDirty();
@@ -199,7 +206,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     };
 
     dispatch({ type: 'ADD_WIDGET', payload: newWidget });
-    dispatch({ type: 'UPDATE_LAYOUT', payload: addWidgetToLayout(state.layout, newLayoutItem) });
+      dispatch({ type: 'UPDATE_LAYOUT', payload: addWidgetToLayout(state.layout, newLayoutItem) });
   };
 
   const removeWidget = (id: string) => {

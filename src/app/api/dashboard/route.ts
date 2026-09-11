@@ -3,12 +3,13 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { isIntegerBetween } from '@/lib/api-validation';
-import { reconcileLayoutTypes } from '@/lib/dashboard-layout';
+import { COMPACT_LAYOUT_VERSION, canonicalizeWidgetMetadata, getWidgetSizing, reconcileLayoutTypes } from '@/lib/dashboard-layout';
 import type { LayoutItem, Widget } from '@/types/dashboard';
 
 type PersistedDashboardState = {
   widgets: Widget[];
   layout: LayoutItem[];
+  layoutVersion?: number;
 };
 
 const widgetTypes = new Set(['todo', 'weather', 'news', 'pomodoro', 'calendar', 'notes', 'analytics', 'bookmarks', 'goals']);
@@ -23,6 +24,7 @@ function isDashboardState(value: unknown): value is PersistedDashboardState {
   const state = value as PersistedDashboardState;
   if (!Array.isArray(state.widgets) || !Array.isArray(state.layout) ||
       state.widgets.length > MAX_WIDGETS || state.layout.length > MAX_LAYOUT_ITEMS) return false;
+  if (state.layoutVersion !== undefined && !isIntegerBetween(state.layoutVersion, 0, COMPACT_LAYOUT_VERSION)) return false;
 
   const widgetIds = new Set<string>();
   for (const widget of state.widgets) {
@@ -101,9 +103,15 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid dashboard state' }, { status: 400 });
   }
 
+  const canonicalWidgets = canonicalizeWidgetMetadata(state.widgets);
   const canonicalState = {
     ...state,
-    layout: reconcileLayoutTypes(state.layout, state.widgets),
+    widgets: canonicalWidgets,
+    layoutVersion: COMPACT_LAYOUT_VERSION,
+    layout: reconcileLayoutTypes(state.layout, canonicalWidgets).map((item) => ({
+      ...item,
+      ...getWidgetSizing(item.type),
+    })),
   };
 
   try {

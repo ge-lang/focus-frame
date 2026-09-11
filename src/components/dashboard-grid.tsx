@@ -1,12 +1,12 @@
 'use client';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { Responsive, type Layout as GridLayout, type LayoutItem as GridLayoutItem } from 'react-grid-layout';
 import { noCompactor } from 'react-grid-layout/core';
 import 'react-grid-layout/css/styles.css';
 import { useDashboard } from '@/contexts/dashboard-context';
 import { useStableContainerWidth } from '@/hooks/use-stable-container-width';
 import { SortableWidget } from './sortable-widget';
-import { applyLayoutHeightOverrides, canPersistDesktopLayout, getGridHeightForContent, getWidgetSizing, normalizeDesktopOrigin, normalizeLayout, reconcileLayoutTypes, stackLayoutForMobile } from '@/lib/dashboard-layout';
+import { canPersistDesktopLayout, compactLayoutForColumns, getWidgetSizing, normalizeLayout, reconcileLayoutTypes, stackLayoutForMobile } from '@/lib/dashboard-layout';
 import type { LayoutItem } from '@/types/dashboard';
 
 const BREAKPOINTS = { lg: 1024, md: 768, sm: 640, xs: 480, xxs: 0 } as const;
@@ -17,7 +17,6 @@ type AutoScrollState = { active: boolean; pointerY: number; frame: number | null
 export function DashboardGrid() {
   const { state, isHydrated, updateLayout } = useDashboard();
   const { layout, isEditing, widgets } = state;
-  const [heightOverrides, setHeightOverrides] = useState<Record<string, number>>({});
   const { width, containerRef, isStable } = useStableContainerWidth();
   const breakpointRef = useRef('lg');
   const autoScrollRef = useRef<AutoScrollState>({
@@ -26,14 +25,6 @@ export function DashboardGrid() {
     frame: null,
   });
   const isDraggingRef = useRef(false);
-
-  useEffect(() => {
-    setHeightOverrides((current) => {
-      const validIds = new Set(layout.map((item) => item.i));
-      const next = Object.fromEntries(Object.entries(current).filter(([id]) => validIds.has(id)));
-      return Object.keys(next).length === Object.keys(current).length ? current : next;
-    });
-  }, [layout]);
 
   const stopAutoScroll = useCallback(() => {
     const state = autoScrollRef.current;
@@ -86,48 +77,24 @@ export function DashboardGrid() {
     stopAutoScroll();
   }, [stopAutoScroll]);
 
-  const renderDesktopLayout = useMemo(() => applyLayoutHeightOverrides(layout, heightOverrides), [layout, heightOverrides]);
-
   const layouts = useMemo(() => ({
-    lg: renderDesktopLayout,
-    md: stackLayoutForMobile(layout, COLUMNS.md),
-    sm: stackLayoutForMobile(layout, COLUMNS.sm),
-    xs: stackLayoutForMobile(layout, COLUMNS.xs),
-    xxs: stackLayoutForMobile(layout, COLUMNS.xxs),
-  }), [renderDesktopLayout, layout]);
+    lg: layout,
+    md: compactLayoutForColumns(layout, COLUMNS.md),
+    sm: compactLayoutForColumns(layout, COLUMNS.sm),
+    xs: compactLayoutForColumns(layout, COLUMNS.xs),
+    xxs: compactLayoutForColumns(layout, COLUMNS.xxs),
+  }), [layout]);
 
   const getWidgetById = (id: string) => widgets.find((widget) => widget.id === id);
 
-  const renderWidget = (item: LayoutItem) => {
+  const renderWidget = (item: LayoutItem, compact = false) => {
     const widget = getWidgetById(item.i);
     return widget ? (
       <div key={item.i}>
-        <SortableWidget id={item.i} type={item.type} onContentHeightChange={handleWidgetContentHeight} />
+        <SortableWidget id={item.i} type={item.type} compact={compact} />
       </div>
     ) : null;
   };
-
-  function handleWidgetContentHeight(widgetId: string, contentHeight: number) {
-    if (!isStable || width < BREAKPOINTS.sm || breakpointRef.current !== 'lg') return;
-
-    const currentItem = renderDesktopLayout.find((item) => item.i === widgetId);
-    if (!currentItem) return;
-
-    const minimumHeight = getWidgetSizing(currentItem.type).h;
-    const requiredHeight = getGridHeightForContent(contentHeight, 72, 16, minimumHeight);
-    if (requiredHeight === currentItem.h) return;
-
-    setHeightOverrides((current) => {
-      if (requiredHeight === minimumHeight) {
-        if (current[widgetId] === undefined) return current;
-        const next = { ...current };
-        delete next[widgetId];
-        return next;
-      }
-      if (current[widgetId] === requiredHeight) return current;
-      return { ...current, [widgetId]: requiredHeight };
-    });
-  }
 
   const handleUserLayoutChange = (nextLayout: GridLayout) => {
     if (!isStable || !canPersistDesktopLayout(isHydrated, width, breakpointRef.current, BREAKPOINTS.lg) || isDraggingRef.current) return;
@@ -142,7 +109,7 @@ export function DashboardGrid() {
       w: getWidgetSizing(item.type).w,
       h: getWidgetSizing(item.type).h,
     }));
-    const normalized = normalizeDesktopOrigin(normalizeLayout(persistedLayout));
+    const normalized = normalizeLayout(persistedLayout);
     updateLayout(normalized, { markDirty: true });
   };
 
@@ -152,7 +119,7 @@ export function DashboardGrid() {
         <div className="min-h-24" aria-hidden="true" />
       ) : width < BREAKPOINTS.sm ? (
         <div className="ff-mobile-widget-stack">
-          {layout.map(renderWidget)}
+          {layout.map((item) => renderWidget(item))}
         </div>
       ) : (
         <Responsive
@@ -180,7 +147,7 @@ export function DashboardGrid() {
             breakpointRef.current = nextBreakpoint;
           }}
         >
-          {layout.map(renderWidget)}
+          {layout.map((item) => renderWidget(item, true))}
         </Responsive>
       )}
     </div>

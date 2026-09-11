@@ -35,5 +35,6 @@ export interface LayoutItem {
 export interface DashboardState {
   widgets: Widget[];
   layout: LayoutItem[];
+  layoutVersion: number;
   isEditing: boolean;
 }
