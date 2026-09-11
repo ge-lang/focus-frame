@@ -1239,12 +1239,108 @@ body.ff-document-body {
 .ff-topbar .ff-brand-subtitle { display: none; }
 }
 
-/* Compact desktop workspace cards: concise summaries inside the fixed 4x2 grid. */
+/* Compact object workspace: the tile is a quiet surface, while the content carries the identity. */
 .ff-compact-card {
+  box-sizing: border-box;
+  height: 100%;
   min-height: 0;
   overflow: hidden;
-  padding: 1rem;
+  padding: 0;
 }
+
+.ff-compact-object {
+  box-sizing: border-box;
+  height: 100%;
+  min-height: 0;
+  padding: 0.9rem;
+  cursor: grab;
+  outline: none;
+  user-select: none;
+}
+
+.ff-compact-object:active { cursor: grabbing; }
+.ff-compact-object:focus-visible { box-shadow: inset 0 0 0 2px rgba(99, 102, 241, 0.5); }
+.ff-compact-object textarea,
+.ff-compact-object input,
+.ff-compact-object a,
+.ff-compact-object button { user-select: text; }
+
+.ff-compact-card .ff-compact-object > * { min-width: 0; }
+
+.ff-compact-weather-object {
+  display: flex;
+  min-height: 0;
+  height: 100%;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.7rem;
+}
+
+.ff-compact-weather-main {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.ff-compact-weather-main svg { flex: 0 0 auto; color: var(--ff-accent-cyan, #22d3ee); }
+.ff-compact-weather-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.2);
+  padding-top: 0.55rem;
+  color: var(--ff-text-muted, #7b849b);
+  font-size: 0.62rem;
+}
+.ff-compact-weather-empty { display: grid; min-height: 100%; place-items: center; color: var(--ff-text-muted, #7b849b); font-size: 0.72rem; text-align: center; }
+
+.ff-compact-note-paper {
+  position: relative;
+  display: flex;
+  min-height: 0;
+  height: 100%;
+  flex: 1;
+  overflow: hidden;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 0.6rem;
+  background: rgba(248, 250, 252, 0.52);
+  padding: 0.75rem;
+}
+.ff-compact-note-paper::after {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 1.35rem;
+  height: 1.35rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.22);
+  border-left: 1px solid rgba(148, 163, 184, 0.22);
+  background: var(--ff-surface, #fff);
+  clip-path: polygon(0 0, 100% 100%, 0 100%);
+  content: '';
+}
+
+.ff-compact-goals-object {
+  display: flex;
+  min-height: 0;
+  height: 100%;
+  align-items: center;
+  gap: 1.1rem;
+}
+.ff-compact-goals-ring { position: relative; width: min(34%, 8.5rem); aspect-ratio: 1; flex: 0 0 auto; }
+.ff-compact-goals-ring svg { display: block; width: 100%; height: 100%; transform: rotate(-90deg); }
+.ff-compact-goals-ring circle { fill: none; stroke-width: 4; }
+.ff-compact-goals-track { stroke: rgba(148, 163, 184, 0.2); }
+.ff-compact-goals-value { stroke: var(--ff-accent-violet, #6255e8); stroke-linecap: round; }
+.ff-compact-goals-ring strong { position: absolute; inset: 0; display: grid; place-items: center; color: var(--ff-text-primary, #18213b); font-size: 1rem; }
+.ff-compact-goals-list { display: flex; min-width: 0; flex: 1; flex-direction: column; gap: 0.65rem; color: var(--ff-text-secondary, #64748b); font-size: 0.75rem; }
+.ff-compact-goal-row { display: flex; min-width: 0; align-items: center; gap: 0.45rem; }
+.ff-compact-goal-dot { width: 0.5rem; height: 0.5rem; flex: 0 0 auto; border-radius: 9999px; }
+.ff-compact-goal-low { background: #79b85d; }
+.ff-compact-goal-medium { background: #d88b4c; }
+.ff-compact-goal-high { background: #df718b; }
+
+.ff-compact-bookmarks-object { display: flex; min-height: 0; height: 100%; flex-direction: column; justify-content: center; }
 
 .ff-compact-open {
   color: var(--ff-accent-violet, #6255e8);
@@ -1558,6 +1654,11 @@ body.ff-document-body {
 .ff-dark-workspace .ff-compact-card .text-slate-400 { color: #aeb8d2; }
 .ff-dark-workspace .ff-compact-card textarea,
 .ff-dark-workspace .ff-compact-card input { color: #f4f3ff; background: rgba(29, 34, 71, 0.72); border-color: rgba(167, 183, 232, 0.22); }
+.ff-dark-workspace .ff-compact-note-paper { border-color: rgba(167, 183, 232, 0.18); background: rgba(29, 34, 71, 0.58); }
+.ff-dark-workspace .ff-compact-note-paper::after { border-color: rgba(167, 183, 232, 0.18); background: #20264c; }
+.ff-dark-workspace .ff-compact-weather-meta { border-top-color: rgba(167, 183, 232, 0.2); }
+.ff-dark-workspace .ff-compact-goals-ring strong { color: #f4f3ff; }
+.ff-dark-workspace .ff-compact-goals-track { stroke: rgba(174, 184, 210, 0.2); }
 .ff-dark-workspace .ff-focus-view { background: #1a1d3a; }
 
 @media (min-width: 640px) {

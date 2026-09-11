@@ -1,7 +1,9 @@
 import type { LayoutItem, Widget, WidgetType } from '@/types/dashboard';
 
 export const DESKTOP_GRID_COLUMNS = 12;
-export const COMPACT_LAYOUT_VERSION = 1;
+export const OBJECT_LAYOUT_VERSION = 2;
+export const COMPACT_LAYOUT_VERSION = OBJECT_LAYOUT_VERSION;
+export const OBJECT_GRID_MARGIN = 16;
 const mobileWidgetHeights: Record<WidgetType, number> = {
   todo: 7,
   weather: 6,
@@ -20,27 +22,27 @@ export interface WidgetSizing {
 }
 
 const widgetSizing: Record<WidgetType, WidgetSizing> = {
-  todo: { w: 4, h: 2 },
-  weather: { w: 4, h: 2 },
-  news: { w: 4, h: 2 },
-  pomodoro: { w: 4, h: 2 },
-  calendar: { w: 4, h: 2 },
-  notes: { w: 4, h: 2 },
-  analytics: { w: 4, h: 2 },
-  bookmarks: { w: 4, h: 2 },
-  goals: { w: 4, h: 2 },
+  todo: { w: 6, h: 3 },
+  weather: { w: 3, h: 3 },
+  news: { w: 6, h: 3 },
+  pomodoro: { w: 3, h: 3 },
+  calendar: { w: 3, h: 3 },
+  notes: { w: 3, h: 3 },
+  analytics: { w: 3, h: 3 },
+  bookmarks: { w: 3, h: 3 },
+  goals: { w: 6, h: 3 },
 };
 
 const compactDefaultPositions: Record<WidgetType, { x: number; y: number }> = {
   todo: { x: 0, y: 0 },
-  news: { x: 4, y: 0 },
-  pomodoro: { x: 8, y: 0 },
-  weather: { x: 0, y: 2 },
-  calendar: { x: 4, y: 2 },
-  analytics: { x: 8, y: 2 },
-  notes: { x: 0, y: 4 },
-  goals: { x: 4, y: 4 },
-  bookmarks: { x: 8, y: 4 },
+  pomodoro: { x: 6, y: 0 },
+  calendar: { x: 9, y: 0 },
+  goals: { x: 0, y: 3 },
+  weather: { x: 6, y: 3 },
+  analytics: { x: 9, y: 3 },
+  news: { x: 0, y: 6 },
+  notes: { x: 6, y: 6 },
+  bookmarks: { x: 9, y: 6 },
 };
 
 export function getWidgetSizing(type: WidgetType): WidgetSizing {
@@ -62,6 +64,11 @@ export function getGridHeightForContent(
 ): number {
   const safeHeight = Math.max(0, Math.ceil(contentHeight));
   return Math.max(minimumHeight, Math.ceil((safeHeight + rowMargin) / (rowHeight + rowMargin)));
+}
+
+export function getSquareGridUnit(containerWidth: number, columns: number, margin = OBJECT_GRID_MARGIN): number {
+  if (!Number.isFinite(containerWidth) || columns < 1) return 1;
+  return Math.max(1, (containerWidth - margin * (columns - 1)) / columns);
 }
 
 export function canPersistDesktopLayout(
@@ -126,7 +133,7 @@ export function migrateToCompactLayout(
   layoutVersion = 0,
 ): CompactMigrationResult {
   const canonicalWidgets = canonicalizeWidgetMetadata(widgets);
-  if (layoutVersion >= COMPACT_LAYOUT_VERSION) {
+  if (layoutVersion >= OBJECT_LAYOUT_VERSION) {
     const reconciled = reconcileLayoutTypes(layout, canonicalWidgets);
     return {
       widgets: canonicalWidgets,
@@ -200,24 +207,33 @@ export function stackLayoutForMobile(layout: LayoutItem[], columns: number): Lay
 }
 
 export function compactLayoutForColumns(layout: LayoutItem[], columns: number): LayoutItem[] {
-  const width = Math.max(1, Math.floor(columns / 2));
+  if (columns < 6) return stackLayoutForMobile(layout, columns);
+
+  let x = 0;
+  let y = 0;
   return [...layout]
     .sort((first, second) => first.y - second.y || first.x - second.x)
-    .map((item, index) => ({
-      ...item,
-      x: (index % 2) * width,
-      y: Math.floor(index / 2) * 2,
-      w: width,
-      h: 2,
-    }));
+    .map((item) => {
+      const sizing = getWidgetSizing(item.type);
+      if (x > 0 && x + sizing.w > columns) {
+        x = 0;
+        y += 3;
+      }
+      const next = { ...item, x, y, w: Math.min(sizing.w, columns), h: sizing.h };
+      x += next.w;
+      if (x >= columns) {
+        x = 0;
+        y += 3;
+      }
+      return next;
+    });
 }
 
 export function addWidgetToLayout(layout: LayoutItem[], item: LayoutItem): LayoutItem[] {
   const normalized = normalizeLayout(layout);
   const sized = withWidgetSizing(item);
-  const nextRow = normalized.reduce((bottom, current) => Math.max(bottom, current.y + current.h), 0);
-  const appended = { ...sized, x: 0, y: nextRow };
-  return [...normalized, findFreePosition(appended, normalized, DESKTOP_GRID_COLUMNS)];
+  const candidate = { ...sized, x: Math.max(0, Math.round(item.x)), y: Math.max(0, Math.round(item.y)) };
+  return [...normalized, findFreePosition(candidate, normalized, DESKTOP_GRID_COLUMNS)];
 }
 
 export function resizeWidgetInLayout(layout: LayoutItem[], widgetId: string, height: number): LayoutItem[] {

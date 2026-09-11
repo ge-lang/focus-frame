@@ -6,13 +6,22 @@ import 'react-grid-layout/css/styles.css';
 import { useDashboard } from '@/contexts/dashboard-context';
 import { useStableContainerWidth } from '@/hooks/use-stable-container-width';
 import { SortableWidget } from './sortable-widget';
-import { canPersistDesktopLayout, compactLayoutForColumns, getWidgetSizing, normalizeLayout, reconcileLayoutTypes, stackLayoutForMobile } from '@/lib/dashboard-layout';
+import { canPersistDesktopLayout, compactLayoutForColumns, getSquareGridUnit, getWidgetSizing, normalizeLayout, reconcileLayoutTypes } from '@/lib/dashboard-layout';
 import type { LayoutItem } from '@/types/dashboard';
 
 const BREAKPOINTS = { lg: 1024, md: 768, sm: 640, xs: 480, xxs: 0 } as const;
-const COLUMNS = { lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 } as const;
+const COLUMNS = { lg: 12, md: 6, sm: 6, xs: 4, xxs: 2 } as const;
+const GRID_MARGIN = 16;
 const fixedGridCompactor = { ...noCompactor, preventCollision: true };
 type AutoScrollState = { active: boolean; pointerY: number; frame: number | null; cleanup?: () => void };
+
+function getBreakpointForWidth(width: number) {
+  if (width >= BREAKPOINTS.lg) return 'lg';
+  if (width >= BREAKPOINTS.md) return 'md';
+  if (width >= BREAKPOINTS.sm) return 'sm';
+  if (width >= BREAKPOINTS.xs) return 'xs';
+  return 'xxs';
+}
 
 export function DashboardGrid() {
   const { state, isHydrated, updateLayout } = useDashboard();
@@ -25,6 +34,8 @@ export function DashboardGrid() {
     frame: null,
   });
   const isDraggingRef = useRef(false);
+  const activeBreakpoint = getBreakpointForWidth(width);
+  const rowHeight = getSquareGridUnit(width, COLUMNS[activeBreakpoint as keyof typeof COLUMNS], GRID_MARGIN);
 
   const stopAutoScroll = useCallback(() => {
     const state = autoScrollRef.current;
@@ -122,18 +133,18 @@ export function DashboardGrid() {
           {layout.map((item) => renderWidget(item))}
         </div>
       ) : (
-        <Responsive
+          <Responsive
           width={width}
           layouts={layouts}
           breakpoints={BREAKPOINTS}
           cols={COLUMNS}
-          rowHeight={72}
-          margin={[16, 16]}
+          rowHeight={rowHeight}
+          margin={[GRID_MARGIN, GRID_MARGIN]}
           containerPadding={[0, 0]}
           compactor={fixedGridCompactor}
           dragConfig={{
             enabled: true,
-            handle: '.widget-drag-handle',
+            handle: '.ff-compact-drag-surface',
             cancel: 'button, input, textarea, select, a, [draggable], [data-no-drag]',
           }}
           resizeConfig={{ enabled: false }}

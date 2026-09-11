@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import {
   BarChart3,
@@ -37,20 +37,60 @@ interface CompactWidgetProps {
 }
 
 const compactPomodoroDurations = { work: 25 * 60, break: 5 * 60, longBreak: 15 * 60 } as const;
+export const compactPresentationLimits = { news: 2, bookmarks: 3, goals: 2, relevantTasks: 1 } as const;
+
+export function shouldOpenCompactFocusView(targetIsInteractive: boolean, didMove: boolean): boolean {
+  return !targetIsInteractive && !didMove;
+}
 
 function CompactShell({ widget, onOpen, icon, children }: CompactWidgetProps & { icon: ReactNode; children: ReactNode }) {
+  const pointerRef = useRef<{ x: number; y: number } | null>(null);
+  const suppressClickRef = useRef(false);
+  const label = labelForType(widget.type);
+
+  const isInteractiveTarget = (target: EventTarget | null) => target instanceof HTMLElement && Boolean(target.closest('button, input, textarea, select, a, [data-no-drag]'));
+  const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (isInteractiveTarget(event.target)) return;
+    pointerRef.current = { x: event.clientX, y: event.clientY };
+    suppressClickRef.current = false;
+  };
+  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (!pointerRef.current) return;
+    if (Math.hypot(event.clientX - pointerRef.current.x, event.clientY - pointerRef.current.y) > 6) suppressClickRef.current = true;
+  };
+  const handlePointerUp = () => {
+    window.requestAnimationFrame(() => { pointerRef.current = null; });
+  };
+  const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (!shouldOpenCompactFocusView(isInteractiveTarget(event.target), suppressClickRef.current)) {
+      suppressClickRef.current = false;
+      return;
+    }
+    onOpen();
+  };
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if ((event.key === 'Enter' || event.key === ' ') && !isInteractiveTarget(event.target)) {
+      event.preventDefault();
+      onOpen();
+    }
+  };
+
   return (
     <AnimatedWidget className="ff-compact-card">
-      <div className="flex h-full min-h-0 flex-col">
-        <div className="mb-2 flex shrink-0 items-center justify-between gap-2">
-          <h3 className="widget-drag-handle flex min-w-0 cursor-grab select-none items-center gap-2 truncate text-base font-semibold text-slate-900 active:cursor-grabbing">
-            {icon}
-            <span className="truncate">{widget.title || labelForType(widget.type)}</span>
-          </h3>
-          <button type="button" data-no-drag onClick={onOpen} className="ff-compact-open shrink-0 rounded px-1.5 py-0.5 text-xs font-medium" aria-label={`Open ${labelForType(widget.type)}`}>
-            Open
-          </button>
-        </div>
+      <div
+        className="ff-compact-object ff-compact-drag-surface flex h-full min-h-0 flex-col"
+        aria-label={`Open ${label} Focus View`}
+        aria-labelledby={`${widget.id}-compact-label`}
+        role="group"
+        tabIndex={0}
+        onClick={handleClick}
+        onKeyDown={handleKeyDown}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+      >
+        <h3 id={`${widget.id}-compact-label`} className="sr-only">{widget.title || label}</h3>
+        <span className="sr-only">{icon}</span>
         {children}
       </div>
     </AnimatedWidget>
@@ -191,11 +231,10 @@ function CompactTasks({ widget, onOpen }: CompactWidgetProps) {
 }
 
 function CompactNews({ widget, onOpen }: CompactWidgetProps) {
-  const { articles, loading, isDemo } = useNews('general');
+  const { articles, loading } = useNews('general');
   return <CompactShell widget={widget} onOpen={onOpen} icon={<Newspaper size={16} className="text-indigo-600" />}>
     <div className="min-h-0 flex-1">
-      <p className="mb-1 text-[11px] text-slate-500">{isDemo ? 'Demo News' : 'Live News'} · {articles.length} articles</p>
-      {loading ? <p className="text-xs text-slate-500">Loading headlines…</p> : <div className="space-y-1">{articles.slice(0, 2).map((article, index) => <a data-no-drag key={`${article.title}-${index}`} href={article.url} target="_blank" rel="noopener noreferrer" className="block truncate text-xs font-medium text-slate-800 hover:text-indigo-700">{article.title}</a>)}</div>}
+      {loading ? <p className="text-xs text-slate-500">Loading headlines…</p> : <div className="space-y-1">{articles.slice(0, compactPresentationLimits.news).map((article, index) => <a data-no-drag key={`${article.title}-${index}`} href={article.url} target="_blank" rel="noopener noreferrer" className="block truncate text-xs font-medium text-slate-800 hover:text-indigo-700">{article.title}</a>)}</div>}
     </div>
   </CompactShell>;
 }
@@ -268,7 +307,7 @@ function CompactWeather({ widget, onOpen }: CompactWidgetProps) {
   const country = typeof widget.config?.country === 'string' ? widget.config.country : undefined;
   const { weather, isLoading, isDemo } = useWeather(city, country);
   return <CompactShell widget={widget} onOpen={onOpen} icon={<CloudSun size={16} className="text-indigo-600" />}>
-    {isLoading ? <p className="text-xs text-slate-500">Loading weather…</p> : !weather.city ? <div className="flex min-h-0 flex-1 items-center text-xs text-slate-500">Choose a location to see weather.</div> : <div className="flex min-h-0 flex-1 items-center justify-between gap-2"><div className="min-w-0"><p className="truncate text-sm font-medium text-slate-800">{weather.city}{weather.country ? ` · ${weather.country}` : ''}</p><p className="truncate text-xs capitalize text-slate-500">{weather.description}{isDemo ? ' · Demo' : ''}</p></div><div className="flex items-center gap-2"><WeatherIcon icon={weather.icon} className="text-2xl" /><strong className="text-2xl text-slate-900">{Math.round(weather.temp)}°C</strong></div><div className="hidden shrink-0 text-right text-[11px] text-slate-500 sm:block"><div>{weather.humidity}% Humidity</div><div>{weather.windSpeed} m/s Wind</div></div></div>}
+    {isLoading ? <p className="text-xs text-slate-500">Loading weather…</p> : !weather.city ? <div className="ff-compact-weather-empty">Choose a location to see weather.</div> : <div className="ff-compact-weather-object"><div className="ff-compact-weather-main"><WeatherIcon icon={weather.icon} className="text-3xl" /><div className="min-w-0"><strong className="block text-2xl leading-none text-slate-900">{Math.round(weather.temp)}°C</strong><p className="mt-1 truncate text-sm font-medium text-slate-800">{weather.city}</p><p className="truncate text-xs capitalize text-slate-500">{weather.description}{isDemo ? ' · Demo' : ''}</p></div></div><div className="ff-compact-weather-meta"><span>{weather.humidity}% humidity</span><span>{weather.windSpeed} m/s wind</span></div></div>}
   </CompactShell>;
 }
 
@@ -313,19 +352,17 @@ function CompactNotes({ widget, onOpen }: CompactWidgetProps) {
   useEffect(() => { if (isFetched && !isError) setContent(note?.content ?? ''); }, [isError, isFetched, note?.content]);
   useEffect(() => { if (!isFetched || isError || content === (note?.content ?? '')) return; const id = window.setTimeout(() => saveNote({ widgetId: widget.id, content }), 600); return () => window.clearTimeout(id); }, [content, isError, isFetched, note?.content, saveNote, widget.id]);
   return <CompactShell widget={widget} onOpen={onOpen} icon={<StickyNote size={16} className="text-indigo-600" />}>
-    <textarea data-no-drag aria-label="Notes" value={content} onChange={(event) => setContent(event.target.value)} placeholder="Write a short note…" rows={3} className="min-h-0 flex-1 resize-none rounded-md border border-slate-200 bg-white/60 p-2 text-xs text-slate-700 outline-none focus:ring-2 focus:ring-indigo-200" />
+    <div className="ff-compact-note-paper"><textarea data-no-drag aria-label="Notes" value={content} onChange={(event) => setContent(event.target.value)} placeholder="Write a short note…" rows={3} className="min-h-0 flex-1 resize-none bg-transparent p-0 text-xs text-slate-700 outline-none" /></div>
   </CompactShell>;
 }
 
 function CompactGoals({ widget, onOpen }: CompactWidgetProps) {
   const { data: goals = [] } = useGoals();
-  const { mutate: createGoal } = useCreateGoal();
-  const [adding, setAdding] = useState(false);
-  const [title, setTitle] = useState('');
   const completed = goals.filter((goal) => goal.completed).length;
-  const add = () => { if (!title.trim()) return; createGoal({ title: title.trim(), priority: 'medium' }); setTitle(''); setAdding(false); };
+  const completion = goals.length ? Math.round((completed / goals.length) * 100) : 0;
+  const circumference = 2 * Math.PI * 32;
   return <CompactShell widget={widget} onOpen={onOpen} icon={<Target size={16} className="text-indigo-600" />}>
-    <div className="min-h-0 flex-1"><div className="mb-2 flex items-center gap-2"><span className="ff-compact-progress flex-1"><span style={{ width: `${goals.length ? Math.round((completed / goals.length) * 100) : 0}%` }} /></span><span className="text-xs text-slate-500">{goals.length ? Math.round((completed / goals.length) * 100) : 0}%</span></div>{goals.length ? <div className="space-y-1">{goals.filter((goal) => !goal.completed).slice(0, 2).map((goal) => <div key={goal.id} className="flex min-w-0 items-center justify-between gap-2 text-xs"><span className="truncate text-slate-700">{goal.title}</span><span className="shrink-0 text-slate-400">{goal.priority}</span></div>)}</div> : <p className="text-xs text-slate-500">No goals yet</p>}{adding && <form data-no-drag onSubmit={(event) => { event.preventDefault(); add(); }} className="mt-1 flex gap-1"><input autoFocus value={title} onChange={(event) => setTitle(event.target.value)} aria-label="Goal title" className="min-w-0 flex-1 rounded border border-slate-200 px-1.5 py-1 text-xs" /><button type="submit" className="ff-compact-primary rounded px-2 text-xs text-white">Add</button></form>} {!adding && <button type="button" data-no-drag onClick={() => setAdding(true)} className="ff-compact-action mt-1 text-xs font-medium text-indigo-700"><Plus size={12} className="mr-0.5 inline" /> Add goal</button>}</div>
+    <div className="ff-compact-goals-object"><div className="ff-compact-goals-ring"><svg viewBox="0 0 76 76" aria-hidden="true"><circle className="ff-compact-goals-track" cx="38" cy="38" r="32" /><circle className="ff-compact-goals-value" cx="38" cy="38" r="32" strokeDasharray={circumference} strokeDashoffset={circumference * (1 - completion / 100)} /></svg><strong>{completion}%</strong></div><div className="ff-compact-goals-list">{goals.length ? goals.filter((goal) => !goal.completed).slice(0, compactPresentationLimits.goals).map((goal) => <div key={goal.id} className="ff-compact-goal-row"><span className={`ff-compact-goal-dot ff-compact-goal-${goal.priority}`} aria-hidden="true" /><span className="truncate">{goal.title}</span></div>) : <p>No goals yet</p>}</div></div>
   </CompactShell>;
 }
 
@@ -337,7 +374,7 @@ function CompactBookmarks({ widget, onOpen }: CompactWidgetProps) {
   const [url, setUrl] = useState('');
   const add = () => { if (!title.trim() || !url.trim()) return; createBookmark({ title: title.trim(), url: url.trim() }); setTitle(''); setUrl(''); setAdding(false); };
   return <CompactShell widget={widget} onOpen={onOpen} icon={<Bookmark size={16} className="text-indigo-600" />}>
-    <div className="min-h-0 flex-1">{bookmarks.length ? <div className="space-y-1">{bookmarks.slice(0, 3).map((bookmark) => <a data-no-drag key={bookmark.id} href={bookmark.url} target="_blank" rel="noopener noreferrer" className="block truncate text-xs text-slate-700 hover:text-indigo-700">{bookmark.title}<span className="ml-1 text-[10px] text-slate-400">{(() => { try { return new URL(bookmark.url).hostname; } catch { return ''; } })()}</span></a>)}</div> : <p className="text-xs text-slate-500">No bookmarks yet</p>}{adding && <form data-no-drag onSubmit={(event) => { event.preventDefault(); add(); }} className="mt-1 space-y-1"><input autoFocus value={title} onChange={(event) => setTitle(event.target.value)} aria-label="Bookmark title" placeholder="Title" className="w-full rounded border border-slate-200 px-1.5 py-1 text-xs" /><input value={url} onChange={(event) => setUrl(event.target.value)} aria-label="Bookmark URL" placeholder="URL" className="w-full rounded border border-slate-200 px-1.5 py-1 text-xs" /><button type="submit" className="ff-compact-primary rounded px-2 py-1 text-xs text-white">Add</button></form>}{!adding && <button type="button" data-no-drag onClick={() => setAdding(true)} className="ff-compact-action mt-1 text-xs font-medium text-indigo-700"><Plus size={12} className="mr-0.5 inline" /> Add</button>}</div>
+    <div className="ff-compact-bookmarks-object">{bookmarks.length ? <div className="space-y-1">{bookmarks.slice(0, compactPresentationLimits.bookmarks).map((bookmark) => <a data-no-drag key={bookmark.id} href={bookmark.url} target="_blank" rel="noopener noreferrer" className="block truncate text-xs text-slate-700 hover:text-indigo-700">{bookmark.title}<span className="ml-1 text-[10px] text-slate-400">{(() => { try { return new URL(bookmark.url).hostname; } catch { return ''; } })()}</span></a>)}</div> : <p className="text-xs text-slate-500">No bookmarks yet</p>}{adding && <form data-no-drag onSubmit={(event) => { event.preventDefault(); add(); }} className="mt-1 space-y-1"><input autoFocus value={title} onChange={(event) => setTitle(event.target.value)} aria-label="Bookmark title" placeholder="Title" className="w-full rounded border border-slate-200 px-1.5 py-1 text-xs" /><input value={url} onChange={(event) => setUrl(event.target.value)} aria-label="Bookmark URL" placeholder="URL" className="w-full rounded border border-slate-200 px-1.5 py-1 text-xs" /><button type="submit" className="ff-compact-primary rounded px-2 py-1 text-xs text-white">Add</button></form>}{!adding && <button type="button" data-no-drag onClick={() => setAdding(true)} className="ff-compact-action mt-1 text-xs font-medium text-indigo-700"><Plus size={12} className="mr-0.5 inline" /> Add</button>}</div>
   </CompactShell>;
 }
 

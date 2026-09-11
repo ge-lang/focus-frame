@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { getCompactCalendarGrid, summarizeCompactTasks } from './compact-widget-renderer';
+import { compactPresentationLimits, getCompactCalendarGrid, shouldOpenCompactFocusView, summarizeCompactTasks } from './compact-widget-renderer';
 import type { Task } from '@/types/task';
 
 const task = (overrides: Partial<Task>): Task => ({
@@ -35,5 +35,15 @@ describe('compact widget presentation helpers', () => {
     expect(grid.monthLabel).toBe('September 2026');
     expect(grid.weekdayLabels).toEqual(['M', 'T', 'W', 'T', 'F', 'S', 'S']);
     expect(grid.cells).toHaveLength(35);
+  });
+
+  it('keeps compact content intentionally bounded', () => {
+    expect(compactPresentationLimits).toEqual({ news: 2, bookmarks: 3, goals: 2, relevantTasks: 1 });
+  });
+
+  it('opens Focus View only for a click on a non-interactive tile surface', () => {
+    expect(shouldOpenCompactFocusView(false, false)).toBe(true);
+    expect(shouldOpenCompactFocusView(true, false)).toBe(false);
+    expect(shouldOpenCompactFocusView(false, true)).toBe(false);
   });
 });
