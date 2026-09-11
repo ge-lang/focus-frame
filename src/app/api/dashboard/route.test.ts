@@ -48,8 +48,8 @@ describe('/api/dashboard ownership', () => {
     expect(response.status).toBe(200);
     expect(mocks.upsert).toHaveBeenCalledWith({
       where: { userId: 'user-a' },
-      create: { userId: 'user-a', layout: JSON.stringify({ ...state, layoutVersion: 2 }) },
-      update: { layout: JSON.stringify({ ...state, layoutVersion: 2 }) },
+      create: { userId: 'user-a', layout: JSON.stringify({ ...state, layoutVersion: 3 }) },
+      update: { layout: JSON.stringify({ ...state, layoutVersion: 3 }) },
     });
   });
 
@@ -103,17 +103,17 @@ describe('/api/dashboard ownership', () => {
       create: expect.objectContaining({
         layout: JSON.stringify({
           ...mismatchedState,
-          layoutVersion: 2,
-          widgets: [{ id: 'todo-123', type: 'todo', colSpan: 6, rowSpan: 3 }],
-          layout: [{ i: 'todo-123', x: 0, y: 0, w: 6, h: 3, type: 'todo' }],
+          layoutVersion: 3,
+          widgets: [{ id: 'todo-123', type: 'todo', colSpan: 4, rowSpan: 2 }],
+          layout: [{ i: 'todo-123', x: 0, y: 0, w: 4, h: 2, type: 'todo' }],
         }),
       }),
       update: expect.objectContaining({
         layout: JSON.stringify({
           ...mismatchedState,
-          layoutVersion: 2,
-          widgets: [{ id: 'todo-123', type: 'todo', colSpan: 6, rowSpan: 3 }],
-          layout: [{ i: 'todo-123', x: 0, y: 0, w: 6, h: 3, type: 'todo' }],
+          layoutVersion: 3,
+          widgets: [{ id: 'todo-123', type: 'todo', colSpan: 4, rowSpan: 2 }],
+          layout: [{ i: 'todo-123', x: 0, y: 0, w: 4, h: 2, type: 'todo' }],
         }),
       }),
     }));

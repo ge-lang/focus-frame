@@ -1,7 +1,7 @@
 import type { LayoutItem, Widget, WidgetType } from '@/types/dashboard';
 
 export const DESKTOP_GRID_COLUMNS = 12;
-export const OBJECT_LAYOUT_VERSION = 2;
+export const OBJECT_LAYOUT_VERSION = 3;
 export const COMPACT_LAYOUT_VERSION = OBJECT_LAYOUT_VERSION;
 export const OBJECT_GRID_MARGIN = 16;
 const mobileWidgetHeights: Record<WidgetType, number> = {
@@ -22,27 +22,27 @@ export interface WidgetSizing {
 }
 
 const widgetSizing: Record<WidgetType, WidgetSizing> = {
-  todo: { w: 6, h: 3 },
-  weather: { w: 3, h: 3 },
-  news: { w: 6, h: 3 },
-  pomodoro: { w: 3, h: 3 },
-  calendar: { w: 3, h: 3 },
-  notes: { w: 3, h: 3 },
-  analytics: { w: 3, h: 3 },
-  bookmarks: { w: 3, h: 3 },
-  goals: { w: 6, h: 3 },
+  todo: { w: 4, h: 2 },
+  weather: { w: 2, h: 2 },
+  news: { w: 4, h: 2 },
+  pomodoro: { w: 2, h: 2 },
+  calendar: { w: 2, h: 2 },
+  notes: { w: 2, h: 2 },
+  analytics: { w: 2, h: 2 },
+  bookmarks: { w: 2, h: 2 },
+  goals: { w: 4, h: 2 },
 };
 
 const compactDefaultPositions: Record<WidgetType, { x: number; y: number }> = {
   todo: { x: 0, y: 0 },
-  pomodoro: { x: 6, y: 0 },
-  calendar: { x: 9, y: 0 },
-  goals: { x: 0, y: 3 },
-  weather: { x: 6, y: 3 },
-  analytics: { x: 9, y: 3 },
-  news: { x: 0, y: 6 },
-  notes: { x: 6, y: 6 },
-  bookmarks: { x: 9, y: 6 },
+  pomodoro: { x: 4, y: 0 },
+  calendar: { x: 6, y: 0 },
+  news: { x: 8, y: 0 },
+  weather: { x: 0, y: 2 },
+  analytics: { x: 2, y: 2 },
+  goals: { x: 4, y: 2 },
+  notes: { x: 8, y: 2 },
+  bookmarks: { x: 10, y: 2 },
 };
 
 export function getWidgetSizing(type: WidgetType): WidgetSizing {

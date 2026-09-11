@@ -21,9 +21,9 @@ import {
 
 describe('dashboard layout normalization', () => {
   it('defines fixed desktop dimensions for each widget type', () => {
-    expect(OBJECT_LAYOUT_VERSION).toBe(2);
-    for (const type of ['todo', 'news', 'goals'] as const) expect(getWidgetSizing(type)).toEqual({ w: 6, h: 3 });
-    for (const type of ['analytics', 'weather', 'pomodoro', 'calendar', 'notes', 'bookmarks'] as const) expect(getWidgetSizing(type)).toEqual({ w: 3, h: 3 });
+    expect(OBJECT_LAYOUT_VERSION).toBe(3);
+    for (const type of ['todo', 'news', 'goals'] as const) expect(getWidgetSizing(type)).toEqual({ w: 4, h: 2 });
+    for (const type of ['analytics', 'weather', 'pomodoro', 'calendar', 'notes', 'bookmarks'] as const) expect(getWidgetSizing(type)).toEqual({ w: 2, h: 2 });
   });
 
   it('derives a square grid unit from the measured container width', () => {
@@ -31,7 +31,7 @@ describe('dashboard layout normalization', () => {
     expect(getSquareGridUnit(0, 12, 16)).toBe(1);
   });
 
-  it('migrates every existing widget to the exact compact 3x3 arrangement once', () => {
+  it('migrates every existing widget to the exact version-3 two-row arrangement once', () => {
     const types = ['todo', 'news', 'pomodoro', 'weather', 'calendar', 'analytics', 'notes', 'goals', 'bookmarks'] as const;
     const widgets = types.map((type, index) => ({ id: `${type}-${index}`, type, colSpan: 8, rowSpan: 4 }));
     const oldLayout = widgets.map((widget, index) => ({ i: widget.id, x: index, y: index * 7, w: 8, h: 4, type: widget.type }));
@@ -39,17 +39,26 @@ describe('dashboard layout normalization', () => {
 
     expect(migrated.migrated).toBe(true);
     expect(migrated.layout.map(({ i, x, y, w, h }) => ({ i, x, y, w, h }))).toEqual([
-      { i: 'todo-0', x: 0, y: 0, w: 6, h: 3 },
-      { i: 'news-1', x: 0, y: 6, w: 6, h: 3 },
-      { i: 'pomodoro-2', x: 6, y: 0, w: 3, h: 3 },
-      { i: 'weather-3', x: 6, y: 3, w: 3, h: 3 },
-      { i: 'calendar-4', x: 9, y: 0, w: 3, h: 3 },
-      { i: 'analytics-5', x: 9, y: 3, w: 3, h: 3 },
-      { i: 'notes-6', x: 6, y: 6, w: 3, h: 3 },
-      { i: 'goals-7', x: 0, y: 3, w: 6, h: 3 },
-      { i: 'bookmarks-8', x: 9, y: 6, w: 3, h: 3 },
+      { i: 'todo-0', x: 0, y: 0, w: 4, h: 2 },
+      { i: 'news-1', x: 8, y: 0, w: 4, h: 2 },
+      { i: 'pomodoro-2', x: 4, y: 0, w: 2, h: 2 },
+      { i: 'weather-3', x: 0, y: 2, w: 2, h: 2 },
+      { i: 'calendar-4', x: 6, y: 0, w: 2, h: 2 },
+      { i: 'analytics-5', x: 2, y: 2, w: 2, h: 2 },
+      { i: 'notes-6', x: 8, y: 2, w: 2, h: 2 },
+      { i: 'goals-7', x: 4, y: 2, w: 4, h: 2 },
+      { i: 'bookmarks-8', x: 10, y: 2, w: 2, h: 2 },
     ]);
-    expect(migrated.widgets.every((widget) => widget.colSpan === getWidgetSizing(widget.type).w && widget.rowSpan === 3)).toBe(true);
+    expect(migrated.widgets.every((widget) => widget.colSpan === getWidgetSizing(widget.type).w && widget.rowSpan === 2)).toBe(true);
+  });
+
+  it.each([undefined, 0, 1, 2])('migrates legacy layoutVersion %s to version 3', (version) => {
+    const widgets = [{ id: 'weather-1', type: 'weather' as const, colSpan: 3, rowSpan: 3 }];
+    const result = migrateToCompactLayout([], widgets, version);
+
+    expect(result.migrated).toBe(true);
+    expect(result.layout).toEqual([{ i: 'weather-1', x: 0, y: 2, w: 2, h: 2, type: 'weather' }]);
+    expect(result.widgets[0]).toMatchObject({ colSpan: 2, rowSpan: 2 });
   });
 
   it('does not reset user positions after the compact version is persisted', () => {
@@ -58,7 +67,7 @@ describe('dashboard layout normalization', () => {
     const result = migrateToCompactLayout(moved, widgets, COMPACT_LAYOUT_VERSION);
 
     expect(result.migrated).toBe(false);
-    expect(result.layout[0]).toMatchObject({ i: 'weather-1', x: 8, y: 8, w: 3, h: 3 });
+    expect(result.layout[0]).toMatchObject({ i: 'weather-1', x: 8, y: 8, w: 2, h: 2 });
   });
 
   it('migrates only widgets that exist and does not fabricate missing slots', () => {
@@ -69,8 +78,8 @@ describe('dashboard layout normalization', () => {
     const result = migrateToCompactLayout([], widgets, 0);
 
     expect(result.layout).toEqual([
-      { i: 'todo-1', x: 0, y: 0, w: 6, h: 3, type: 'todo' },
-      { i: 'goals-1', x: 0, y: 3, w: 6, h: 3, type: 'goals' },
+      { i: 'todo-1', x: 0, y: 0, w: 4, h: 2, type: 'todo' },
+      { i: 'goals-1', x: 4, y: 2, w: 4, h: 2, type: 'goals' },
     ]);
   });
 
@@ -105,8 +114,8 @@ describe('dashboard layout normalization', () => {
       { i: 'pomodoro-1', x: 0, y: 1, w: 1, h: 1, type: 'pomodoro' },
     ]);
 
-    expect(layout[0]).toMatchObject({ i: 'weather-1', x: 2, y: 0, w: 3, h: 3 });
-    expect(layout[1]).toMatchObject({ i: 'pomodoro-1', x: 0, y: 3, w: 3, h: 3 });
+    expect(layout[0]).toMatchObject({ i: 'weather-1', x: 2, y: 0, w: 2, h: 2 });
+    expect(layout[1]).toMatchObject({ i: 'pomodoro-1', x: 0, y: 1, w: 2, h: 2 });
   });
 
   it('preserves valid twelve-column positions and applies fixed dimensions', () => {
@@ -114,7 +123,7 @@ describe('dashboard layout normalization', () => {
       { i: 'notes-1', x: 7, y: 5, w: 4, h: 1, type: 'notes' },
     ]);
 
-    expect(layout[0]).toMatchObject({ i: 'notes-1', x: 7, y: 5, w: 3, h: 3 });
+    expect(layout[0]).toMatchObject({ i: 'notes-1', x: 7, y: 5, w: 2, h: 2 });
   });
 
   it('keeps canonical desktop widths when a responsive layout is normalized', () => {
@@ -124,8 +133,8 @@ describe('dashboard layout normalization', () => {
     ]);
 
     expect(normalized).toMatchObject([
-      { i: 'todo-1', w: 6 },
-      { i: 'analytics-1', w: 3 },
+      { i: 'todo-1', w: 4 },
+      { i: 'analytics-1', w: 2 },
     ]);
   });
 
@@ -135,7 +144,7 @@ describe('dashboard layout normalization', () => {
     ], [{ id: 'todo-123', type: 'todo' }]);
     const normalized = normalizeLayout(reconciled);
 
-    expect(normalized[0]).toMatchObject({ i: 'todo-123', type: 'todo', w: 6, h: 3 });
+    expect(normalized[0]).toMatchObject({ i: 'todo-123', type: 'todo', w: 4, h: 2 });
   });
 
   it('reconciles News and Analytics layout identity before sizing', () => {
@@ -148,8 +157,8 @@ describe('dashboard layout normalization', () => {
     ]));
 
     expect(normalized).toMatchObject([
-      { i: 'news-123', type: 'news', w: 6 },
-      { i: 'analytics-123', type: 'analytics', w: 3 },
+      { i: 'news-123', type: 'news', w: 4 },
+      { i: 'analytics-123', type: 'analytics', w: 2 },
     ]);
   });
 
@@ -172,9 +181,9 @@ describe('dashboard layout normalization', () => {
     ]);
 
     expect(migrated).toMatchObject([
-      { i: 'todo-1', w: 6 },
-      { i: 'news-1', w: 6 },
-      { i: 'analytics-1', w: 3 },
+      { i: 'todo-1', w: 4 },
+      { i: 'news-1', w: 4 },
+      { i: 'analytics-1', w: 2 },
     ]);
     expect(migrated.every((item, index) => !hasLayoutCollision(item, migrated.slice(index + 1)))).toBe(true);
   });
@@ -191,9 +200,9 @@ describe('dashboard layout normalization', () => {
 
     expect(reload).toEqual(firstLoad);
     expect(reload).toMatchObject([
-      { i: 'todo-1', w: 6 },
-      { i: 'weather-1', w: 3 },
-      { i: 'analytics-1', w: 3 },
+      { i: 'todo-1', w: 4 },
+      { i: 'weather-1', w: 2 },
+      { i: 'analytics-1', w: 2 },
     ]);
   });
 
@@ -227,7 +236,7 @@ describe('dashboard layout normalization', () => {
       { i: 'news-1', x: 0, y: 10 },
       { i: 'calendar-1', x: 8, y: 10 },
       { i: 'notes-1', x: 4, y: 20 },
-      { i: 'goals-1', x: 6, y: 25 },
+      { i: 'goals-1', x: 8, y: 25 },
     ]);
     expect(second).toEqual(first);
     expect(third).toEqual(second);
@@ -268,8 +277,8 @@ describe('dashboard layout normalization', () => {
       { i: 'bookmarks-1', x: 20, y: 0, w: 1, h: 1, type: 'bookmarks' },
     ]);
 
-    expect(layout[0]).toMatchObject({ x: 6, y: 0, w: 6, h: 3 });
-    expect(layout[1]).toMatchObject({ x: 9, y: 3, w: 3, h: 3 });
+    expect(layout[0]).toMatchObject({ x: 8, y: 0, w: 4, h: 2 });
+    expect(layout[1]).toMatchObject({ x: 10, y: 2, w: 2, h: 2 });
     expect(hasLayoutCollision(layout[0], [layout[1]])).toBe(false);
   });
 
@@ -309,16 +318,16 @@ describe('dashboard layout normalization', () => {
     ]);
 
     expect(normalized[0]).toMatchObject({ i: 'weather-1', x: 0, y: 0 });
-    expect(normalized[1]).toMatchObject({ i: 'notes-1', x: 0, y: 3 });
-    expect(normalized[2]).toMatchObject({ i: 'goals-1', x: 6, y: 20 });
+    expect(normalized[1]).toMatchObject({ i: 'notes-1', x: 0, y: 2 });
+    expect(normalized[2]).toMatchObject({ i: 'goals-1', x: 8, y: 20 });
   });
 
   it('adds widgets after the occupied layout without moving existing widgets', () => {
     const existing = [{ i: 'todo-1', x: 0, y: 0, w: 8, h: 3, type: 'todo' as const }];
     const next = addWidgetToLayout(existing, { i: 'weather-2', x: 0, y: 0, w: 1, h: 1, type: 'weather' });
 
-    expect(next[0]).toMatchObject({ ...existing[0], w: 6, h: 3 });
-    expect(next[1]).toMatchObject({ i: 'weather-2', x: 0, y: 3, w: 3, h: 3 });
+    expect(next[0]).toMatchObject({ ...existing[0], w: 4, h: 2 });
+    expect(next[1]).toMatchObject({ i: 'weather-2', x: 0, y: 2, w: 2, h: 2 });
     expect(hasLayoutCollision(next[1], [next[0]])).toBe(false);
   });
 
@@ -326,7 +335,7 @@ describe('dashboard layout normalization', () => {
     const existing = [{ i: 'pomodoro-1', x: 4, y: 2, w: 4, h: 3, type: 'pomodoro' as const }];
     const next = addWidgetToLayout(existing, { i: 'pomodoro-2', x: 0, y: 0, w: 1, h: 1, type: 'pomodoro' });
 
-    expect(next[1]).toMatchObject({ i: 'pomodoro-2', x: 0, y: 0, w: 3, h: 3 });
+    expect(next[1]).toMatchObject({ i: 'pomodoro-2', x: 0, y: 0, w: 2, h: 2 });
     expect(next[0]).toMatchObject({ x: 4, y: 2 });
     expect(hasLayoutCollision(next[1], next.slice(0, 1))).toBe(false);
   });
@@ -339,7 +348,7 @@ describe('dashboard layout normalization', () => {
     ];
     const next = addWidgetToLayout(existing, { i: 'weather-2', x: 0, y: 0, w: 1, h: 1, type: 'weather' });
 
-    expect(next[3]).toMatchObject({ i: 'weather-2', x: 0, y: 3, w: 3, h: 3 });
+    expect(next[3]).toMatchObject({ i: 'weather-2', x: 0, y: 2, w: 2, h: 2 });
     expect(next.every((item, index) => !hasLayoutCollision(item, next.slice(index + 1)))).toBe(true);
   });
 
@@ -353,8 +362,8 @@ describe('dashboard layout normalization', () => {
     });
 
     expect(next[0]).toMatchObject({ i: 'todo-1', x: 0, y: 0 });
-    expect(next[1]).toMatchObject({ i: 'bookmarks-1', x: 4, y: 3 });
-    expect(next[2]).toMatchObject({ i: 'bookmarks-2', x: 4, y: 6 });
+    expect(next[1]).toMatchObject({ i: 'bookmarks-1', x: 4, y: 0 });
+    expect(next[2]).toMatchObject({ i: 'bookmarks-2', x: 4, y: 2 });
     expect(next.every((item, index) => !hasLayoutCollision(item, next.slice(index + 1)))).toBe(true);
   });
 
@@ -364,7 +373,7 @@ describe('dashboard layout normalization', () => {
       { i: 'notes-1', x: 3, y: 0, w: 3, h: 3, type: 'notes' as const },
     ];
 
-    expect(removeWidgetFromLayout(layout, 'weather-1')).toEqual([{ ...layout[1], w: 3, h: 3 }]);
+    expect(removeWidgetFromLayout(layout, 'weather-1')).toEqual([{ ...layout[1], w: 2, h: 2 }]);
   });
 
   it('derives a deterministic one-column mobile layout without changing desktop data', () => {
@@ -394,9 +403,9 @@ describe('dashboard layout normalization', () => {
     const tablet = compactLayoutForColumns(desktop, 6);
 
     expect(tablet).toMatchObject([
-      { i: 'todo-1', x: 0, y: 0, w: 6, h: 3 },
-      { i: 'weather-1', x: 0, y: 3, w: 3, h: 3 },
-      { i: 'news-1', x: 0, y: 6, w: 6, h: 3 },
+      { i: 'todo-1', x: 0, y: 0, w: 4, h: 2 },
+      { i: 'weather-1', x: 4, y: 0, w: 2, h: 2 },
+      { i: 'news-1', x: 0, y: 3, w: 4, h: 2 },
     ]);
     expect(desktop[2]).toMatchObject({ x: 6, y: 3, w: 3, h: 3 });
   });
