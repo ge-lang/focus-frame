@@ -29,10 +29,10 @@ describe('compact widget presentation helpers', () => {
     expect(result.relevantTask?.id).toBe('soon');
   });
 
-  it('builds a Monday-first current-month grid without navigation metadata', () => {
-    const grid = getCompactCalendarGrid(new Date(2026, 8, 11), 'en-US');
+  it('builds an English Monday-first month grid without a year label', () => {
+    const grid = getCompactCalendarGrid(new Date(2026, 8, 11), 'ru-RU');
 
-    expect(grid.monthLabel).toBe('September 2026');
+    expect(grid.monthLabel).toBe('September');
     expect(grid.weekdayLabels).toEqual(['M', 'T', 'W', 'T', 'F', 'S', 'S']);
     expect(grid.cells).toHaveLength(35);
   });
