@@ -1751,6 +1751,48 @@ body.ff-document-body {
 .ff-dark-workspace .ff-compact-note-paper { border: 0; background: rgba(29, 34, 71, 0.42); }
 .ff-dark-workspace .ff-compact-note-paper::after { background: #20264c; }
 
+/* Three visible fixes: keep status content in normal flow, expose the V-edge, and clarify the watch scale. */
+.ff-dark-workspace .ff-compact-status-summary > div {
+  align-items: center;
+  gap: 0.42rem;
+  line-height: 1;
+}
+.ff-dark-workspace .ff-compact-status-marker {
+  width: 1.18rem;
+  height: 1.18rem;
+  margin: 0;
+  flex: 0 0 auto;
+  line-height: 1;
+}
+.ff-dark-workspace .ff-compact-status-summary > div > span:not(.ff-compact-status-marker) {
+  line-height: 1;
+}
+.ff-dark-workspace .ff-compact-status-summary > div > strong { line-height: 1; }
+
+.ff-dark-workspace .ff-compact-card-bookmarks {
+  background: linear-gradient(145deg, #b6d1ff 0%, #78e2f2 50%, #9d8fff 100%) !important;
+}
+.ff-dark-workspace .ff-compact-card-bookmarks > .ff-compact-object {
+  height: calc(100% - 4px);
+  margin: 2px;
+  background: linear-gradient(145deg, rgba(31, 48, 95, 0.99), rgba(8, 16, 38, 1) 70%) !important;
+}
+
+.ff-dark-workspace .ff-compact-timer-ring-large::before {
+  inset: 0.8rem;
+  background: repeating-conic-gradient(from -2deg, rgba(220, 235, 255, 1) 0 1.5deg, transparent 1.5deg 6deg);
+  filter: drop-shadow(0 0 1px rgba(103, 215, 229, 0.46));
+  -webkit-mask: radial-gradient(transparent calc(100% - 7px), #000 calc(100% - 1px));
+  mask: radial-gradient(transparent calc(100% - 7px), #000 calc(100% - 1px));
+}
+.ff-dark-workspace .ff-compact-timer-ring-large::after {
+  inset: 0.44rem;
+  background: repeating-conic-gradient(from -2deg, rgba(249, 252, 255, 1) 0 3.6deg, transparent 3.6deg 30deg);
+  filter: drop-shadow(0 0 1px rgba(141, 128, 255, 0.54));
+  -webkit-mask: radial-gradient(transparent calc(100% - 10px), #000 calc(100% - 1px));
+  mask: radial-gradient(transparent calc(100% - 10px), #000 calc(100% - 1px));
+}
+
 /* Final lock pass: make the existing watch marks and object hierarchy read at preview scale. */
 .ff-dark-workspace .ff-compact-timer-ring-large::before {
   inset: 0.92rem;
