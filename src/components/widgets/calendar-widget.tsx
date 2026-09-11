@@ -27,7 +27,7 @@ export default function CalendarWidget({ widgetId, title }: CalendarWidgetProps)
   const firstDayOfMonth = new Date(year, month, 1);
   const lastDayOfMonth = new Date(year, month + 1, 0);
   const daysInMonth = lastDayOfMonth.getDate();
-  const startingDayOfWeek = firstDayOfMonth.getDay();
+  const startingDayOfWeek = (firstDayOfMonth.getDay() + 6) % 7;
 
   const monthNames = [
     'January', 'February', 'March', 'April', 'May', 'June',
@@ -123,7 +123,7 @@ export default function CalendarWidget({ widgetId, title }: CalendarWidgetProps)
 
         {/* Week days */}
         <div className="grid grid-cols-7 gap-1 mb-2">
-          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+          {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
             <div key={day} className="py-1 text-center text-xs font-medium text-indigo-700/70">
               {day}
             </div>

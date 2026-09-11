@@ -235,7 +235,11 @@ function CompactNews({ widget, onOpen }: CompactWidgetProps) {
   return <CompactShell widget={widget} onOpen={onOpen} icon={<Newspaper size={16} className="text-indigo-600" />}>
     <div className="ff-compact-news-object">
       {loading ? <p className="text-xs text-slate-500">Loading headlines…</p> : articles.slice(0, compactPresentationLimits.news).map((article, index) => <a data-no-drag key={`${article.title}-${index}`} href={article.url} target="_blank" rel="noopener noreferrer" className="ff-compact-news-story">
-        <span className="ff-compact-news-index">0{index + 1}</span>
+        {article.image ? (
+          // News image URLs come from the provider and are intentionally rendered without a remote Next image allowlist.
+          // eslint-disable-next-line @next/next/no-img-element
+          <img className="ff-compact-news-image" src={article.image} alt="" />
+        ) : <span className="ff-compact-news-index">0{index + 1}</span>}
         <span className="min-w-0">
           <strong className="ff-compact-news-headline">{article.title}</strong>
           <span className="ff-compact-news-meta">{article.source} · {new Date(article.publishedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
@@ -341,13 +345,13 @@ function CompactCalendar({ widget, onOpen }: CompactWidgetProps) {
 function CompactAnalytics({ widget, onOpen }: CompactWidgetProps) {
   const { data, isLoading } = useAnalytics('week');
   const metrics = [
-    ['Productivity', data ? `${data.productivity}%` : '—', 'text-indigo-600'],
-    ['Focus', data ? `${data.focusMinutes}m` : '—', 'text-cyan-600'],
-    ['Tasks', data?.completedTasks ?? '—', 'text-emerald-600'],
-    ['Goals', data?.completedGoals ?? '—', 'text-pink-600'],
+    ['Productivity', data ? `${data.productivity}%` : '—', 'text-indigo-600', TrendingUp],
+    ['Focus', data ? `${data.focusMinutes}m` : '—', 'text-cyan-600', Clock3],
+    ['Tasks', data?.completedTasks ?? '—', 'text-emerald-600', CheckCircle2],
+    ['Goals', data?.completedGoals ?? '—', 'text-pink-600', Target],
   ] as const;
   return <CompactShell widget={widget} onOpen={onOpen} icon={<BarChart3 size={16} className="text-indigo-600" />}>
-    {isLoading ? <p className="text-xs text-slate-500">Loading analytics…</p> : <div className="ff-compact-analytics-grid">{metrics.map(([label, value, color]) => <div key={label} className="ff-compact-kpi"><span className={`ff-compact-kpi-value ${color}`}>{value}</span><span className="ff-compact-kpi-label text-[10px] text-slate-500">{label}</span></div>)}</div>}
+    {isLoading ? <p className="text-xs text-slate-500">Loading analytics…</p> : <div className="ff-compact-analytics-grid">{metrics.map(([label, value, color, Icon]) => <div key={label} className="ff-compact-kpi"><Icon size={15} className={`ff-compact-kpi-icon ${color}`} aria-hidden="true" /><span className={`ff-compact-kpi-value ${color}`}>{value}</span><span className="ff-compact-kpi-label text-[10px] text-slate-500">{label}</span></div>)}</div>}
   </CompactShell>;
 }
 

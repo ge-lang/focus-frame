@@ -454,19 +454,20 @@ body.ff-document-body {
   color: var(--ff-dark-text);
   min-height: 100dvh;
   background:
-    radial-gradient(60rem 34rem at 4% -12%, rgba(112, 73, 209, 0.28), transparent 68%),
-    radial-gradient(48rem 30rem at 96% 0%, rgba(38, 115, 204, 0.16), transparent 70%),
-    linear-gradient(180deg, #17132f 0%, #11152a 42%, #0f1325 100%);
+    radial-gradient(68rem 38rem at 7% -14%, rgba(106, 84, 220, 0.34), transparent 66%),
+    radial-gradient(54rem 34rem at 96% 2%, rgba(38, 126, 218, 0.2), transparent 70%),
+    radial-gradient(48rem 28rem at 48% 92%, rgba(47, 79, 151, 0.13), transparent 74%),
+    linear-gradient(180deg, #17132f 0%, #11152a 46%, #0e1224 100%);
 }
 
 .ff-dark-workspace::before {
   top: -6rem;
   left: -12%;
   width: 124%;
-  height: 27rem;
+  height: 31rem;
   border-radius: 0 0 48% 38% / 0 0 34% 24%;
-  background: linear-gradient(112deg, rgba(121, 75, 221, 0.26), rgba(49, 64, 164, 0.1) 42%, rgba(39, 179, 205, 0.1) 74%, transparent 96%);
-  filter: blur(34px);
+  background: linear-gradient(112deg, rgba(121, 75, 221, 0.3), rgba(49, 64, 164, 0.12) 42%, rgba(39, 179, 205, 0.12) 74%, transparent 96%);
+  filter: blur(38px);
 }
 
 .ff-dark-workspace::after {
@@ -474,8 +475,8 @@ body.ff-document-body {
   right: -14rem;
   width: 36rem;
   height: 32rem;
-  background: radial-gradient(circle, rgba(78, 72, 201, 0.18), transparent 70%);
-  filter: blur(40px);
+  background: radial-gradient(circle, rgba(78, 72, 201, 0.22), transparent 70%);
+  filter: blur(44px);
 }
 
 .ff-dark-workspace .ff-topbar {
@@ -2092,3 +2093,140 @@ html[data-ff-theme='light'] .ff-modal-panel label { color: var(--ff-text-seconda
   .ff-light-workspace .ff-mobile-sticky-actions .ff-glass-control { border-color: rgba(103, 92, 246, 0.22); background: rgba(255, 255, 255, 0.84) !important; color: #574ed1 !important; }
   .ff-light-workspace .ff-mobile-sticky-actions .ff-glass-control-primary { background: rgba(237, 235, 255, 0.92) !important; }
 }
+
+/* Final cool object treatment: atmospheric depth without changing the grid. */
+.ff-dark-workspace .ff-compact-card {
+  border-color: rgba(111, 157, 255, 0.42) !important;
+  background: linear-gradient(145deg, rgba(32, 48, 94, 0.94), rgba(13, 21, 48, 0.97)) !important;
+  box-shadow: 0 18px 38px rgba(3, 8, 25, 0.42), 0 0 20px rgba(76, 117, 231, 0.1), inset 0 1px 0 rgba(191, 220, 255, 0.13) !important;
+}
+
+.ff-dark-workspace .ff-compact-card:hover {
+  border-color: rgba(132, 175, 255, 0.62) !important;
+  box-shadow: 0 20px 42px rgba(3, 8, 25, 0.48), 0 0 26px rgba(91, 130, 240, 0.15), inset 0 1px 0 rgba(205, 228, 255, 0.17) !important;
+}
+
+.ff-dark-workspace .ff-compact-status-summary > div { position: relative; }
+.ff-dark-workspace .ff-compact-status-summary > div::before {
+  width: 0.34rem;
+  height: 0.34rem;
+  margin: 0 auto 0.22rem;
+  border-radius: 9999px;
+  content: '';
+}
+.ff-dark-workspace .ff-compact-status-summary > div:nth-child(1)::before { background: #8fa7ff; }
+.ff-dark-workspace .ff-compact-status-summary > div:nth-child(2)::before { background: var(--ff-accent-cyan); }
+.ff-dark-workspace .ff-compact-status-summary > div:nth-child(3)::before { background: var(--ff-accent-green); }
+
+.ff-dark-workspace .ff-compact-task-progress-ring {
+  filter: drop-shadow(0 0 10px rgba(124, 108, 255, 0.18));
+  box-shadow: 0 0 0 4px rgba(91, 119, 231, 0.08), 0 0 0 7px rgba(103, 215, 229, 0.035);
+}
+
+.ff-dark-workspace .ff-compact-timer-ring-large {
+  position: relative;
+  isolation: isolate;
+  width: 9.5rem;
+  height: 9.5rem;
+  border-width: 0.42rem;
+  box-shadow: 0 0 0 4px rgba(103, 215, 229, 0.06), 0 0 0 8px rgba(124, 108, 255, 0.06), 0 0 30px rgba(91, 103, 241, 0.2);
+}
+
+.ff-dark-workspace .ff-compact-timer-ring-large::before {
+  position: absolute;
+  inset: -0.48rem;
+  border-radius: 9999px;
+  background: repeating-conic-gradient(from -2deg, rgba(194, 216, 255, 0.5) 0 1deg, transparent 1deg 15deg);
+  content: '';
+  pointer-events: none;
+  -webkit-mask: radial-gradient(transparent calc(100% - 3px), #000 calc(100% - 2px));
+  mask: radial-gradient(transparent calc(100% - 3px), #000 calc(100% - 2px));
+}
+
+.ff-dark-workspace .ff-compact-timer-ring-large span { font-size: 1.6rem; }
+.ff-dark-workspace .ff-compact-timer-ring-large small { color: #b8c7e8; }
+.ff-dark-workspace .ff-compact-pomodoro-controls { margin-top: -1rem; }
+
+.ff-dark-workspace .ff-compact-calendar-month { font-size: 1.08rem; letter-spacing: 0.01em; }
+.ff-dark-workspace .ff-compact-calendar-cell { font-size: 0.78rem; }
+.ff-dark-workspace .ff-compact-calendar-cell-today { box-shadow: 0 0 0 3px rgba(124, 108, 255, 0.16), 0 0 16px rgba(124, 108, 255, 0.32); }
+
+.ff-dark-workspace .ff-compact-weather-icon { width: 4.5rem !important; height: 4.5rem !important; filter: drop-shadow(0 0 16px rgba(103, 215, 229, 0.18)); }
+.ff-dark-workspace .ff-compact-weather-temperature { font-size: 2.55rem; text-shadow: 0 0 18px rgba(177, 201, 255, 0.12); }
+
+.ff-dark-workspace .ff-compact-analytics-grid { border-radius: 0.8rem; background: rgba(18, 29, 63, 0.24); }
+.ff-dark-workspace .ff-compact-kpi-value { font-size: 1.72rem; }
+.ff-dark-workspace .ff-compact-kpi-icon { margin-bottom: 0.2rem; filter: drop-shadow(0 0 8px currentColor); }
+
+.ff-dark-workspace .ff-compact-goals-ring { filter: drop-shadow(0 0 12px rgba(124, 108, 255, 0.2)); }
+.ff-dark-workspace .ff-compact-goals-ring strong { font-size: 1.28rem; }
+.ff-dark-workspace .ff-compact-goal-copy small { color: #b8c7e8; }
+
+.ff-dark-workspace .ff-compact-note-paper {
+  background:
+    linear-gradient(145deg, rgba(33, 59, 108, 0.76), rgba(18, 34, 74, 0.72)),
+    repeating-linear-gradient(to bottom, transparent 0 1.25rem, rgba(137, 180, 255, 0.1) 1.25rem 1.3rem) !important;
+  box-shadow: inset 0 1px 0 rgba(191, 220, 255, 0.12), inset 0 0 22px rgba(76, 117, 231, 0.12);
+}
+
+.ff-dark-workspace .ff-compact-note-paper textarea {
+  border: 0 !important;
+  background: transparent !important;
+  color: #f4f3ff !important;
+}
+
+.ff-dark-workspace .ff-compact-note-paper::after { background: #2a4a84; box-shadow: -1px 1px 0 rgba(191, 220, 255, 0.18); }
+.ff-dark-workspace .ff-compact-bookmarks-object::after { width: 3.1rem; height: 0.72rem; background: linear-gradient(90deg, rgba(103, 215, 229, 0.62), rgba(141, 128, 255, 0.78)); opacity: 0.7; }
+
+.ff-compact-news-image {
+  width: 3.4rem;
+  height: 4.2rem;
+  flex: 0 0 auto;
+  border-radius: 0.55rem;
+  object-fit: cover;
+  opacity: 0.86;
+}
+
+.ff-dark-workspace .ff-compact-news-image { border: 1px solid rgba(167, 203, 255, 0.22); box-shadow: 0 0 14px rgba(76, 117, 231, 0.12); }
+
+/* Final compact object balance: preserve the fixed square while giving each object a clear resting zone. */
+.ff-compact-task-body { gap: 0.15rem; }
+.ff-compact-status-summary { padding-bottom: 0.35rem; }
+.ff-compact-task-completion { min-height: 0; flex: 1 1 auto; }
+.ff-compact-task-progress-ring { width: 7.25rem; height: 7.25rem; }
+.ff-compact-relevant-task { flex: 0 0 1.55rem; min-height: 1.55rem; padding-top: 0.3rem; }
+
+.ff-compact-note-paper {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 0;
+}
+
+.ff-compact-note-paper::after { right: -0.05rem; background: var(--ff-bg-card, #fff); }
+
+.ff-compact-bookmarks-object {
+  position: relative;
+  padding-bottom: 1rem;
+}
+
+.ff-compact-bookmarks-object::after {
+  position: absolute;
+  bottom: 0.05rem;
+  left: 0.05rem;
+  width: 2.3rem;
+  height: 0.48rem;
+  background: var(--ff-accent-violet, #6255e8);
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  content: '';
+  opacity: 0.42;
+}
+
+.ff-compact-weather-icon { width: 4.35rem !important; height: 4.35rem !important; }
+.ff-compact-weather-temperature { font-size: 2.2rem; }
+.ff-compact-goals-object { gap: 0.8rem; }
+.ff-compact-goals-list { gap: 0.62rem; }
+
+.ff-dark-workspace .ff-compact-note-paper { background: transparent; }
+.ff-dark-workspace .ff-compact-note-paper::after { background: #20264c; }
+.ff-dark-workspace .ff-compact-bookmarks-object::after { background: var(--ff-accent-violet); opacity: 0.5; }
