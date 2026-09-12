@@ -3772,6 +3772,21 @@ html[data-ff-theme='light'] .ff-modal-panel label { color: #e5c5d5 !important; }
     place-items: center;
   }
 
+  .ff-dark-workspace .ff-compact-goals-object,
+  .ff-light-workspace .ff-compact-goals-object {
+    gap: 0.8rem;
+  }
+
+  .ff-dark-workspace .ff-compact-goals-ring,
+  .ff-light-workspace .ff-compact-goals-ring {
+    width: min(38%, 9.25rem);
+  }
+
+  .ff-dark-workspace .ff-compact-goals-list,
+  .ff-light-workspace .ff-compact-goals-list {
+    gap: 0.62rem;
+  }
+
   .ff-dark-workspace .ff-compact-calendar-month,
   .ff-light-workspace .ff-compact-calendar-month {
     display: grid;
@@ -3815,6 +3830,17 @@ html[data-ff-theme='light'] .ff-modal-panel label { color: #e5c5d5 !important; }
   .ff-dark-workspace .ff-compact-news-chevron,
   .ff-light-workspace .ff-compact-news-chevron {
     flex: 0 0 auto;
+  }
+
+  .ff-dark-workspace .ff-compact-kpi-icon,
+  .ff-light-workspace .ff-compact-kpi-icon {
+    width: 1.15rem;
+    height: 1.15rem;
+    margin-bottom: 0.15rem;
+    opacity: 0.96;
+    filter: none;
+    transform: translateY(-0.2rem);
+    stroke-width: 1.75;
   }
 
   .ff-dark-workspace .ff-compact-pomodoro-body,
@@ -3922,8 +3948,8 @@ html[data-ff-theme='light'] .ff-modal-panel label { color: #e5c5d5 !important; }
 
   .ff-dark-workspace .ff-compact-task-progress-ring,
   .ff-light-workspace .ff-compact-task-progress-ring {
-    width: 9.55rem;
-    height: 9.55rem;
+    width: 8.9rem;
+    height: 8.9rem;
     margin-top: 0.35rem;
   }
 
