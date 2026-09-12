@@ -65,7 +65,7 @@ describe('/api/tasks input validation', () => {
 
     expect(response.status).toBe(200);
     expect(mocks.create).toHaveBeenCalledWith({
-      data: {
+      data: expect.objectContaining({
         title: 'Plan release',
         description: null,
         priority: 'medium',
@@ -73,7 +73,8 @@ describe('/api/tasks input validation', () => {
         dueDate: new Date('2026-09-09T00:00:00.000Z'),
         isCompleted: false,
         userId: 'user-a',
-      },
+        history: [expect.objectContaining({ type: 'created', createdAt: expect.any(String) })],
+      }),
     });
     await expect(response.json()).resolves.toMatchObject({ id: 'task-1', dueDate: '2026-09-09T00:00:00.000Z' });
   });

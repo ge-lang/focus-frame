@@ -11,7 +11,9 @@ import {
   Calendar,
   Flag,
   GripVertical,
-  ClipboardList
+  ClipboardList,
+  History as HistoryIcon,
+  RotateCcw,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Task, TaskStatus } from '@/types/task';
@@ -30,6 +32,7 @@ interface EditState {
   description: string;
   priority: 'low' | 'medium' | 'high';
   dueDate: string;
+  status: TaskStatus;
 }
 
 // Helper functions
@@ -63,11 +66,37 @@ const formatFocusTime = (seconds?: number) => {
   return minutes < 60 ? `${minutes}m focused` : `${Math.floor(minutes / 60)}h ${minutes % 60}m focused`;
 };
 
+const formatHistoryDate = (value: string) => new Date(value).toLocaleString(undefined, {
+  day: 'numeric',
+  month: 'short',
+  hour: '2-digit',
+  minute: '2-digit',
+});
+
+const formatHistoryValue = (type: 'status' | 'priority' | 'deadline', value: string | null | undefined) => {
+  if (value == null || value === '') return type === 'deadline' ? 'No deadline' : '—';
+  if (type === 'status') return getStatusLabel(value as TaskStatus);
+  if (type === 'priority') return `${value[0].toUpperCase()}${value.slice(1)}`;
+  return new Date(`${value.slice(0, 10)}T00:00:00`).toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+};
+
+const historyEventLabel = (event: NonNullable<Task['history']>[number]) => {
+  switch (event.type) {
+    case 'created': return 'Task created';
+    case 'deadline_changed': return 'Deadline changed';
+    case 'priority_changed': return 'Priority changed';
+    case 'completed': return 'Task completed';
+    case 'reopened': return 'Task reopened';
+    case 'status_changed': return 'Status changed';
+  }
+};
+
 // Task card component
 function TaskCard({ 
   task, 
   status, 
-  onEdit, 
+  onEdit,
+  onEditChange,
   onDelete, 
   onDragStart,
   onDragEnd,
@@ -79,6 +108,7 @@ function TaskCard({
   task: Task;
   status: TaskStatus;
   onEdit: (task: Task, status: TaskStatus) => void;
+  onEditChange: (patch: Partial<EditState>) => void;
   onDelete: (id: string) => void;
   onDragStart: (task: Task, status: TaskStatus) => void;
   onDragEnd: () => void;
@@ -88,6 +118,9 @@ function TaskCard({
   onCancelEdit: () => void;
 }) {
   const isEditing = editState.id === task.id;
+  const [showHistory, setShowHistory] = useState(false);
+  const history = task.history ?? [];
+  const deadlineWasChanged = history.some((event) => event.type === 'deadline_changed');
 
   return (
     <motion.div
@@ -117,17 +150,52 @@ function TaskCard({
           <input
             type="text"
             value={editState.title}
-            onChange={(e) => onEdit({ ...task, title: e.target.value }, status)}
+            onChange={(e) => onEditChange({ title: e.target.value })}
             className="w-full p-1 border border-gray-300 rounded text-sm"
             autoFocus
           />
           <textarea
             value={editState.description}
-            onChange={(e) => onEdit({ ...task, description: e.target.value }, status)}
+            onChange={(e) => onEditChange({ description: e.target.value })}
             placeholder="Description"
             className="w-full p-1 border border-gray-300 rounded text-sm resize-none"
             rows={2}
           />
+          <div className="grid grid-cols-2 gap-2">
+            <label className="sr-only" htmlFor={`edit-task-status-${task.id}`}>Task status</label>
+            <select
+              id={`edit-task-status-${task.id}`}
+              value={editState.status}
+              onChange={(event) => onEditChange({ status: event.target.value as TaskStatus })}
+              className="w-full rounded border border-gray-300 p-1 text-sm"
+            >
+              <option value="todo">To Do</option>
+              <option value="in_progress">In Progress</option>
+              <option value="done">Done</option>
+            </select>
+            <label className="sr-only" htmlFor={`edit-task-priority-${task.id}`}>Task priority</label>
+            <select
+              id={`edit-task-priority-${task.id}`}
+              value={editState.priority}
+              onChange={(event) => onEditChange({ priority: event.target.value as Task['priority'] })}
+              className="w-full rounded border border-gray-300 p-1 text-sm"
+            >
+              <option value="low">Low priority</option>
+              <option value="medium">Medium priority</option>
+              <option value="high">High priority</option>
+            </select>
+          </div>
+          <div className="flex items-center gap-2">
+            <label className="sr-only" htmlFor={`edit-task-due-date-${task.id}`}>Task deadline</label>
+            <input
+              id={`edit-task-due-date-${task.id}`}
+              type="date"
+              value={editState.dueDate}
+              onChange={(event) => onEditChange({ dueDate: event.target.value })}
+              className="min-w-0 flex-1 rounded border border-gray-300 p-1 text-sm"
+            />
+            {editState.dueDate && <button type="button" onClick={() => onEditChange({ dueDate: '' })} className="rounded border border-slate-200 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50">Clear</button>}
+          </div>
           <div className="flex space-x-1">
             <button
               onClick={onSaveEdit}
@@ -187,6 +255,7 @@ function TaskCard({
               <span className={`flex items-center text-xs ${getDueDateMeta(task.dueDate)?.className}`}>
                 <Calendar size={10} className="mr-1" />
                 {getDueDateMeta(task.dueDate)?.label}
+                {deadlineWasChanged && <button type="button" onClick={() => setShowHistory((visible) => !visible)} title="Deadline changed" aria-label="Show deadline history" className="ml-1 inline-flex items-center"><RotateCcw size={10} /></button>}
               </span>
             )}
           </div>
@@ -213,6 +282,27 @@ function TaskCard({
               </div>
             </details>
           </div>
+          {history.length > 0 && (
+            <div className="mt-2">
+              <button type="button" onClick={() => setShowHistory((visible) => !visible)} className="inline-flex items-center gap-1 text-xs font-medium text-indigo-600 hover:text-indigo-800">
+                <HistoryIcon size={12} />
+                {showHistory ? 'Hide history' : `History (${history.length})`}
+              </button>
+              {showHistory && (
+                <div className="mt-2 space-y-2 border-l border-slate-200 pl-2">
+                  {[...history].reverse().map((event) => {
+                    const valueType = event.type === 'deadline_changed' ? 'deadline' : event.type === 'priority_changed' ? 'priority' : 'status';
+                    const hasValues = event.from !== undefined || event.to !== undefined;
+                    return <div key={event.id} className="text-[11px] leading-tight text-slate-600">
+                      <div className="font-medium text-slate-700">{historyEventLabel(event)}</div>
+                      {hasValues && <div>{formatHistoryValue(valueType, event.from)} → {formatHistoryValue(valueType, event.to)}</div>}
+                      <time className="text-slate-400">{formatHistoryDate(event.createdAt)}</time>
+                    </div>;
+                  })}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
     </motion.div>
@@ -225,7 +315,8 @@ function TaskColumn({
   tasks, 
   onDragOver, 
   onDrop, 
-  onEdit, 
+  onEdit,
+  onEditChange,
   onDelete, 
   onDragStart,
   onDragEnd,
@@ -240,6 +331,7 @@ function TaskColumn({
   onDragOver: (e: React.DragEvent, status: TaskStatus) => void;
   onDrop: (e: React.DragEvent, status: TaskStatus) => void;
   onEdit: (task: Task, status: TaskStatus) => void;
+  onEditChange: (patch: Partial<EditState>) => void;
   onDelete: (id: string) => void;
   onDragStart: (task: Task, status: TaskStatus) => void;
   onDragEnd: () => void;
@@ -275,6 +367,7 @@ function TaskColumn({
               task={task}
               status={status}
               onEdit={onEdit}
+              onEditChange={onEditChange}
               onDelete={onDelete}
               onDragStart={onDragStart}
               onDragEnd={onDragEnd}
@@ -311,7 +404,8 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
     title: '', 
     description: '', 
     priority: 'medium',
-    dueDate: ''
+    dueDate: '',
+    status: 'todo',
   });
   const [isAdding, setIsAdding] = useState(false);
   const [draggedTask, setDraggedTask] = useState<{ task: Task; status: TaskStatus } | null>(null);
@@ -363,8 +457,13 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
       title: task.title, 
       description: task.description || '',
       priority: task.priority,
-      dueDate: toDateInputValue(task.dueDate)
+      dueDate: toDateInputValue(task.dueDate),
+      status: task.status,
     });
+  };
+
+  const handleEditChange = (patch: Partial<EditState>) => {
+    setEditState((current) => ({ ...current, ...patch }));
   };
 
   const handleSaveEdit = async () => {
@@ -375,8 +474,9 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
         description: editState.description.trim() || null,
         priority: editState.priority,
         dueDate: editState.dueDate || null,
+        status: editState.status,
       });
-      setEditState({ id: null, title: '', description: '', priority: 'medium', dueDate: '' });
+      setEditState({ id: null, title: '', description: '', priority: 'medium', dueDate: '', status: 'todo' });
     }
   };
 
@@ -567,6 +667,7 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
                 onDragOver={handleDragOver}
                 onDrop={handleDrop}
                 onEdit={handleEdit}
+                onEditChange={handleEditChange}
                 onDelete={handleDelete}
                 onDragStart={handleDragStart}
                 onDragEnd={handleDragEnd}
@@ -574,7 +675,7 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
                 isDropTarget={dragOverStatus === status}
                 editState={editState}
                 onSaveEdit={handleSaveEdit}
-                onCancelEdit={() => setEditState({ id: null, title: '', description: '', priority: 'medium', dueDate: '' })}
+                onCancelEdit={() => setEditState({ id: null, title: '', description: '', priority: 'medium', dueDate: '', status: 'todo' })}
               />
             ))}
           </div>
@@ -589,6 +690,7 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
                 onDragOver={handleDragOver}
                 onDrop={handleDrop}
                 onEdit={handleEdit}
+                onEditChange={handleEditChange}
                 onDelete={handleDelete}
                 onDragStart={handleDragStart}
                 onDragEnd={handleDragEnd}
@@ -596,7 +698,7 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
                 isDropTarget={dragOverStatus === status}
                 editState={editState}
                 onSaveEdit={handleSaveEdit}
-                onCancelEdit={() => setEditState({ id: null, title: '', description: '', priority: 'medium', dueDate: '' })}
+                onCancelEdit={() => setEditState({ id: null, title: '', description: '', priority: 'medium', dueDate: '', status: 'todo' })}
               />
             ))}
           </div>
@@ -609,8 +711,9 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
                     status={status as TaskStatus}
                     tasks={statusTasks}
                 onDragOver={() => undefined}
-                onDrop={() => undefined}
+                    onDrop={() => undefined}
                     onEdit={handleEdit}
+                    onEditChange={handleEditChange}
                     onDelete={handleDelete}
                 onDragStart={handleDragStart}
                 onDragEnd={handleDragEnd}
@@ -618,7 +721,7 @@ export default function TaskWidget({ widgetId, title }: TaskWidgetProps) {
                 isDropTarget={false}
                     editState={editState}
                     onSaveEdit={handleSaveEdit}
-                    onCancelEdit={() => setEditState({ id: null, title: '', description: '', priority: 'medium', dueDate: '' })}
+                    onCancelEdit={() => setEditState({ id: null, title: '', description: '', priority: 'medium', dueDate: '', status: 'todo' })}
                   />
                 </div>
               ))}

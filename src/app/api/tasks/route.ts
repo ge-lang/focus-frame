@@ -1,10 +1,11 @@
 // src/app/api/tasks/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { TaskPriority, TaskStatus } from '@prisma/client';
+import { Prisma, TaskPriority, TaskStatus } from '@prisma/client';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { InvalidRequestError, isOneOf, parseOptionalDate, parseOptionalString, readJsonObject } from '@/lib/api-validation';
+import { createdTaskHistoryEvent, normalizeTaskHistory } from '@/lib/task-history';
 
 export async function GET() {
   try {
@@ -20,6 +21,7 @@ export async function GET() {
     });
     return NextResponse.json(tasks.map(({ focusSessions, ...task }) => ({
       ...task,
+      history: normalizeTaskHistory(task.history),
       focusSeconds: focusSessions.reduce((total, session) => total + session.duration, 0),
     })));
   } catch (error) {
@@ -56,6 +58,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid task data' }, { status: 400 });
     }
     
+    const createdAt = new Date().toISOString();
     const task = await prisma.task.create({
       data: {
         title: title.trim(),
@@ -64,6 +67,7 @@ export async function POST(req: NextRequest) {
         status: parsedStatus,
         dueDate: dueDate ?? null,
         isCompleted: parsedStatus === TaskStatus.done,
+        history: [createdTaskHistoryEvent('task', createdAt)] as unknown as Prisma.InputJsonValue,
         userId: session.user.id,
       },
     });

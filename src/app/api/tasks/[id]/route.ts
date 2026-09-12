@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { TaskPriority, TaskStatus } from '@prisma/client';
+import { Prisma, TaskPriority, TaskStatus } from '@prisma/client';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { InvalidRequestError, isOneOf, parseOptionalDate, parseOptionalString, readJsonObject } from '@/lib/api-validation';
+import { normalizeTaskHistory, taskHistoryChanges } from '@/lib/task-history';
 
 function getTaskId(request: NextRequest) {
   return new URL(request.url).pathname.split('/').pop();
@@ -46,6 +47,17 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Task not found' }, { status: 404 });
     }
 
+    const nextStatus = parsedStatus ?? (isCompleted === undefined ? existingTask.status : isCompleted ? TaskStatus.done : TaskStatus.todo);
+    const nextPriority = parsedPriority ?? existingTask.priority;
+    const nextDueDate = dueDate === undefined ? existingTask.dueDate : dueDate;
+    const historyTimestamp = new Date().toISOString();
+    const historyEvents = taskHistoryChanges(
+      { status: existingTask.status, priority: existingTask.priority, dueDate: existingTask.dueDate?.toISOString() ?? null },
+      { status: nextStatus, priority: nextPriority, dueDate: nextDueDate?.toISOString() ?? null },
+      existingTask.id,
+      historyTimestamp,
+    );
+
     const task = await prisma.task.update({
       where: { id },
       data: {
@@ -55,6 +67,7 @@ export async function PUT(request: NextRequest) {
         ...(dueDate !== undefined && { dueDate }),
         ...(parsedStatus !== undefined && { status: parsedStatus, isCompleted: parsedStatus === TaskStatus.done }),
         ...(isCompleted !== undefined && { isCompleted }),
+        ...(historyEvents.length > 0 && { history: [...normalizeTaskHistory(existingTask.history), ...historyEvents] as unknown as Prisma.InputJsonValue }),
       },
     });
 
