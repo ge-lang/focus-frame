@@ -50,6 +50,8 @@ export function DayArc({ sunrise, sunset, timezoneOffsetSeconds = 0, now = Math.
   const angle = Math.PI * (1 - progress);
   const dotX = 20 + Math.cos(angle) * 15;
   const dotY = 23 - Math.sin(angle) * 15;
+  const durationMinutes = Math.max(Math.round(span / 60), 0);
+  const daylightDuration = `${Math.floor(durationMinutes / 60)}h ${String(durationMinutes % 60).padStart(2, '0')}m`;
 
   return (
     <div className="ff-weather-day-arc" role="img" aria-label={`Sunrise ${formatWeatherTime(sunrise, timezoneOffsetSeconds)}, sunset ${formatWeatherTime(sunset, timezoneOffsetSeconds)}`}>
@@ -57,7 +59,11 @@ export function DayArc({ sunrise, sunset, timezoneOffsetSeconds = 0, now = Math.
         <path className="ff-weather-instrument-track" d="M5 23a15 15 0 0 1 30 0" />
         <circle className="ff-weather-day-progress" cx={dotX} cy={dotY} r="2.2" />
       </svg>
-      <div className="ff-weather-day-times"><span>{formatWeatherTime(sunrise, timezoneOffsetSeconds)}</span><span>{formatWeatherTime(sunset, timezoneOffsetSeconds)}</span></div>
+      <div className="ff-weather-day-times">
+        <span className="ff-weather-day-time"><strong>{formatWeatherTime(sunrise, timezoneOffsetSeconds)}</strong><small>Sunrise</small></span>
+        <span className="ff-weather-day-time"><strong>{formatWeatherTime(sunset, timezoneOffsetSeconds)}</strong><small>Sunset</small></span>
+      </div>
+      <span className="ff-weather-day-duration">Daylight {daylightDuration}</span>
     </div>
   );
 }

@@ -4014,14 +4014,14 @@ html[data-ff-theme='light'] .ff-modal-panel label { color: #e5c5d5 !important; }
 /* Weather V4: centered infographic composition rather than metric cards. */
 .ff-weather-scene {
   width: min(100%, 52rem);
-  min-height: 10.5rem;
+  min-height: 11.5rem;
   margin: 0 auto 1rem;
   grid-template-columns: minmax(14rem, 0.95fr) minmax(13rem, 1.05fr);
   gap: 1.75rem;
 }
 
-.ff-weather-scene-visual { min-height: 10rem; }
-.ff-weather-scene .ff-weather-svg { width: 11rem; height: 8rem; }
+.ff-weather-scene-visual { min-height: 11rem; }
+.ff-weather-scene .ff-weather-svg { width: 12rem; height: 9rem; }
 .ff-weather-sun-halo { opacity: 0.18; filter: blur(1px); }
 .ff-weather-sun-disc { filter: drop-shadow(0 0 8px currentColor); }
 .ff-weather-moon-shadow { fill: rgba(62, 78, 112, 0.78); filter: drop-shadow(0 0 7px currentColor); }
@@ -4097,7 +4097,12 @@ html[data-ff-theme='light'] .ff-modal-panel label { color: #e5c5d5 !important; }
 }
 
 .ff-weather-day-arc svg { height: 2.8rem; }
-.ff-weather-day-times { padding-inline: 0.1rem; }
+.ff-weather-day-times { align-items: end; padding-inline: 0.1rem; }
+.ff-weather-day-time { display: grid; gap: 0.1rem; }
+.ff-weather-day-time:last-child { text-align: right; }
+.ff-weather-day-time strong { color: var(--ff-text-primary, #f4f3ff); font-size: 0.78rem; font-weight: 650; }
+.ff-weather-day-time small { color: var(--ff-text-muted, #8f96b8); font-size: 0.62rem; }
+.ff-weather-day-duration { justify-self: center; color: var(--ff-text-muted, #8f96b8); font-size: 0.63rem; }
 
 @media (max-width: 639px) {
   .ff-weather-scene {
@@ -4122,6 +4127,10 @@ html[data-ff-theme='light'] .ff-modal-panel label { color: #e5c5d5 !important; }
 .ff-light-workspace .ff-weather-quick-metrics,
 .ff-light-workspace .ff-weather-infographic-cell,
 .ff-light-workspace .ff-weather-day-arc-cell { border-color: rgba(255, 202, 220, 0.24); }
+
+@media (min-width: 640px) {
+  .ff-weather-details-toggle { display: none; }
+}
 
 /* Shared WeatherVisual object language. Geometry is identical in compact and full Weather. */
 .ff-weather-svg {

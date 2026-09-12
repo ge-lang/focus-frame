@@ -41,6 +41,7 @@ export default function WeatherWidget({
   const [inputCity, setInputCity] = useState(initialCity);
   const [countryCode, setCountryCode] = useState(initialCountryCode ?? findCountryForCity(initialCity) ?? '');
   const [showDetails, setShowDetails] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
   const [unit, setUnit] = useState<'celsius' | 'fahrenheit'>('celsius');
   const contentRef = useRef<HTMLDivElement>(null);
   const { suggestions, isSearching } = useWeatherSearch(isEditing ? inputCity : '', countryCode || undefined);
@@ -68,7 +69,15 @@ export default function WeatherWidget({
       window.cancelAnimationFrame(frame);
       window.clearTimeout(settleTimer);
     };
-  }, [isEditing, onContentHeightChange, showDetails, weather.city, weather.loading, widgetId]);
+  }, [isDesktop, isEditing, onContentHeightChange, showDetails, weather.city, weather.loading, widgetId]);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(min-width: 640px)');
+    const updateViewport = () => setIsDesktop(mediaQuery.matches);
+    updateViewport();
+    mediaQuery.addEventListener('change', updateViewport);
+    return () => mediaQuery.removeEventListener('change', updateViewport);
+  }, []);
 
   // Temperature conversion
   const displayTemp = unit === 'celsius' ? weather.temp : Math.round((weather.temp * 9/5) + 32);
@@ -76,6 +85,7 @@ export default function WeatherWidget({
   const targetWeatherDate = getTargetLocationDate(new Date(), weather.location?.timezone ?? 0);
   const uvIndex = Math.min(Math.max(weather.uvIndex, 0), 11);
   const uvLabel = uvIndex < 3 ? 'Low' : uvIndex < 6 ? 'Moderate' : uvIndex < 8 ? 'High' : uvIndex < 11 ? 'Very High' : 'Extreme';
+  const detailsVisible = isDesktop || showDetails;
 
   const handleCityChange = (newCity: string, selectedCountry = countryCode, selectedLocation?: WeatherLocation) => {
     setLocation(selectedLocation ?? { name: newCity, country: selectedCountry || '' });
@@ -331,7 +341,7 @@ export default function WeatherWidget({
 
             {/* Detailed information */}
             <AnimatePresence>
-              {showDetails && (
+              {detailsVisible && (
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
