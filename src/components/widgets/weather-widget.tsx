@@ -308,13 +308,13 @@ export default function WeatherWidget({
 
             {/* Quick metrics */}
             <div className="ff-weather-quick-metrics grid grid-cols-2 gap-3 mb-4">
-              <div className="ff-weather-detail-block ff-semantic-accent ff-accent-violet rounded-lg border border-slate-200 bg-slate-50 p-3 text-center">
+              <div className="ff-weather-primary-metric ff-semantic-accent ff-accent-violet">
                 <Droplets size={16} className="mx-auto mb-1 text-indigo-600" />
                 <div className="text-sm font-medium">{weather.humidity}%</div>
                 <div className="text-xs text-gray-600">Humidity</div>
               </div>
               
-              <div className="ff-weather-detail-block ff-semantic-accent ff-accent-cyan rounded-lg border border-slate-200 bg-slate-50 p-3 text-center">
+              <div className="ff-weather-primary-metric ff-semantic-accent ff-accent-cyan">
                 <Wind size={16} className="mx-auto mb-1 text-indigo-600" />
                 <div className="text-sm font-medium">{weather.windSpeed} m/s</div>
                 <div className="text-xs text-gray-600">Wind</div>
@@ -324,9 +324,9 @@ export default function WeatherWidget({
             {/* Details button */}
             <button
               onClick={() => setShowDetails(!showDetails)}
-              className="ff-weather-details-toggle mb-4 w-full rounded-lg border border-slate-200 bg-white py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
+              className="ff-weather-details-toggle mb-4 text-sm font-medium text-slate-700 transition-colors"
             >
-              {showDetails ? 'Hide Details' : 'Show Details'}
+              <span>{showDetails ? 'Hide details' : 'Show details'}</span><span aria-hidden="true">{showDetails ? '⌃' : '⌄'}</span>
             </button>
 
             {/* Detailed information */}
@@ -338,9 +338,8 @@ export default function WeatherWidget({
                   exit={{ opacity: 0, height: 0 }}
                   className="ff-weather-expanded-details overflow-hidden"
                 >
-                  {weather.sunrise > 0 && weather.sunset > 0 ? <DayArc sunrise={weather.sunrise} sunset={weather.sunset} timezoneOffsetSeconds={weather.location?.timezone ?? 0} /> : null}
-                  <div className="ff-weather-details grid grid-cols-2 gap-3">
-                    <div className="ff-weather-detail-block ff-semantic-accent ff-accent-violet rounded-lg border border-slate-200 bg-slate-50 p-3">
+                  <div className="ff-weather-details ff-weather-detail-grid">
+                    <div className="ff-weather-detail-block ff-weather-infographic-cell ff-semantic-accent ff-accent-violet">
                       <div className="flex items-center justify-between">
                         <span className="text-xs text-gray-600">Pressure</span>
                         <Gauge size={12} className="text-indigo-600" />
@@ -348,7 +347,7 @@ export default function WeatherWidget({
                       <div className="text-sm font-medium">{weather.pressure} hPa</div>
                     </div>
                     
-                    <div className="ff-weather-detail-block ff-semantic-accent ff-accent-cyan rounded-lg border border-slate-200 bg-slate-50 p-3">
+                    <div className="ff-weather-detail-block ff-weather-infographic-cell ff-semantic-accent ff-accent-cyan">
                       <div className="flex items-center justify-between">
                         <span className="text-xs text-gray-600">Visibility</span>
                         <Eye size={12} className="text-indigo-600" />
@@ -356,7 +355,7 @@ export default function WeatherWidget({
                       <div className="text-sm font-medium">{weather.visibility / 1000} km</div>
                     </div>
                   
-                    <div className="ff-weather-detail-block ff-semantic-accent ff-accent-cyan rounded-lg border border-slate-200 bg-slate-50 p-3">
+                    <div className="ff-weather-detail-block ff-weather-infographic-cell ff-semantic-accent ff-accent-cyan">
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-xs text-gray-600">Wind Direction</span>
                         <WindCompass degrees={weather.windDirection} />
@@ -366,7 +365,7 @@ export default function WeatherWidget({
                       </div>
                     </div>
 
-                    <div className="ff-weather-detail-block ff-semantic-accent ff-accent-amber rounded-lg border border-slate-200 bg-slate-50 p-3">
+                    <div className="ff-weather-detail-block ff-weather-infographic-cell ff-semantic-accent ff-accent-amber">
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-xs text-gray-600">UV Index</span>
                         <UvGauge value={uvIndex} />
@@ -375,6 +374,7 @@ export default function WeatherWidget({
                         {uvIndex} - {uvLabel}
                       </div>
                     </div>
+                    {weather.sunrise > 0 && weather.sunset > 0 ? <div className="ff-weather-day-arc-cell"><DayArc sunrise={weather.sunrise} sunset={weather.sunset} timezoneOffsetSeconds={weather.location?.timezone ?? 0} /></div> : null}
                   </div>
                 </motion.div>
               )}
