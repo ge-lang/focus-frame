@@ -3069,6 +3069,87 @@ html[data-ff-theme='light'] .ff-modal-panel label { color: #e5c5d5; }
   backdrop-filter: none;
 }
 
+/* Full Calendar Focus View: compact month overview with a shared agenda structure. */
+.ff-calendar-focus-shell {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+.ff-calendar-focus-header,
+.ff-calendar-month-nav,
+.ff-calendar-section-heading { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
+.ff-calendar-focus-caption,
+.ff-calendar-section-heading p { color: var(--ff-text-muted, #7b849b); font-size: 0.68rem; }
+.ff-calendar-month-nav { justify-content: center; }
+.ff-calendar-month-nav strong { min-width: 11rem; color: var(--ff-text-primary, #18213b); font-size: 1.15rem; text-align: center; }
+.ff-calendar-nav-button,
+.ff-calendar-today-action,
+.ff-calendar-clear-selection {
+  display: inline-flex;
+  min-height: 2rem;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: transparent;
+  color: var(--ff-text-secondary, #64748b);
+  font-size: 0.72rem;
+}
+.ff-calendar-nav-button { width: 2rem; border-radius: 9999px; }
+.ff-calendar-nav-button:hover,
+.ff-calendar-nav-button:focus-visible,
+.ff-calendar-today-action:hover,
+.ff-calendar-today-action:focus-visible,
+.ff-calendar-clear-selection:hover,
+.ff-calendar-clear-selection:focus-visible { background: rgba(99, 102, 241, 0.1); color: var(--ff-accent-violet, #6255e8); outline: none; }
+.ff-calendar-today-action { padding: 0.25rem 0.4rem; font-weight: 650; }
+.ff-calendar-month-panel { width: min(74%, 36rem); margin: 0 auto; }
+.ff-calendar-weekdays,
+.ff-calendar-month-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 0.25rem; }
+.ff-calendar-weekdays { margin-bottom: 0.35rem; color: var(--ff-text-muted, #7b849b); font-size: 0.68rem; font-weight: 650; text-align: center; }
+.ff-calendar-day { position: relative; display: grid; min-width: 0; min-height: 2.15rem; place-items: center; border: 1px solid transparent; border-radius: 0.55rem; background: transparent; color: var(--ff-text-secondary, #64748b); font-size: 0.78rem; }
+.ff-calendar-day:not(.ff-calendar-day-empty):hover { background: rgba(99, 102, 241, 0.08); color: var(--ff-text-primary, #18213b); }
+.ff-calendar-day-number { display: grid; width: 1.65rem; height: 1.65rem; place-items: center; border-radius: 9999px; }
+.ff-calendar-day.is-today .ff-calendar-day-number { background: var(--ff-accent-violet, #6255e8); color: #fff; font-weight: 700; }
+.ff-calendar-day.is-selected { border-color: var(--ff-accent-cyan, #22d3ee); }
+.ff-calendar-day.is-selected.is-today { border-color: transparent; }
+.ff-calendar-day.is-selected.is-today .ff-calendar-day-number { box-shadow: 0 0 0 2px var(--ff-accent-cyan, #22d3ee); }
+.ff-calendar-day-markers { position: absolute; right: 0.28rem; bottom: 0.2rem; display: inline-flex; align-items: center; gap: 0.12rem; }
+.ff-calendar-day-markers .ff-calendar-priority-dot { width: 0.24rem; height: 0.24rem; }
+.ff-calendar-day-markers b { color: var(--ff-text-muted, #7b849b); font-size: 0.52rem; font-weight: 700; }
+.ff-calendar-lower { display: grid; grid-template-columns: minmax(0, 1fr) 10rem; gap: 1rem; border-top: 1px solid var(--ff-border-subtle, rgba(148, 163, 184, 0.2)); padding-top: 0.9rem; }
+.ff-calendar-agenda h4,
+.ff-calendar-summary h4 { color: var(--ff-text-primary, #18213b); font-size: 0.82rem; font-weight: 700; }
+.ff-calendar-section-heading { align-items: flex-start; margin-bottom: 0.55rem; }
+.ff-calendar-section-heading p { margin-top: 0.15rem; }
+.ff-calendar-agenda-list { display: grid; gap: 0.35rem; }
+.ff-calendar-agenda-row { display: grid; grid-template-columns: 0.45rem minmax(0, 1fr) auto auto; align-items: center; gap: 0.45rem; min-width: 0; padding: 0.38rem 0.5rem; border-radius: 0.45rem; background: rgba(99, 102, 241, 0.045); color: var(--ff-text-secondary, #64748b); font-size: 0.7rem; }
+.ff-calendar-agenda-task { overflow: hidden; color: var(--ff-text-primary, #18213b); text-overflow: ellipsis; white-space: nowrap; }
+.ff-calendar-agenda-status { color: var(--ff-text-muted, #7b849b); font-size: 0.62rem; }
+.ff-calendar-agenda-date { color: var(--ff-text-secondary, #64748b); font-size: 0.64rem; white-space: nowrap; }
+.ff-calendar-summary { display: grid; align-content: start; gap: 0.5rem; }
+.ff-calendar-summary h4 { margin-bottom: 0.15rem; }
+.ff-calendar-summary > div { display: flex; align-items: center; justify-content: space-between; color: var(--ff-text-muted, #7b849b); font-size: 0.68rem; }
+.ff-calendar-summary strong { color: var(--ff-text-primary, #18213b); font-size: 0.85rem; }
+.ff-calendar-empty-agenda { display: flex; min-height: 4rem; align-items: center; justify-content: center; gap: 0.45rem; color: var(--ff-text-muted, #7b849b); font-size: 0.72rem; }
+
+.ff-dark-workspace .ff-calendar-weekdays { color: #9ba8d1; }
+.ff-dark-workspace .ff-calendar-day.is-today .ff-calendar-day-number { background: linear-gradient(135deg, #6255e8, #3acfe9); }
+.ff-dark-workspace .ff-calendar-day.is-selected { border-color: #69d7ed; }
+.ff-dark-workspace .ff-calendar-agenda-row { background: rgba(75, 88, 150, 0.22); }
+.ff-light-workspace .ff-calendar-weekdays { color: #d6a9b8; }
+.ff-light-workspace .ff-calendar-day.is-today .ff-calendar-day-number { background: linear-gradient(135deg, #d94f9c, #ef9d73); }
+.ff-light-workspace .ff-calendar-day.is-selected { border-color: #ef9b9e; }
+.ff-light-workspace .ff-calendar-agenda-row { background: rgba(122, 42, 91, 0.2); }
+
+@media (max-width: 639px) {
+  .ff-calendar-month-panel { width: 100%; }
+  .ff-calendar-lower { grid-template-columns: minmax(0, 1fr); }
+  .ff-calendar-summary { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.45rem; }
+  .ff-calendar-summary h4 { grid-column: 1 / -1; }
+  .ff-calendar-summary > div { display: grid; gap: 0.1rem; }
+}
+
 .ff-compact-priority-low { background: rgba(22, 163, 74, 0.1); color: #15803d; }
 .ff-compact-priority-medium { background: rgba(217, 119, 6, 0.12); color: #b45309; }
 .ff-compact-priority-high { background: rgba(225, 29, 72, 0.12); color: #be123c; }

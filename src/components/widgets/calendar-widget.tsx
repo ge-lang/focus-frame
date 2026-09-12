@@ -1,181 +1,141 @@
-// src/components/widgets/calendar-widget.tsx
 'use client';
-import { useState } from 'react';
+
+import { useMemo, useState } from 'react';
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react';
 import { AnimatedWidget } from '@/components/animated-widget';
-import { AnimatedButton } from '@/components/animated-button';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
 import { useTasks } from '@/hooks/use-tasks';
-import { EmptyState } from '@/components/empty-state';
 import { getCalendarPriorityAccent } from '@/lib/calendar-priority';
+import { calendarMonthCells, calendarSummary, localDateKey, taskDeadlineKey, tasksForCalendarDate, upcomingTasksWithinDays } from '@/lib/calendar-agenda';
+import type { Task } from '@/types/task';
 
-
-
-// src/components/widgets/calendar-widget.tsx
 interface CalendarWidgetProps {
   widgetId: string;
   title?: string;
 }
 
-export default function CalendarWidget({ widgetId, title }: CalendarWidgetProps)  {
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const { data: tasks = [] } = useTasks();
+const monthFormatter = new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' });
+const dayFormatter = new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric' });
+const shortDayFormatter = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' });
+const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
+function statusLabel(status: Task['status']) {
+  return status === 'in_progress' ? 'In Progress' : status === 'todo' ? 'To Do' : 'Done';
+}
+
+function priorityDotClass(priority: Task['priority']) {
+  return `ff-calendar-priority-dot ${getCalendarPriorityAccent(priority) ?? ''}`;
+}
+
+function AgendaRow({ task, showDate }: { task: Task; showDate: boolean }) {
+  return (
+    <div className="ff-calendar-agenda-row">
+      <span className={priorityDotClass(task.priority)} aria-label={`${task.priority} priority`} title={`${task.priority} priority`} />
+      <span className="ff-calendar-agenda-task" title={task.title}>{task.title}</span>
+      <span className="ff-calendar-agenda-status">{statusLabel(task.status)}</span>
+      {showDate && taskDeadlineKey(task.dueDate) ? <time className="ff-calendar-agenda-date" dateTime={taskDeadlineKey(task.dueDate) ?? undefined}>{shortDayFormatter.format(new Date(`${taskDeadlineKey(task.dueDate)}T00:00:00`))}</time> : null}
+    </div>
+  );
+}
+
+export default function CalendarWidget({ title }: CalendarWidgetProps) {
+  const [currentDate, setCurrentDate] = useState(() => new Date());
+  const [selectedDateKey, setSelectedDateKey] = useState<string | null>(null);
+  const { data: tasks = [] } = useTasks();
   const today = new Date();
+  const todayKey = localDateKey(today);
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
-
-  const firstDayOfMonth = new Date(year, month, 1);
-  const lastDayOfMonth = new Date(year, month + 1, 0);
-  const daysInMonth = lastDayOfMonth.getDate();
-  const startingDayOfWeek = (firstDayOfMonth.getDay() + 6) % 7;
-
-  const monthNames = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
-  ];
+  const monthCells = useMemo(() => calendarMonthCells(currentDate), [currentDate]);
+  const monthLabel = monthFormatter.format(currentDate);
+  const selectedTasks = selectedDateKey ? tasksForCalendarDate(tasks, selectedDateKey) : [];
+  const upcomingTasks = upcomingTasksWithinDays(tasks, today).slice(0, 5);
+  const summary = calendarSummary(tasks, today);
+  const selectedDate = selectedDateKey ? new Date(`${selectedDateKey}T00:00:00`) : null;
 
   const navigateMonth = (direction: 'prev' | 'next') => {
     setCurrentDate(new Date(year, month + (direction === 'next' ? 1 : -1), 1));
+    setSelectedDateKey(null);
   };
 
   const goToToday = () => {
-    setCurrentDate(new Date());
+    setCurrentDate(new Date(today.getFullYear(), today.getMonth(), 1));
+    setSelectedDateKey(todayKey);
   };
 
-  const isToday = (day: number) => {
-    return (
-      day === today.getDate() &&
-      month === today.getMonth() &&
-      year === today.getFullYear()
-    );
-  };
-
-  const isCurrentMonth = month === today.getMonth() && year === today.getFullYear();
-  const taskDueOn = (day: number) => tasks.filter((task) => {
-    if (!task.dueDate) return false;
-    const dueDate = new Date(`${task.dueDate.slice(0, 10)}T00:00:00`);
-    return dueDate.getFullYear() === year && dueDate.getMonth() === month && dueDate.getDate() === day;
-  });
-  const upcomingTasks = tasks
-    .filter((task) => {
-      if (!task.dueDate || task.isCompleted) return false;
-      const dueDate = new Date(`${task.dueDate.slice(0, 10)}T00:00:00`);
-      const end = new Date(today);
-      end.setHours(23, 59, 59, 999);
-      end.setDate(end.getDate() + 7);
-      return dueDate >= new Date(today.getFullYear(), today.getMonth(), today.getDate()) && dueDate <= end;
-    })
-    .sort((a, b) => (a.dueDate || '').localeCompare(b.dueDate || ''))
-    .slice(0, 4);
-
-  // Generate calendar days
-  const calendarDays = [];
-  for (let i = 0; i < startingDayOfWeek; i++) {
-    calendarDays.push(null);
-  }
-  for (let day = 1; day <= daysInMonth; day++) {
-    calendarDays.push(day);
-  }
+  const isCurrentMonth = year === today.getFullYear() && month === today.getMonth();
 
   return (
-    <AnimatedWidget className="text-slate-800">
-      <div className="p-1">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center">
-            <CalendarIcon size={20} className="mr-2 text-indigo-600" />
-            <h3 className="widget-drag-handle cursor-grab select-none font-semibold text-lg active:cursor-grabbing">{title || 'Calendar'}</h3>
+    <AnimatedWidget className="ff-calendar-focus text-slate-800">
+      <div className="ff-calendar-focus-shell">
+        <header className="ff-calendar-focus-header">
+          <div className="flex items-center gap-2">
+            <CalendarIcon size={18} className="text-indigo-600" aria-hidden="true" />
+            <h3 className="widget-drag-handle cursor-grab select-none text-lg font-semibold active:cursor-grabbing">{title || 'Calendar'}</h3>
           </div>
-          
-          {!isCurrentMonth && (
-            <AnimatedButton
-              ariaLabel="Go to today"
-              onClick={goToToday}
-              className="rounded-lg bg-indigo-600 px-2 py-1 text-xs text-white hover:bg-indigo-700"
-            >
-              Today
-            </AnimatedButton>
-          )}
+          <span className="ff-calendar-focus-caption">Month overview</span>
+        </header>
+
+        <div className="ff-calendar-month-nav">
+          <button type="button" className="ff-calendar-nav-button" onClick={() => navigateMonth('prev')} aria-label="Previous month"><ChevronLeft size={17} /></button>
+          <strong>{monthLabel}</strong>
+          <button type="button" className="ff-calendar-nav-button" onClick={() => navigateMonth('next')} aria-label="Next month"><ChevronRight size={17} /></button>
+          {!isCurrentMonth || selectedDateKey ? <button type="button" className="ff-calendar-today-action" onClick={goToToday}>Today</button> : null}
         </div>
 
-        {/* Month navigation */}
-        <div className="flex items-center justify-between mb-4">
-          <AnimatedButton
-            ariaLabel="Previous month"
-            onClick={() => navigateMonth('prev')}
-            className="p-1 hover:bg-gray-100 rounded"
-          >
-            <ChevronLeft size={16} />
-          </AnimatedButton>
-
-          <span className="font-semibold text-gray-700">
-            {monthNames[month]} {year}
-          </span>
-
-          <AnimatedButton
-            ariaLabel="Next month"
-            onClick={() => navigateMonth('next')}
-            className="p-1 hover:bg-gray-100 rounded"
-          >
-            <ChevronRight size={16} />
-          </AnimatedButton>
-        </div>
-
-        {/* Week days */}
-        <div className="grid grid-cols-7 gap-1 mb-2">
-          {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
-            <div key={day} className="py-1 text-center text-xs font-medium text-indigo-700/70">
-              {day}
-            </div>
-          ))}
-        </div>
-
-        {/* Calendar grid */}
-        <div className="grid grid-cols-7 gap-1">
-          {calendarDays.map((day, index) => {
-            const dueTasks = day === null ? [] : taskDueOn(day);
-            return (
-            <div
-              key={index}
-              title={dueTasks.map((task) => task.title).join(', ')}
-              className={`h-8 flex flex-col items-center justify-center text-sm rounded ${
-                day === null
-                  ? 'text-gray-300'
-                  : isToday(day)
-                  ? 'bg-indigo-600 text-white font-bold'
-                  : 'text-slate-700 hover:bg-slate-50 cursor-pointer'
-              }`}
-            >
-              {day}
-              {dueTasks.length > 0 && <span className="mt-0.5 h-1.5 w-1.5 rounded-full bg-indigo-500" />}
-            </div>
-          )})}
-        </div>
-
-        {/* Upcoming task deadlines */}
-        <div className="mt-4 border-t border-slate-200 pt-4">
-          <h4 className="font-medium text-sm mb-2">Next 7 days</h4>
-          {upcomingTasks.length ? <div className="space-y-1">
-            {upcomingTasks.map((task) => {
-              const priorityAccent = getCalendarPriorityAccent(task.priority);
+        <section className="ff-calendar-month-panel" aria-label={`${monthLabel} calendar`}>
+          <div className="ff-calendar-weekdays">
+            {weekdays.map((day) => <span key={day}>{day}</span>)}
+          </div>
+          <div className="ff-calendar-month-grid">
+            {monthCells.map((day, index) => {
+              if (day === null) return <span key={`empty-${index}`} className="ff-calendar-day ff-calendar-day-empty" aria-hidden="true" />;
+              const dateKey = localDateKey(new Date(year, month, day));
+              const dueTasks = tasksForCalendarDate(tasks, dateKey);
+              const selected = selectedDateKey === dateKey;
+              const current = todayKey === dateKey;
+              const priorities: Task['priority'][] = ['high', 'medium', 'low'];
               return (
-                <div key={task.id} className="text-xs flex items-center justify-between gap-2 text-gray-600">
-                  <span className="flex min-w-0 items-center gap-1.5 truncate">
-                    <span
-                      aria-label={`${task.priority} priority`}
-                      title={`${task.priority} priority`}
-                      className={`h-1.5 w-1.5 shrink-0 rounded-full ${priorityAccent ? `ff-calendar-priority-dot ${priorityAccent}` : 'bg-slate-400'}`}
-                    />
-                    <span className="truncate">{task.title}</span>
-                  </span>
-                  <span className={`shrink-0 ${priorityAccent ? `ff-calendar-priority-date ${priorityAccent}` : 'text-blue-600'}`}>
-                    {new Date(`${task.dueDate?.slice(0, 10)}T00:00:00`).toLocaleDateString()}
-                  </span>
-                </div>
+                <button
+                  key={dateKey}
+                  type="button"
+                  className={`ff-calendar-day${current ? ' is-today' : ''}${selected ? ' is-selected' : ''}`}
+                  onClick={() => setSelectedDateKey(dateKey)}
+                  aria-label={`${dayFormatter.format(new Date(year, month, day))}${dueTasks.length ? `, ${dueTasks.length} task${dueTasks.length === 1 ? '' : 's'}` : ''}`}
+                  aria-pressed={selected}
+                >
+                  <span className="ff-calendar-day-number">{day}</span>
+                  {dueTasks.length > 0 ? <span className="ff-calendar-day-markers" aria-hidden="true">
+                    {priorities.filter((priority) => dueTasks.some((task) => task.priority === priority)).slice(0, 3).map((priority) => <i key={priority} className={priorityDotClass(priority)} />)}
+                    {dueTasks.length > 3 ? <b>+{dueTasks.length - 3}</b> : null}
+                  </span> : null}
+                </button>
               );
             })}
-          </div> : <EmptyState icon={CalendarIcon} title="No deadlines this week" />}
-        </div>
+          </div>
+        </section>
+
+        <section className="ff-calendar-lower" aria-live="polite">
+          <div className="ff-calendar-agenda">
+            <div className="ff-calendar-section-heading">
+              <div>
+                <h4>{selectedDate ? dayFormatter.format(selectedDate) : 'Upcoming · Next 7 days'}</h4>
+                <p>{selectedDate ? `${selectedTasks.length} task${selectedTasks.length === 1 ? '' : 's'} scheduled` : 'Current task deadlines'}</p>
+              </div>
+              {selectedDate ? <button type="button" className="ff-calendar-clear-selection" onClick={() => setSelectedDateKey(null)}>Show upcoming</button> : null}
+            </div>
+            <div className="ff-calendar-agenda-list">
+              {(selectedDate ? selectedTasks : upcomingTasks).map((task) => <AgendaRow key={task.id} task={task} showDate={!selectedDate} />)}
+            </div>
+            {(selectedDate ? selectedTasks : upcomingTasks).length === 0 ? <div className="ff-calendar-empty-agenda"><CalendarIcon size={16} aria-hidden="true" /><span>{selectedDate ? 'No tasks scheduled' : 'No deadlines this week'}</span></div> : null}
+          </div>
+
+          <aside className="ff-calendar-summary" aria-label="Calendar summary">
+            <h4>Summary</h4>
+            <div><span>Upcoming</span><strong>{summary.upcoming}</strong></div>
+            <div><span>Overdue</span><strong>{summary.overdue}</strong></div>
+            <div><span>High priority</span><strong>{summary.highPriority}</strong></div>
+          </aside>
+        </section>
       </div>
     </AnimatedWidget>
   );
