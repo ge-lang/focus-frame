@@ -3103,9 +3103,10 @@ html[data-ff-theme='light'] .ff-modal-panel label { color: #e5c5d5; }
 .ff-calendar-clear-selection:hover,
 .ff-calendar-clear-selection:focus-visible { background: rgba(99, 102, 241, 0.1); color: var(--ff-accent-violet, #6255e8); outline: none; }
 .ff-calendar-today-action { padding: 0.25rem 0.4rem; font-weight: 650; }
-.ff-calendar-month-panel { width: min(74%, 36rem); margin: 0 auto; }
+.ff-calendar-month-panel { width: min(74%, 36rem); min-height: 16.2rem; margin: 0 auto; }
 .ff-calendar-weekdays,
 .ff-calendar-month-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 0.25rem; }
+.ff-calendar-month-grid { grid-template-rows: repeat(6, minmax(2.15rem, 1fr)); min-height: 14.15rem; }
 .ff-calendar-weekdays { margin-bottom: 0.35rem; color: var(--ff-text-muted, #7b849b); font-size: 0.68rem; font-weight: 650; text-align: center; }
 .ff-calendar-day { position: relative; display: grid; min-width: 0; min-height: 2.15rem; place-items: center; border: 1px solid transparent; border-radius: 0.55rem; background: transparent; color: var(--ff-text-secondary, #64748b); font-size: 0.78rem; }
 .ff-calendar-day:not(.ff-calendar-day-empty):hover { background: rgba(99, 102, 241, 0.08); color: var(--ff-text-primary, #18213b); }

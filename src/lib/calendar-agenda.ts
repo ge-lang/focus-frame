@@ -17,7 +17,7 @@ export function tasksForCalendarDate(tasks: Task[], dateKey: string): Task[] {
 export function calendarMonthCells(date: Date): Array<number | null> {
   const firstDayOffset = (new Date(date.getFullYear(), date.getMonth(), 1).getDay() + 6) % 7;
   const daysInMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
-  const cellCount = Math.ceil((firstDayOffset + daysInMonth) / 7) * 7;
+  const cellCount = 42;
   return Array.from({ length: cellCount }, (_, index) => {
     const day = index - firstDayOffset + 1;
     return day >= 1 && day <= daysInMonth ? day : null;

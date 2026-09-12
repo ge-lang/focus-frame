@@ -11,7 +11,8 @@ describe('calendar agenda helpers', () => {
   it('creates a Monday-first month grid with complete weeks', () => {
     const cells = calendarMonthCells(new Date(2026, 8, 1));
     expect(cells.slice(0, 2)).toEqual([null, 1]);
-    expect(cells).toHaveLength(35);
+    expect(cells).toHaveLength(42);
+    expect(cells.slice(35)).toEqual([null, null, null, null, null, null, null]);
   });
 
   it('matches task deadlines by local calendar date without shifting UTC dates', () => {
