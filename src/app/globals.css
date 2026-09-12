@@ -519,8 +519,6 @@ body.ff-document-body {
 .ff-dark-workspace .ff-glass-control:hover { border-color: rgba(196, 188, 255, 0.62); background: rgba(48, 51, 100, 0.92) !important; }
 .ff-dark-workspace .ff-glass-control-primary:hover { background: linear-gradient(135deg, #887aff, #715be0) !important; }
 
-.ff-dark-workspace .ff-dashboard-stage { padding-top: 1.2rem; }
-
 .ff-dark-workspace .ff-card,
 .ff-dark-workspace .ff-card.ff-card-solid {
   color: var(--ff-dark-text);
@@ -1748,7 +1746,7 @@ body.ff-document-body {
 .ff-dark-workspace .ff-compact-kpi:nth-child(odd),
 .ff-dark-workspace .ff-compact-kpi:nth-child(-n + 2),
 .ff-dark-workspace .ff-compact-news-story + .ff-compact-news-story { border-color: rgba(167, 183, 232, 0.2); }
-.ff-dark-workspace .ff-compact-note-paper { border: 0; background: rgba(29, 34, 71, 0.42); }
+.ff-dark-workspace .ff-compact-note-paper { background: rgba(29, 34, 71, 0.42); }
 .ff-dark-workspace .ff-compact-note-paper::after { background: #20264c; }
 
 /* HOT structural parity: mirror COOL composition; only the visual tokens differ. */
@@ -1760,165 +1758,6 @@ body.ff-document-body {
 .ff-page-shell.ff-light-workspace::after {
   background: radial-gradient(circle, rgba(125, 39, 111, 0.18), rgba(218, 103, 67, 0.08) 52%, transparent 70%);
   filter: blur(44px);
-}
-
-.ff-light-workspace .ff-compact-task-body { gap: 0; }
-.ff-light-workspace .ff-compact-status-summary {
-  gap: 0.65rem;
-  border-bottom: 0 !important;
-  padding-bottom: 0.1rem;
-}
-.ff-light-workspace .ff-compact-status-summary::before,
-.ff-light-workspace .ff-compact-status-summary::after,
-.ff-light-workspace .ff-compact-task-completion::before,
-.ff-light-workspace .ff-compact-task-completion::after { display: none !important; }
-.ff-light-workspace .ff-compact-status-summary > div {
-  gap: 0.04rem;
-  padding-inline: 0.18rem;
-}
-.ff-light-workspace .ff-compact-status-summary > div + div { border-left: 0 !important; }
-.ff-light-workspace .ff-compact-status-marker {
-  display: grid;
-  width: 1.18rem;
-  height: 1.18rem;
-  margin: 0;
-  flex: 0 0 auto;
-  place-items: center;
-  border: 1.5px solid #ed9bc7;
-  border-radius: 9999px;
-  color: #fff1f8;
-  font-size: 0;
-  line-height: 1;
-}
-.ff-light-workspace .ff-compact-status-marker-in-progress { border-color: #ef9b76; background: rgba(239, 155, 118, 0.14); }
-.ff-light-workspace .ff-compact-status-marker-done { border-color: transparent; background: var(--ff-accent-green); color: #1b2730; }
-.ff-light-workspace .ff-compact-task-progress-ring {
-  width: 10rem;
-  height: 10rem;
-  margin-top: 0.45rem;
-}
-.ff-light-workspace .ff-compact-task-completion { border: 0 !important; transform: translateY(0.75rem); }
-.ff-light-workspace .ff-compact-relevant-task { border-top: 0 !important; padding-top: 0.1rem; }
-
-.ff-light-workspace .ff-compact-pomodoro-body { position: relative; }
-.ff-light-workspace .ff-compact-pomodoro-tools {
-  position: absolute;
-  top: -0.15rem;
-  right: 0;
-  left: 0;
-  z-index: 2;
-  display: flex;
-  justify-content: space-between;
-  pointer-events: none;
-}
-.ff-light-workspace .ff-compact-pomodoro-tools button {
-  display: grid;
-  width: 1.7rem;
-  height: 1.7rem;
-  place-items: center;
-  border: 0;
-  border-radius: 9999px;
-  background: transparent;
-  color: #e5a6c4;
-  pointer-events: auto;
-}
-.ff-light-workspace .ff-compact-timer-ring-large {
-  display: flex;
-  width: 9.5rem;
-  height: 9.5rem;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  gap: 0.18rem;
-}
-.ff-light-workspace .ff-compact-timer-ring-large::before {
-  inset: 0.92rem;
-  opacity: 1;
-  -webkit-mask: radial-gradient(transparent calc(100% - 5px), #000 calc(100% - 2px));
-  mask: radial-gradient(transparent calc(100% - 5px), #000 calc(100% - 2px));
-}
-.ff-light-workspace .ff-compact-timer-ring-large::after {
-  inset: 0.62rem;
-  -webkit-mask: radial-gradient(transparent calc(100% - 6px), #000 calc(100% - 1px));
-  mask: radial-gradient(transparent calc(100% - 6px), #000 calc(100% - 1px));
-}
-.ff-light-workspace .ff-compact-timer-ring-large > span,
-.ff-light-workspace .ff-compact-timer-ring-large > small,
-.ff-light-workspace .ff-compact-timer-ring-large > .ff-compact-skip { position: relative; z-index: 1; }
-.ff-light-workspace .ff-compact-pomodoro-controls { z-index: 1; margin-top: -0.2rem; gap: 0.45rem; }
-
-.ff-light-workspace .ff-compact-weather-main {
-  position: relative;
-  z-index: 0;
-  isolation: isolate;
-  transform: translateY(1.2rem);
-}
-.ff-light-workspace .ff-compact-weather-main::before {
-  position: absolute;
-  z-index: -1;
-  inset: -1.2rem -1.5rem -1rem -1.25rem;
-  border-radius: 50%;
-  background: radial-gradient(ellipse at center, rgba(238, 130, 164, 0.25), rgba(215, 76, 149, 0.16) 48%, transparent 76%);
-  content: '';
-  filter: blur(16px);
-  pointer-events: none;
-}
-.ff-light-workspace .ff-compact-weather-main > * { position: relative; z-index: 1; }
-.ff-light-workspace .ff-compact-weather-visual {
-  position: relative;
-  display: grid;
-  width: 5.2rem;
-  height: 4.6rem;
-  flex: 0 0 auto;
-  place-items: center;
-  color: #ffe8ef;
-}
-.ff-light-workspace .ff-compact-weather-visual::before {
-  position: absolute;
-  inset: 0.2rem;
-  border-radius: 9999px;
-  background: radial-gradient(circle, rgba(239, 126, 157, 0.28), rgba(215, 76, 149, 0.14) 46%, transparent 72%);
-  content: '';
-  filter: blur(8px);
-}
-.ff-light-workspace .ff-compact-weather-visual svg {
-  position: relative;
-  z-index: 1;
-  width: 5.1rem;
-  height: 3.7rem;
-  overflow: visible;
-  stroke-width: 1.25;
-}
-.ff-light-workspace .ff-compact-weather-meta span { display: inline-flex; align-items: center; gap: 0.3rem; }
-
-.ff-light-workspace .ff-compact-kpi-icon { width: 1.15rem; height: 1.15rem; margin-bottom: 0.15rem; filter: none; transform: translateY(-0.2rem); }
-.ff-light-workspace .ff-compact-kpi {
-  align-items: center;
-  gap: 0.45rem;
-  padding: 0.45rem 0.65rem;
-  text-align: center;
-}
-.ff-light-workspace .ff-compact-kpi-value { color: #fff5fa !important; filter: none; text-shadow: none; }
-.ff-light-workspace .ff-compact-kpi-label { color: #c29eb2 !important; margin-top: 0.08rem; }
-
-.ff-light-workspace .ff-compact-card-bookmarks {
-  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 82%, 0 100%);
-  border: 0 !important;
-  border-radius: 1rem 1rem 0.8rem 0.8rem;
-}
-.ff-light-workspace .ff-compact-card-bookmarks > .ff-compact-object {
-  height: calc(100% - 2.5px);
-  margin: 1.25px;
-  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 82%, 0 100%);
-  padding-bottom: 1.75rem;
-  background: linear-gradient(145deg, rgba(65, 21, 57, 0.99), rgba(23, 9, 28, 1) 70%) !important;
-}
-
-.ff-light-workspace .ff-compact-card-notes .ff-compact-object { padding: 0; }
-.ff-light-workspace .ff-compact-card-notes .ff-compact-note-paper {
-  padding: 1rem 1.55rem 1rem 1rem;
-  background: transparent !important;
-  box-shadow: none;
 }
 
 @media (min-width: 640px) {
@@ -1942,6 +1781,288 @@ body.ff-document-body {
   }
   .ff-light-workspace .ff-topbar .ff-header-action:focus-visible,
   .ff-light-workspace .ff-topbar .ff-theme-control:focus-within { outline: 2px solid rgba(255, 157, 201, 0.5); outline-offset: 3px; }
+}
+
+/* Compact desktop structure: one geometry system, with theme rules limited to paint. */
+@media (min-width: 640px) {
+  .ff-page-shell .ff-dashboard-stage { padding-top: 0; }
+
+  .ff-page-shell .ff-compact-card {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .ff-page-shell .ff-compact-card::before {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    border-radius: inherit;
+    content: '';
+    pointer-events: none;
+  }
+
+  .ff-page-shell .ff-compact-card > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .ff-page-shell .ff-compact-object {
+    box-sizing: border-box;
+    height: 100%;
+    min-height: 0;
+    padding: 1rem;
+  }
+
+  .ff-page-shell .ff-compact-task-body {
+    display: flex;
+    min-height: 0;
+    flex: 1;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 0;
+  }
+
+  .ff-page-shell .ff-compact-status-summary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: center;
+    gap: 0.65rem;
+    border-bottom: 0;
+    padding-bottom: 0.1rem;
+  }
+
+  .ff-page-shell .ff-compact-status-summary > div {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    flex-direction: column;
+    gap: 0.04rem;
+    padding-inline: 0.18rem;
+    line-height: 1;
+  }
+
+  .ff-page-shell .ff-compact-status-summary > div + div { border-left: 0; }
+  .ff-page-shell .ff-compact-status-summary::before,
+  .ff-page-shell .ff-compact-status-summary::after,
+  .ff-page-shell .ff-compact-task-completion::before,
+  .ff-page-shell .ff-compact-task-completion::after { display: none; }
+
+  .ff-page-shell .ff-compact-status-marker {
+    display: grid;
+    width: 1.1rem;
+    height: 1.1rem;
+    margin: 0 auto 0.12rem;
+    flex: 0 0 auto;
+    place-items: center;
+    line-height: 1;
+  }
+
+  .ff-page-shell .ff-compact-task-completion {
+    display: flex;
+    min-height: 0;
+    flex: 1 1 auto;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    border: 0;
+    transform: translateY(0.35rem);
+  }
+
+  .ff-page-shell .ff-compact-task-progress-ring {
+    position: relative;
+    width: 8.5rem;
+    height: 8.5rem;
+    margin-top: 0.35rem;
+    filter: none;
+  }
+
+  .ff-page-shell .ff-compact-task-progress-ring svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+  }
+
+  .ff-page-shell .ff-compact-task-progress-ring circle {
+    fill: none;
+    stroke-width: 2.5;
+  }
+
+  .ff-page-shell .ff-compact-task-progress-value { stroke-linecap: round; }
+  .ff-page-shell .ff-compact-relevant-task { min-height: 1.55rem; padding-top: 0.15rem; }
+
+  .ff-page-shell .ff-compact-note-paper {
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    padding: 0;
+  }
+  .ff-page-shell .ff-compact-note-paper::after { right: -0.05rem; background: var(--ff-bg-card, #fff); }
+  .ff-page-shell .ff-compact-note-paper textarea { border: 0; background: transparent; }
+
+  .ff-page-shell .ff-compact-pomodoro-body {
+    position: relative;
+    display: flex;
+    min-height: 0;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .ff-page-shell .ff-compact-pomodoro-tools {
+    position: absolute;
+    top: -0.15rem;
+    right: 0;
+    left: 0;
+    z-index: 2;
+    display: flex;
+    justify-content: space-between;
+    pointer-events: none;
+  }
+
+  .ff-page-shell .ff-compact-pomodoro-tools button {
+    display: grid;
+    width: 1.7rem;
+    height: 1.7rem;
+    place-items: center;
+    pointer-events: auto;
+  }
+
+  .ff-page-shell .ff-compact-timer-ring-large {
+    position: relative;
+    display: flex;
+    width: 9.5rem;
+    height: 9.5rem;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 0.18rem;
+    border-width: 0.42rem;
+    isolation: isolate;
+  }
+
+  .ff-page-shell .ff-compact-timer-ring-large::before {
+    position: absolute;
+    z-index: 0;
+    inset: 0.7rem;
+    border-radius: 9999px;
+    content: '';
+    pointer-events: none;
+    -webkit-mask: radial-gradient(transparent calc(100% - 3px), #000 calc(100% - 1px));
+    mask: radial-gradient(transparent calc(100% - 3px), #000 calc(100% - 1px));
+  }
+
+  .ff-page-shell .ff-compact-timer-ring-large::after {
+    position: absolute;
+    z-index: 0;
+    inset: 0.46rem;
+    border-radius: 9999px;
+    content: '';
+    pointer-events: none;
+    -webkit-mask: radial-gradient(transparent calc(100% - 4px), #000 calc(100% - 1px));
+    mask: radial-gradient(transparent calc(100% - 4px), #000 calc(100% - 1px));
+  }
+
+  .ff-page-shell .ff-compact-timer-ring-large > span,
+  .ff-page-shell .ff-compact-timer-ring-large > small,
+  .ff-page-shell .ff-compact-timer-ring-large > .ff-compact-skip {
+    position: relative;
+    z-index: 1;
+  }
+
+  .ff-page-shell .ff-compact-timer-ring-large > span { font-size: 1.6rem; }
+  .ff-page-shell .ff-compact-timer-ring-large > small { max-width: 7rem; }
+  .ff-page-shell .ff-compact-timer-ring-large .ff-compact-skip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.08rem;
+    margin-top: 0.08rem;
+    padding: 0.15rem 0.25rem;
+    font-size: 0.58rem;
+  }
+  .ff-page-shell .ff-compact-pomodoro-controls { z-index: 1; gap: 0.45rem; margin-top: -0.2rem; }
+  .ff-page-shell .ff-compact-pomodoro-controls button { width: 2.05rem; height: 2.05rem; }
+
+  .ff-page-shell .ff-compact-calendar { gap: 0.3rem; }
+  .ff-page-shell .ff-compact-calendar-month {
+    display: grid;
+    grid-template-columns: 1.5rem minmax(0, 1fr) 1.5rem;
+    align-items: center;
+    gap: 0.15rem;
+    font-size: 1.08rem;
+    font-weight: 700;
+    line-height: normal;
+    letter-spacing: 0.01em;
+    text-transform: none;
+    font-feature-settings: normal;
+  }
+  .ff-page-shell .ff-compact-calendar-month > span { min-width: 0; }
+  .ff-page-shell .ff-compact-calendar-month button { display: grid; width: 1.45rem; height: 1.45rem; place-items: center; }
+  .ff-page-shell .ff-compact-calendar-weekdays { font-size: 0.68rem; font-weight: 600; line-height: normal; }
+  .ff-page-shell .ff-compact-calendar-cell { font-size: 0.78rem; line-height: 1; }
+
+  .ff-page-shell .ff-compact-weather-object { gap: 0.55rem; }
+  .ff-page-shell .ff-compact-weather-main {
+    position: relative;
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    justify-content: center;
+    gap: 0.85rem;
+    transform: translateY(1.2rem);
+    isolation: isolate;
+  }
+  .ff-page-shell .ff-compact-weather-main::before {
+    position: absolute;
+    z-index: -1;
+    inset: -1.2rem -1.5rem -1rem -1.25rem;
+    border-radius: 50%;
+    content: '';
+    filter: blur(16px);
+    pointer-events: none;
+  }
+  .ff-page-shell .ff-compact-weather-main > * { position: relative; z-index: 1; }
+  .ff-page-shell .ff-compact-weather-visual { position: relative; display: grid; width: 5.2rem; height: 4.6rem; flex: 0 0 auto; place-items: center; }
+  .ff-page-shell .ff-compact-weather-visual::before { position: absolute; inset: 0.2rem; border-radius: 9999px; content: ''; filter: blur(8px); }
+  .ff-page-shell .ff-compact-weather-visual svg { position: relative; z-index: 1; width: 5.1rem; height: 3.7rem; overflow: visible; stroke-width: 1.25; }
+  .ff-page-shell .ff-compact-weather-copy { display: grid; gap: 0.15rem; }
+  .ff-page-shell .ff-compact-weather-icon { width: 4.35rem !important; height: 4.35rem !important; }
+  .ff-page-shell .ff-compact-weather-temperature { font-size: 2.2rem; }
+  .ff-page-shell .ff-compact-weather-meta span { display: inline-flex; align-items: center; gap: 0.3rem; }
+  .ff-page-shell .ff-compact-weather-temperature { font-size: 2.2rem; font-weight: 700; line-height: 1; }
+  .ff-page-shell .ff-compact-weather-copy > p:first-of-type { font-size: 0.875rem; font-weight: 500; line-height: 1.25; }
+  .ff-page-shell .ff-compact-weather-copy > p:last-of-type { font-size: 0.75rem; line-height: 1rem; }
+
+  .ff-page-shell .ff-compact-goals-object { align-items: center; gap: 0.8rem; }
+  .ff-page-shell .ff-compact-goals-ring { width: 9.25rem; height: 9.25rem; flex: 0 0 9.25rem; }
+  .ff-page-shell .ff-compact-goals-outer,
+  .ff-page-shell .ff-compact-goals-middle,
+  .ff-page-shell .ff-compact-goals-inner { fill: none; stroke-width: 2.3; stroke-linecap: round; }
+  .ff-page-shell .ff-compact-goals-center { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+  .ff-page-shell .ff-compact-goals-center strong { position: static; }
+  .ff-page-shell .ff-compact-goals-list { gap: 0.62rem; }
+  .ff-page-shell .ff-compact-goal-copy > span { font-size: 0.78rem; font-weight: 600; }
+
+  .ff-page-shell .ff-compact-bookmarks-object { align-items: flex-start; justify-content: flex-start; gap: 0.45rem; padding-bottom: 1.75rem; }
+  .ff-page-shell .ff-compact-card-bookmarks { clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 82%, 0 100%); border-radius: 1rem 1rem 0.8rem 0.8rem; }
+  .ff-page-shell .ff-compact-card-bookmarks > .ff-compact-object { height: calc(100% - 2.5px); margin: 1.25px; clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 82%, 0 100%); }
+
+  .ff-page-shell .ff-compact-card-notes .ff-compact-object { padding: 0; }
+  .ff-page-shell .ff-compact-card-notes .ff-compact-note-paper { padding: 1rem 1.55rem 1rem 1rem; }
+
+  .ff-page-shell .ff-compact-news-story { align-items: center; padding-top: 0.5rem; padding-bottom: 0.5rem; }
+  .ff-page-shell .ff-compact-news-story > .min-w-0 { flex: 1; }
+  .ff-page-shell .ff-compact-news-image { width: clamp(6rem, 28%, 11rem); height: 4.6rem; max-width: 11rem; flex: 0 0 auto; border-radius: 0.55rem; object-fit: cover; opacity: 0.86; }
+
+  .ff-page-shell .ff-compact-analytics-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(2, minmax(0, 1fr)); min-height: 0; flex: 1; border-radius: 0.8rem; }
+  .ff-page-shell .ff-compact-kpi { position: relative; display: flex; min-height: 0; align-items: center; justify-content: center; flex-direction: column; gap: 0.45rem; border-radius: 0; padding: 0.45rem 0.65rem; text-align: center; }
+  .ff-page-shell .ff-compact-kpi:nth-child(odd) { border-right-width: 1px; border-right-style: solid; }
+  .ff-page-shell .ff-compact-kpi:nth-child(-n + 2) { border-bottom-width: 1px; border-bottom-style: solid; }
+  .ff-page-shell .ff-compact-kpi-icon { display: block; width: 1.15rem; height: 1.15rem; flex: 0 0 1.15rem; margin-bottom: 0.15rem; opacity: 0.96; filter: none; transform: translateY(-0.2rem); stroke-width: 1.75; }
+  .ff-page-shell .ff-compact-kpi-value { font-size: 1.72rem; line-height: 1; }
+  .ff-page-shell .ff-compact-kpi-label { margin-top: 0.08rem; }
 }
 
 /* HOT final precedence: these existing warm values win over legacy Light visuals. */
@@ -2422,18 +2543,12 @@ html[data-ff-theme='light'] body.ff-document-body { background: #120b18; }
   box-shadow: 0 0 0 4px rgba(225, 72, 153, 0.07), 0 0 0 8px rgba(238, 119, 108, 0.06), 0 0 30px rgba(211, 49, 139, 0.2);
 }
 .ff-light-workspace .ff-compact-timer-ring-large::before {
-  inset: 0.76rem;
   background: repeating-conic-gradient(from -2deg, rgba(244, 194, 218, 0.82) 0 1.7deg, transparent 1.7deg 6deg);
   filter: drop-shadow(0 0 1px rgba(229, 117, 169, 0.48));
-  -webkit-mask: radial-gradient(transparent calc(100% - 8px), #000 calc(100% - 1px));
-  mask: radial-gradient(transparent calc(100% - 8px), #000 calc(100% - 1px));
 }
 .ff-light-workspace .ff-compact-timer-ring-large::after {
-  inset: 0.4rem;
   background: repeating-conic-gradient(from -2deg, rgba(255, 220, 224, 0.98) 0 4deg, transparent 4deg 30deg);
   filter: drop-shadow(0 0 1px rgba(245, 141, 122, 0.62));
-  -webkit-mask: radial-gradient(transparent calc(100% - 12px), #000 calc(100% - 1px));
-  mask: radial-gradient(transparent calc(100% - 12px), #000 calc(100% - 1px));
 }
 .ff-light-workspace .ff-compact-pomodoro-tools button { color: #e5a6c4; }
 .ff-light-workspace .ff-compact-pomodoro-tools button:hover,
@@ -2560,90 +2675,41 @@ html[data-ff-theme='light'] .ff-modal-panel label { color: #e5c5d5; }
 .ff-light-workspace .ff-page-signature span:last-child { color: #d4a2b5; }
 
 /* Three visible fixes: keep status content in normal flow, expose the V-edge, and clarify the watch scale. */
-.ff-dark-workspace .ff-compact-status-summary > div {
-  align-items: center;
-  gap: 0.42rem;
-  line-height: 1;
-}
-.ff-dark-workspace .ff-compact-status-marker {
-  width: 1.18rem;
-  height: 1.18rem;
-  margin: 0;
-  flex: 0 0 auto;
-  line-height: 1;
-}
-.ff-dark-workspace .ff-compact-status-summary > div > span:not(.ff-compact-status-marker) {
-  line-height: 1;
-}
-.ff-dark-workspace .ff-compact-status-summary > div > strong { line-height: 1; }
-
 .ff-dark-workspace .ff-compact-card-bookmarks {
   background: linear-gradient(145deg, #b6d1ff 0%, #78e2f2 50%, #9d8fff 100%) !important;
 }
 .ff-dark-workspace .ff-compact-card-bookmarks > .ff-compact-object {
-  height: calc(100% - 4px);
-  margin: 2px;
   background: linear-gradient(145deg, rgba(31, 48, 95, 0.99), rgba(8, 16, 38, 1) 70%) !important;
 }
 
 .ff-dark-workspace .ff-compact-timer-ring-large::before {
-  inset: 0.8rem;
   background: repeating-conic-gradient(from -2deg, rgba(220, 235, 255, 1) 0 1.5deg, transparent 1.5deg 6deg);
   filter: drop-shadow(0 0 1px rgba(103, 215, 229, 0.46));
-  -webkit-mask: radial-gradient(transparent calc(100% - 7px), #000 calc(100% - 1px));
-  mask: radial-gradient(transparent calc(100% - 7px), #000 calc(100% - 1px));
 }
 .ff-dark-workspace .ff-compact-timer-ring-large::after {
-  inset: 0.44rem;
   background: repeating-conic-gradient(from -2deg, rgba(249, 252, 255, 1) 0 3.6deg, transparent 3.6deg 30deg);
   filter: drop-shadow(0 0 1px rgba(141, 128, 255, 0.54));
-  -webkit-mask: radial-gradient(transparent calc(100% - 10px), #000 calc(100% - 1px));
-  mask: radial-gradient(transparent calc(100% - 10px), #000 calc(100% - 1px));
 }
 
 /* Final lock pass: make the existing watch marks and object hierarchy read at preview scale. */
 .ff-dark-workspace .ff-compact-timer-ring-large::before {
-  inset: 0.92rem;
   background: repeating-conic-gradient(from -2deg, rgba(218, 233, 255, 0.94) 0 1.45deg, transparent 1.45deg 6deg);
   opacity: 1;
-  -webkit-mask: radial-gradient(transparent calc(100% - 5px), #000 calc(100% - 2px));
-  mask: radial-gradient(transparent calc(100% - 5px), #000 calc(100% - 2px));
 }
 .ff-dark-workspace .ff-compact-timer-ring-large::after {
-  inset: 0.62rem;
   background: repeating-conic-gradient(from -2deg, rgba(248, 251, 255, 1) 0 3.4deg, transparent 3.4deg 30deg);
-  -webkit-mask: radial-gradient(transparent calc(100% - 6px), #000 calc(100% - 1px));
-  mask: radial-gradient(transparent calc(100% - 6px), #000 calc(100% - 1px));
 }
 
 .ff-dark-workspace .ff-compact-weather-main::before {
-  inset: -1.45rem -1.8rem -1.15rem -1.5rem;
   background:
     radial-gradient(ellipse at 42% 48%, rgba(103, 221, 247, 0.34), transparent 54%),
     radial-gradient(ellipse at center, rgba(87, 179, 239, 0.24), rgba(104, 91, 225, 0.17) 58%, transparent 82%);
   filter: blur(17px);
 }
 
-.ff-dark-workspace .ff-compact-kpi-icon { transform: translateY(-0.2rem); }
-
-.ff-dark-workspace .ff-compact-status-marker { width: 1.18rem; height: 1.18rem; }
-.ff-dark-workspace .ff-compact-task-body { gap: 0; }
-.ff-dark-workspace .ff-compact-task-progress-ring {
-  width: 10rem;
-  height: 10rem;
-  margin-top: 0.45rem;
-}
-.ff-dark-workspace .ff-compact-task-completion { transform: translateY(0.75rem); }
-.ff-dark-workspace .ff-compact-relevant-task { padding-top: 0.1rem; }
-
 .ff-dark-workspace .ff-compact-card-bookmarks {
   background: linear-gradient(145deg, rgba(171, 207, 255, 1), rgba(91, 221, 239, 0.98) 52%, rgba(126, 151, 255, 1)) !important;
 }
-.ff-dark-workspace .ff-compact-card-bookmarks > .ff-compact-object {
-  height: calc(100% - 2.5px);
-  margin: 1.25px;
-}
-
 @media (min-width: 640px) {
   .ff-topbar .ff-brand-mark { width: 3.35rem; height: 3.5rem; }
   .ff-topbar .ff-evva-mark { width: 2.82rem; height: 3.5rem; }
@@ -3003,59 +3069,16 @@ html[data-ff-theme='light'] .ff-modal-panel label { color: var(--ff-text-seconda
   box-shadow: 0 20px 42px rgba(3, 8, 25, 0.48), 0 0 26px rgba(91, 130, 240, 0.15), inset 0 1px 0 rgba(205, 228, 255, 0.17) !important;
 }
 
-.ff-dark-workspace .ff-compact-status-summary > div { position: relative; }
-.ff-dark-workspace .ff-compact-status-summary > div::before {
-  width: 0.42rem;
-  height: 0.42rem;
-  margin: 0 auto 0.22rem;
-  border-radius: 9999px;
-  content: '';
-}
-.ff-dark-workspace .ff-compact-status-summary > div:nth-child(1)::before { background: #8fa7ff; }
-.ff-dark-workspace .ff-compact-status-summary > div:nth-child(2)::before { background: var(--ff-accent-cyan); }
-.ff-dark-workspace .ff-compact-status-summary > div:nth-child(3)::before { background: var(--ff-accent-green); }
-
-.ff-dark-workspace .ff-compact-task-progress-ring {
-  filter: drop-shadow(0 0 10px rgba(124, 108, 255, 0.18));
-}
-
-.ff-dark-workspace .ff-compact-timer-ring-large {
-  position: relative;
-  isolation: isolate;
-  width: 9.5rem;
-  height: 9.5rem;
-  border-width: 0.42rem;
-  box-shadow: 0 0 0 4px rgba(103, 215, 229, 0.06), 0 0 0 8px rgba(124, 108, 255, 0.06), 0 0 30px rgba(91, 103, 241, 0.2);
-}
-
-.ff-dark-workspace .ff-compact-timer-ring-large::before {
-  position: absolute;
-  inset: -0.48rem;
-  border-radius: 9999px;
-  background: repeating-conic-gradient(from -2deg, rgba(194, 216, 255, 0.5) 0 1deg, transparent 1deg 15deg);
-  content: '';
-  pointer-events: none;
-  -webkit-mask: radial-gradient(transparent calc(100% - 3px), #000 calc(100% - 2px));
-  mask: radial-gradient(transparent calc(100% - 3px), #000 calc(100% - 2px));
-}
-
-.ff-dark-workspace .ff-compact-timer-ring-large span { font-size: 1.6rem; }
 .ff-dark-workspace .ff-compact-timer-ring-large small { color: #b8c7e8; }
-.ff-dark-workspace .ff-compact-pomodoro-controls { margin-top: -1rem; }
 
-.ff-dark-workspace .ff-compact-calendar-month { font-size: 1.08rem; letter-spacing: 0.01em; }
-.ff-dark-workspace .ff-compact-calendar-cell { font-size: 0.78rem; }
 .ff-dark-workspace .ff-compact-calendar-cell-today { box-shadow: 0 0 0 3px rgba(124, 108, 255, 0.16), 0 0 16px rgba(124, 108, 255, 0.32); }
 
-.ff-dark-workspace .ff-compact-weather-icon { width: 4.5rem !important; height: 4.5rem !important; filter: drop-shadow(0 0 16px rgba(103, 215, 229, 0.18)); }
-.ff-dark-workspace .ff-compact-weather-temperature { font-size: 2.55rem; text-shadow: 0 0 18px rgba(177, 201, 255, 0.12); }
+.ff-dark-workspace .ff-compact-weather-icon { filter: drop-shadow(0 0 16px rgba(103, 215, 229, 0.18)); }
+.ff-dark-workspace .ff-compact-weather-temperature { text-shadow: 0 0 18px rgba(177, 201, 255, 0.12); }
 
-.ff-dark-workspace .ff-compact-analytics-grid { border-radius: 0.8rem; background: rgba(18, 29, 63, 0.24); }
-.ff-dark-workspace .ff-compact-kpi-value { font-size: 1.72rem; }
-.ff-dark-workspace .ff-compact-kpi-icon { margin-bottom: 0.2rem; filter: drop-shadow(0 0 8px currentColor); }
+.ff-dark-workspace .ff-compact-analytics-grid { background: rgba(18, 29, 63, 0.24); }
 
 .ff-dark-workspace .ff-compact-goals-ring { filter: drop-shadow(0 0 12px rgba(124, 108, 255, 0.2)); }
-.ff-dark-workspace .ff-compact-goals-ring strong { font-size: 1.28rem; }
 .ff-dark-workspace .ff-compact-goal-copy small { color: #b8c7e8; }
 
 .ff-dark-workspace .ff-compact-note-paper {
@@ -3066,21 +3089,10 @@ html[data-ff-theme='light'] .ff-modal-panel label { color: var(--ff-text-seconda
 }
 
 .ff-dark-workspace .ff-compact-note-paper textarea {
-  border: 0 !important;
-  background: transparent !important;
   color: #f4f3ff !important;
 }
 
 .ff-dark-workspace .ff-compact-note-paper::after { background: #2a4a84; box-shadow: -1px 1px 0 rgba(191, 220, 255, 0.18); }
-
-.ff-compact-news-image {
-  width: 3.4rem;
-  height: 4.2rem;
-  flex: 0 0 auto;
-  border-radius: 0.55rem;
-  object-fit: cover;
-  opacity: 0.86;
-}
 
 .ff-dark-workspace .ff-compact-news-image { border: 1px solid rgba(167, 203, 255, 0.22); box-shadow: 0 0 14px rgba(76, 117, 231, 0.12); }
 
@@ -3090,35 +3102,18 @@ html[data-ff-theme='light'] .ff-modal-panel label { color: var(--ff-text-seconda
 .ff-dark-workspace .ff-compact-card-goals { box-shadow: 0 18px 38px rgba(3, 8, 25, 0.44), 0 0 26px rgba(121, 95, 241, 0.17), inset 0 1px 0 rgba(194, 220, 255, 0.16) !important; }
 
 .ff-dark-workspace .ff-compact-weather-visual {
-  position: relative;
-  display: grid;
-  width: 5.2rem;
-  height: 4.6rem;
-  flex: 0 0 auto;
-  place-items: center;
   color: #d9ebff;
 }
 
 .ff-dark-workspace .ff-compact-weather-visual::before {
-  position: absolute;
-  inset: 0.2rem;
-  border-radius: 9999px;
   background: radial-gradient(circle, rgba(124, 180, 255, 0.38), rgba(80, 116, 232, 0.16) 46%, transparent 72%);
-  content: '';
   filter: blur(8px);
 }
 
 .ff-dark-workspace .ff-compact-weather-visual svg {
-  position: relative;
-  z-index: 1;
-  width: 5.1rem;
-  height: 3.7rem;
-  overflow: visible;
-  stroke-width: 1.25;
   filter: drop-shadow(0 0 9px rgba(193, 220, 255, 0.38));
 }
 
-.ff-dark-workspace .ff-compact-weather-meta span { display: inline-flex; align-items: center; gap: 0.3rem; }
 .ff-dark-workspace .ff-compact-weather-meta span:first-child svg { color: #9fd6ff; }
 .ff-dark-workspace .ff-compact-weather-meta span:last-child svg { color: var(--ff-accent-cyan); }
 
@@ -3128,13 +3123,6 @@ html[data-ff-theme='light'] .ff-modal-panel label { color: var(--ff-text-seconda
 .ff-dark-workspace .ff-weather-cloud-rain,
 .ff-dark-workspace .ff-weather-cloud-snow { fill: none; stroke: #a8dcff; stroke-linecap: round; stroke-width: 3; }
 
-.ff-dark-workspace .ff-compact-card-bookmarks {
-  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 82%, 0 100%);
-  border-radius: 1rem 1rem 0.8rem 0.8rem;
-}
-
-.ff-dark-workspace .ff-compact-card-bookmarks .ff-compact-object { padding-bottom: 1.75rem; }
-
 .ff-dark-workspace .ff-compact-card-notes {
   background:
     repeating-linear-gradient(to bottom, transparent 0 1.25rem, rgba(148, 196, 255, 0.1) 1.25rem 1.3rem),
@@ -3142,80 +3130,35 @@ html[data-ff-theme='light'] .ff-modal-panel label { color: var(--ff-text-seconda
   box-shadow: 0 18px 38px rgba(3, 8, 25, 0.42), 0 0 22px rgba(76, 117, 231, 0.14), inset 0 1px 0 rgba(205, 228, 255, 0.16) !important;
 }
 
-.ff-dark-workspace .ff-compact-card-notes .ff-compact-object { padding: 0; }
-.ff-dark-workspace .ff-compact-card-notes .ff-compact-note-paper { padding: 1rem; background: transparent !important; box-shadow: none; }
+.ff-dark-workspace .ff-compact-card-notes .ff-compact-note-paper { background: transparent !important; box-shadow: none; }
 .ff-dark-workspace .ff-compact-card-notes .ff-compact-note-paper::after { background: #4a72b6; }
 
 .ff-dark-workspace .ff-compact-goals-outer,
 .ff-dark-workspace .ff-compact-goals-middle,
-.ff-dark-workspace .ff-compact-goals-inner { fill: none; stroke-width: 2.3; stroke-linecap: round; }
+.ff-dark-workspace .ff-compact-goals-inner { stroke: #6bd7e5; }
 .ff-dark-workspace .ff-compact-goals-outer { stroke: #7c6cff; }
 .ff-dark-workspace .ff-compact-goals-middle { stroke: #9c8cff; }
-.ff-dark-workspace .ff-compact-goals-inner { stroke: #6bd7e5; }
 .ff-dark-workspace .ff-compact-goals-ring { filter: drop-shadow(0 0 12px rgba(124, 108, 255, 0.2)); }
-.ff-dark-workspace .ff-compact-goals-center { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #f4f3ff; }
-.ff-dark-workspace .ff-compact-goals-center strong { position: static; font-size: 1.1rem; }
+.ff-dark-workspace .ff-compact-goals-center { color: #f4f3ff; }
 
 .ff-dark-workspace .ff-compact-kpi-icon { opacity: 0.96; }
 .ff-dark-workspace .ff-compact-kpi-value { filter: none; text-shadow: none; }
 
-.ff-dark-workspace .ff-compact-news-story { align-items: center; padding-top: 0.5rem; padding-bottom: 0.5rem; }
-.ff-dark-workspace .ff-compact-news-story > .min-w-0 { flex: 1; }
-.ff-dark-workspace .ff-compact-news-image { width: clamp(6rem, 28%, 11rem); height: 4.6rem; max-width: 11rem; }
-.ff-dark-workspace .ff-compact-news-chevron { flex: 0 0 auto; color: #9bbcff; opacity: 0.8; }
+.ff-dark-workspace .ff-compact-news-chevron { color: #9bbcff; opacity: 0.8; }
 .ff-dark-workspace .ff-compact-news-story:hover .ff-compact-news-chevron { color: #e0eaff; opacity: 1; }
 
 /* Dark tile edge light: a directional inner rim keeps the center calm. */
 .ff-dark-workspace .ff-compact-card {
-  position: relative;
-  isolation: isolate;
   background: linear-gradient(145deg, rgba(39, 56, 108, 0.96), rgba(16, 28, 63, 0.98) 48%, rgba(9, 17, 42, 1)) !important;
 }
 
 .ff-dark-workspace .ff-compact-card::before {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  border-radius: inherit;
   box-shadow:
     inset 0 1px 0 rgba(205, 228, 255, 0.16),
     inset 15px 0 28px rgba(124, 108, 255, 0.08),
     inset -16px -8px 30px rgba(74, 190, 229, 0.07),
     inset 0 -18px 30px rgba(3, 8, 25, 0.2);
-  content: '';
-  pointer-events: none;
 }
-
-.ff-dark-workspace .ff-compact-card > * { position: relative; z-index: 1; }
-
-.ff-dark-workspace .ff-compact-weather-main { transform: translateY(0.3rem); }
-.ff-dark-workspace .ff-compact-weather-temperature { letter-spacing: -0.06em; }
-
-/* Final compact object balance: preserve the fixed square while giving each object a clear resting zone. */
-.ff-compact-task-body { gap: 0.15rem; }
-.ff-compact-status-summary { padding-bottom: 0.35rem; }
-.ff-compact-task-completion { min-height: 0; flex: 1 1 auto; }
-.ff-compact-task-progress-ring { width: 7.25rem; height: 7.25rem; }
-.ff-compact-relevant-task { flex: 0 0 1.55rem; min-height: 1.55rem; padding-top: 0.3rem; }
-
-.ff-compact-note-paper {
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  padding: 0;
-}
-
-.ff-compact-note-paper::after { right: -0.05rem; background: var(--ff-bg-card, #fff); }
-
-.ff-compact-bookmarks-object {
-  position: relative;
-  padding-bottom: 1rem;
-}
-
-.ff-compact-weather-icon { width: 4.35rem !important; height: 4.35rem !important; }
-.ff-compact-weather-temperature { font-size: 2.2rem; }
-.ff-compact-goals-object { gap: 0.8rem; }
-.ff-compact-goals-list { gap: 0.62rem; }
 
 .ff-dark-workspace .ff-compact-note-paper { background: transparent; }
 
@@ -3228,17 +3171,9 @@ html[data-ff-theme='light'] .ff-modal-panel label { color: var(--ff-text-seconda
     inset 0 -18px 30px rgba(3, 8, 25, 0.22);
 }
 
-.ff-dark-workspace .ff-compact-status-summary > div::before { display: none; }
 .ff-dark-workspace .ff-compact-status-marker {
-  display: grid;
-  width: 1rem;
-  height: 1rem;
-  margin: 0 auto 0.12rem;
-  place-items: center;
   border: 1.5px solid #8fa7ff;
-  border-radius: 9999px;
   color: #dce5ff;
-  font-size: 0;
 }
 .ff-dark-workspace .ff-compact-status-marker-in-progress {
   border-color: var(--ff-accent-cyan);
@@ -3250,108 +3185,32 @@ html[data-ff-theme='light'] .ff-modal-panel label { color: var(--ff-text-seconda
   color: #102b30;
 }
 
-.ff-dark-workspace .ff-compact-task-progress-ring {
-  width: 8.4rem;
-  height: 8.4rem;
-  margin-top: -0.15rem;
-}
-
-.ff-dark-workspace .ff-compact-pomodoro-body { position: relative; }
-.ff-dark-workspace .ff-compact-pomodoro-tools {
-  position: absolute;
-  top: -0.15rem;
-  right: 0;
-  left: 0;
-  z-index: 2;
-  display: flex;
-  justify-content: space-between;
-  pointer-events: none;
-}
-.ff-dark-workspace .ff-compact-pomodoro-tools button {
-  display: grid;
-  width: 1.7rem;
-  height: 1.7rem;
-  place-items: center;
-  border: 0;
-  border-radius: 9999px;
-  background: transparent;
-  color: #9cb4df;
-  pointer-events: auto;
-}
+.ff-dark-workspace .ff-compact-pomodoro-tools button { color: #9cb4df; }
 .ff-dark-workspace .ff-compact-pomodoro-tools button:hover,
 .ff-dark-workspace .ff-compact-pomodoro-tools button:focus-visible { color: #e2eaff; outline: 1px solid rgba(141, 128, 255, 0.48); outline-offset: 2px; }
-.ff-dark-workspace .ff-compact-timer-ring-large {
-  display: flex;
-  width: 9.5rem;
-  height: 9.5rem;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  gap: 0.18rem;
-}
 .ff-dark-workspace .ff-compact-timer-ring-large::before {
-  z-index: 0;
-  inset: 0.55rem;
   background: repeating-conic-gradient(from -2deg, rgba(194, 216, 255, 0.52) 0 1deg, transparent 1deg 15deg);
   opacity: 0.72;
-  -webkit-mask: radial-gradient(transparent calc(100% - 2px), #000 calc(100% - 1px));
-  mask: radial-gradient(transparent calc(100% - 2px), #000 calc(100% - 1px));
 }
-.ff-dark-workspace .ff-compact-timer-ring-large > span,
-.ff-dark-workspace .ff-compact-timer-ring-large > small,
-.ff-dark-workspace .ff-compact-timer-ring-large > .ff-compact-skip { position: relative; z-index: 1; }
-.ff-dark-workspace .ff-compact-timer-ring-large > span { font-size: 1.6rem; }
-.ff-dark-workspace .ff-compact-timer-ring-large > small { max-width: 7rem; }
 .ff-dark-workspace .ff-compact-timer-ring-large .ff-compact-skip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.08rem;
-  margin-top: 0.08rem;
-  padding: 0.15rem 0.25rem;
   color: #b9caff;
-  font-size: 0.58rem;
 }
-.ff-dark-workspace .ff-compact-pomodoro-controls { z-index: 1; margin-top: -0.45rem; gap: 0.45rem; }
-.ff-dark-workspace .ff-compact-pomodoro-controls button { width: 2.05rem; height: 2.05rem; color: #bdc9e6; }
+.ff-dark-workspace .ff-compact-pomodoro-controls button { color: #bdc9e6; }
 .ff-dark-workspace .ff-compact-pomodoro-controls button:nth-child(2) { box-shadow: 0 0 18px rgba(124, 108, 255, 0.26); }
 
-.ff-dark-workspace .ff-compact-calendar-month {
-  display: grid;
-  grid-template-columns: 1.5rem minmax(0, 1fr) 1.5rem;
-  align-items: center;
-  gap: 0.15rem;
-}
-.ff-dark-workspace .ff-compact-calendar-month > span { min-width: 0; }
-.ff-dark-workspace .ff-compact-calendar-month button {
-  display: grid;
-  width: 1.45rem;
-  height: 1.45rem;
-  place-items: center;
-  border: 0;
-  border-radius: 9999px;
-  background: transparent;
-  color: #a8b9e8;
-}
+.ff-dark-workspace .ff-compact-calendar-month button { color: #a8b9e8; }
 .ff-dark-workspace .ff-compact-calendar-month button:hover,
 .ff-dark-workspace .ff-compact-calendar-month button:focus-visible { background: rgba(124, 108, 255, 0.16); color: #f0efff; outline: none; }
 
-.ff-dark-workspace .ff-compact-weather-main { transform: translateY(0.75rem); }
-.ff-dark-workspace .ff-compact-weather-meta span svg { width: 1rem; height: 1rem; }
 
-.ff-dark-workspace .ff-compact-kpi-icon { width: 1.15rem; height: 1.15rem; filter: none; }
 .ff-dark-workspace .ff-compact-kpi-value { color: #f7f7ff !important; filter: none; text-shadow: none; }
 .ff-dark-workspace .ff-compact-kpi-label { color: #9da9c7 !important; }
-.ff-dark-workspace .ff-compact-goals-ring { width: min(42%, 10.5rem); }
-.ff-dark-workspace .ff-compact-goal-copy > span { color: #edf0ff; font-size: 0.78rem; font-weight: 600; }
+.ff-dark-workspace .ff-compact-goal-copy > span { color: #edf0ff; }
 
 .ff-dark-workspace .ff-compact-card-bookmarks {
-  border: 0 !important;
   background: linear-gradient(145deg, rgba(88, 118, 206, 0.84), rgba(20, 34, 75, 0.98)) !important;
 }
 .ff-dark-workspace .ff-compact-card-bookmarks > .ff-compact-object {
-  height: calc(100% - 2px);
-  margin: 1px;
-  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 82%, 0 100%);
   background: linear-gradient(145deg, rgba(32, 48, 94, 0.98), rgba(10, 18, 43, 0.99));
 }
 .ff-dark-workspace .ff-compact-bookmark-row > svg { color: #a9c6ff; }
@@ -3382,79 +3241,19 @@ html[data-ff-theme='light'] .ff-modal-panel label { color: var(--ff-text-seconda
 }
 
 /* Final cool theme composition: localized hero light, watch-face detail, and quieter structure. */
-.ff-dark-workspace .ff-compact-weather-main {
-  position: relative;
-  z-index: 0;
-  isolation: isolate;
-  transform: translateY(1.2rem);
-}
 .ff-dark-workspace .ff-compact-weather-main::before {
-  position: absolute;
-  z-index: -1;
-  inset: -1.2rem -1.5rem -1rem -1.25rem;
-  border-radius: 50%;
   background: radial-gradient(ellipse at center, rgba(87, 179, 239, 0.3), rgba(104, 91, 225, 0.16) 48%, transparent 76%);
-  content: '';
   filter: blur(16px);
-  pointer-events: none;
 }
-.ff-dark-workspace .ff-compact-weather-main > * { position: relative; z-index: 1; }
-.ff-dark-workspace .ff-compact-weather-temperature { letter-spacing: -0.09em; font-variant-numeric: tabular-nums; }
-
 .ff-dark-workspace .ff-compact-timer-ring-large::before {
-  inset: 0.7rem;
   background: repeating-conic-gradient(from -2deg, rgba(213, 230, 255, 0.82) 0 1.1deg, transparent 1.1deg 6deg);
   opacity: 0.92;
-  -webkit-mask: radial-gradient(transparent calc(100% - 3px), #000 calc(100% - 1px));
-  mask: radial-gradient(transparent calc(100% - 3px), #000 calc(100% - 1px));
 }
 .ff-dark-workspace .ff-compact-timer-ring-large::after {
-  position: absolute;
-  z-index: 0;
-  inset: 0.46rem;
-  border-radius: 9999px;
   background: repeating-conic-gradient(from -2deg, rgba(239, 245, 255, 0.98) 0 2.8deg, transparent 2.8deg 30deg);
-  content: '';
-  pointer-events: none;
-  -webkit-mask: radial-gradient(transparent calc(100% - 4px), #000 calc(100% - 1px));
-  mask: radial-gradient(transparent calc(100% - 4px), #000 calc(100% - 1px));
 }
-.ff-dark-workspace .ff-compact-pomodoro-controls { margin-top: -0.2rem; }
 
-.ff-dark-workspace .ff-compact-analytics-grid { background: transparent; }
-.ff-dark-workspace .ff-compact-kpi {
-  align-items: center;
-  gap: 0.45rem;
-  padding: 0.45rem 0.65rem;
-  text-align: center;
-}
-.ff-dark-workspace .ff-compact-kpi-icon { margin-bottom: 0.15rem; }
-.ff-dark-workspace .ff-compact-kpi-value { margin-top: 0.08rem; }
-.ff-dark-workspace .ff-compact-kpi-label { margin-top: 0.08rem; }
-
-.ff-dark-workspace .ff-compact-status-summary {
-  gap: 0.65rem;
-  border-bottom: 0 !important;
-  padding-bottom: 0.1rem;
-}
-.ff-dark-workspace .ff-compact-status-summary::before,
-.ff-dark-workspace .ff-compact-status-summary::after,
-.ff-dark-workspace .ff-compact-task-completion::before,
-.ff-dark-workspace .ff-compact-task-completion::after { display: none !important; }
-.ff-dark-workspace .ff-compact-status-summary > div {
-  gap: 0.04rem;
-  padding-inline: 0.18rem;
-}
-.ff-dark-workspace .ff-compact-status-marker { width: 1.1rem; height: 1.1rem; }
-.ff-dark-workspace .ff-compact-status-summary > div + div { border-left: 0 !important; }
-.ff-dark-workspace .ff-compact-task-progress-ring {
-  width: 9.55rem;
-  height: 9.55rem;
-  margin-top: 0.35rem;
-}
-.ff-dark-workspace .ff-compact-task-completion { border: 0 !important; transform: translateY(0.35rem); }
-.ff-dark-workspace .ff-compact-relevant-task { border-top: 0 !important; padding-top: 0.15rem; }
-
+.ff-dark-workspace .ff-compact-analytics-grid { background: rgba(18, 29, 63, 0.24); }
 .ff-dark-workspace .ff-compact-card-bookmarks {
   background: linear-gradient(145deg, rgba(139, 178, 255, 0.96), rgba(74, 183, 219, 0.9) 55%, rgba(80, 108, 201, 0.96)) !important;
 }
@@ -3626,427 +3425,7 @@ html[data-ff-theme='light'] .ff-modal-panel label { color: #e5c5d5 !important; }
   .ff-light-workspace .ff-mobile-sticky-actions .ff-glass-control { border-color: rgba(255, 148, 197, 0.28) !important; background: rgba(65, 20, 57, 0.82) !important; color: #ffe5f0 !important; }
   .ff-light-workspace .ff-mobile-sticky-actions .ff-glass-control-primary { background: rgba(197, 53, 133, 0.82) !important; }
 }
-/* HOT structural parity lock: COOL remains the geometry source of truth. */
-.ff-light-workspace .ff-compact-task-body { gap: 0; }
-.ff-light-workspace .ff-compact-status-summary {
-  gap: 0.65rem;
-  border-bottom: 0 !important;
-  padding-bottom: 0.1rem;
-}
-.ff-light-workspace .ff-compact-status-summary::before,
-.ff-light-workspace .ff-compact-status-summary::after,
-.ff-light-workspace .ff-compact-task-completion::before,
-.ff-light-workspace .ff-compact-task-completion::after { display: none !important; }
-.ff-light-workspace .ff-compact-status-summary > div {
-  gap: 0.04rem;
-  padding-inline: 0.18rem;
-}
-.ff-light-workspace .ff-compact-status-summary > div + div { border-left: 0 !important; }
-.ff-light-workspace .ff-compact-status-marker {
-  display: grid;
-  width: 1.18rem;
-  height: 1.18rem;
-  margin: 0;
-  flex: 0 0 auto;
-  place-items: center;
-  border: 1.5px solid #ed9bc7;
-  border-radius: 9999px;
-  color: #fff1f8;
-  font-size: 0;
-  line-height: 1;
-}
-.ff-light-workspace .ff-compact-status-marker-in-progress { border-color: #ef9b76; background: rgba(239, 155, 118, 0.14); }
-.ff-light-workspace .ff-compact-status-marker-done { border-color: transparent; background: var(--ff-accent-green); color: #1b2730; }
-.ff-light-workspace .ff-compact-task-progress-ring { width: 10rem; height: 10rem; margin-top: 0.45rem; }
-.ff-light-workspace .ff-compact-task-completion { border: 0 !important; transform: translateY(0.75rem); }
-.ff-light-workspace .ff-compact-relevant-task { border-top: 0 !important; padding-top: 0.1rem; }
-
-.ff-light-workspace .ff-compact-pomodoro-body { position: relative; }
-.ff-light-workspace .ff-compact-pomodoro-tools {
-  position: absolute;
-  top: -0.15rem;
-  right: 0;
-  left: 0;
-  z-index: 2;
-  display: flex;
-  justify-content: space-between;
-  pointer-events: none;
-}
-.ff-light-workspace .ff-compact-pomodoro-tools button {
-  display: grid;
-  width: 1.7rem;
-  height: 1.7rem;
-  place-items: center;
-  border: 0;
-  border-radius: 9999px;
-  background: transparent;
-  pointer-events: auto;
-}
-.ff-light-workspace .ff-compact-timer-ring-large {
-  display: flex;
-  width: 9.5rem;
-  height: 9.5rem;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  gap: 0.18rem;
-}
-.ff-light-workspace .ff-compact-timer-ring-large::before {
-  inset: 0.92rem;
-  opacity: 1;
-  -webkit-mask: radial-gradient(transparent calc(100% - 5px), #000 calc(100% - 2px));
-  mask: radial-gradient(transparent calc(100% - 5px), #000 calc(100% - 2px));
-}
-.ff-light-workspace .ff-compact-timer-ring-large::after {
-  inset: 0.62rem;
-  -webkit-mask: radial-gradient(transparent calc(100% - 6px), #000 calc(100% - 1px));
-  mask: radial-gradient(transparent calc(100% - 6px), #000 calc(100% - 1px));
-}
-.ff-light-workspace .ff-compact-timer-ring-large > span,
-.ff-light-workspace .ff-compact-timer-ring-large > small,
-.ff-light-workspace .ff-compact-timer-ring-large > .ff-compact-skip { position: relative; z-index: 1; }
-.ff-light-workspace .ff-compact-pomodoro-controls { z-index: 1; margin-top: -0.2rem; gap: 0.45rem; }
-
-.ff-light-workspace .ff-compact-weather-main {
-  position: relative;
-  z-index: 0;
-  isolation: isolate;
-  transform: translateY(1.2rem);
-}
-.ff-light-workspace .ff-compact-weather-main::before {
-  position: absolute;
-  z-index: -1;
-  inset: -1.2rem -1.5rem -1rem -1.25rem;
-  border-radius: 50%;
-  content: '';
-  filter: blur(16px);
-  pointer-events: none;
-}
-.ff-light-workspace .ff-compact-weather-main > * { position: relative; z-index: 1; }
-.ff-light-workspace .ff-compact-weather-visual {
-  position: relative;
-  display: grid;
-  width: 5.2rem;
-  height: 4.6rem;
-  flex: 0 0 auto;
-  place-items: center;
-}
-.ff-light-workspace .ff-compact-weather-visual::before {
-  position: absolute;
-  inset: 0.2rem;
-  border-radius: 9999px;
-  content: '';
-  filter: blur(8px);
-}
-.ff-light-workspace .ff-compact-weather-visual svg {
-  position: relative;
-  z-index: 1;
-  width: 5.1rem;
-  height: 3.7rem;
-  overflow: visible;
-  stroke-width: 1.25;
-}
-.ff-light-workspace .ff-compact-weather-meta span { display: inline-flex; align-items: center; gap: 0.3rem; }
-
-.ff-light-workspace .ff-compact-analytics-grid { background: transparent; }
-
-/* Desktop geometry parity: both themes share the same composition and differ only in paint. */
-@media (min-width: 640px) {
-  .ff-dark-workspace .ff-dashboard-stage,
-  .ff-light-workspace .ff-dashboard-stage {
-    padding-top: 0;
-  }
-
-  .ff-dark-workspace .ff-compact-status-summary > div,
-  .ff-light-workspace .ff-compact-status-summary > div {
-    align-items: center;
-  }
-
-  .ff-dark-workspace .ff-compact-status-marker,
-  .ff-light-workspace .ff-compact-status-marker {
-    display: grid;
-    width: 1.1rem;
-    height: 1.1rem;
-    margin: 0 auto 0.12rem;
-    flex: 0 0 auto;
-    place-items: center;
-  }
-
-  .ff-dark-workspace .ff-compact-goals-object,
-  .ff-light-workspace .ff-compact-goals-object {
-    gap: 0.8rem;
-  }
-
-  .ff-dark-workspace .ff-compact-goals-ring,
-  .ff-light-workspace .ff-compact-goals-ring {
-    width: min(38%, 9.25rem);
-  }
-
-  .ff-dark-workspace .ff-compact-goals-list,
-  .ff-light-workspace .ff-compact-goals-list {
-    gap: 0.62rem;
-  }
-
-  .ff-dark-workspace .ff-compact-calendar-month,
-  .ff-light-workspace .ff-compact-calendar-month {
-    display: grid;
-    grid-template-columns: 1.5rem minmax(0, 1fr) 1.5rem;
-    align-items: center;
-    gap: 0.15rem;
-  }
-
-  .ff-dark-workspace .ff-compact-calendar-month > span,
-  .ff-light-workspace .ff-compact-calendar-month > span {
-    min-width: 0;
-  }
-
-  .ff-dark-workspace .ff-compact-calendar-month button,
-  .ff-light-workspace .ff-compact-calendar-month button {
-    display: grid;
-    width: 1.45rem;
-    height: 1.45rem;
-    place-items: center;
-  }
-
-  .ff-dark-workspace .ff-compact-news-story,
-  .ff-light-workspace .ff-compact-news-story {
-    align-items: center;
-    padding-top: 0.5rem;
-    padding-bottom: 0.5rem;
-  }
-
-  .ff-dark-workspace .ff-compact-news-story > .min-w-0,
-  .ff-light-workspace .ff-compact-news-story > .min-w-0 {
-    flex: 1;
-  }
-
-  .ff-dark-workspace .ff-compact-news-image,
-  .ff-light-workspace .ff-compact-news-image {
-    width: clamp(6rem, 28%, 11rem);
-    height: 4.6rem;
-    max-width: 11rem;
-  }
-
-  .ff-dark-workspace .ff-compact-news-chevron,
-  .ff-light-workspace .ff-compact-news-chevron {
-    flex: 0 0 auto;
-  }
-
-  .ff-dark-workspace .ff-compact-kpi-icon,
-  .ff-light-workspace .ff-compact-kpi-icon {
-    width: 1.15rem;
-    height: 1.15rem;
-    margin-bottom: 0.15rem;
-    opacity: 0.96;
-    filter: none;
-    transform: translateY(-0.2rem);
-    stroke-width: 1.75;
-  }
-
-  .ff-dark-workspace .ff-compact-pomodoro-body,
-  .ff-light-workspace .ff-compact-pomodoro-body {
-    position: relative;
-  }
-
-  .ff-dark-workspace .ff-compact-pomodoro-tools,
-  .ff-light-workspace .ff-compact-pomodoro-tools {
-    position: absolute;
-    top: -0.15rem;
-    right: 0;
-    left: 0;
-    z-index: 2;
-    display: flex;
-    justify-content: space-between;
-    pointer-events: none;
-  }
-
-  .ff-dark-workspace .ff-compact-pomodoro-tools button,
-  .ff-light-workspace .ff-compact-pomodoro-tools button {
-    display: grid;
-    width: 1.7rem;
-    height: 1.7rem;
-    place-items: center;
-    pointer-events: auto;
-  }
-
-  .ff-dark-workspace .ff-compact-timer-ring-large,
-  .ff-light-workspace .ff-compact-timer-ring-large {
-    position: relative;
-    display: flex;
-    width: 9.5rem;
-    height: 9.5rem;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    gap: 0.18rem;
-    border-width: 0.42rem;
-    isolation: isolate;
-  }
-
-  .ff-dark-workspace .ff-compact-timer-ring-large::before,
-  .ff-light-workspace .ff-compact-timer-ring-large::before {
-    position: absolute;
-    z-index: 0;
-    inset: 0.7rem;
-    border-radius: 9999px;
-    content: '';
-    pointer-events: none;
-    -webkit-mask: radial-gradient(transparent calc(100% - 3px), #000 calc(100% - 1px));
-    mask: radial-gradient(transparent calc(100% - 3px), #000 calc(100% - 1px));
-  }
-
-  .ff-dark-workspace .ff-compact-timer-ring-large::after,
-  .ff-light-workspace .ff-compact-timer-ring-large::after {
-    position: absolute;
-    z-index: 0;
-    inset: 0.46rem;
-    border-radius: 9999px;
-    content: '';
-    pointer-events: none;
-    -webkit-mask: radial-gradient(transparent calc(100% - 4px), #000 calc(100% - 1px));
-    mask: radial-gradient(transparent calc(100% - 4px), #000 calc(100% - 1px));
-  }
-
-  .ff-dark-workspace .ff-compact-timer-ring-large > span,
-  .ff-light-workspace .ff-compact-timer-ring-large > span {
-    position: relative;
-    z-index: 1;
-    font-size: 1.6rem;
-  }
-
-  .ff-dark-workspace .ff-compact-timer-ring-large > small,
-  .ff-light-workspace .ff-compact-timer-ring-large > small {
-    position: relative;
-    z-index: 1;
-    max-width: 7rem;
-  }
-
-  .ff-dark-workspace .ff-compact-timer-ring-large > .ff-compact-skip,
-  .ff-light-workspace .ff-compact-timer-ring-large > .ff-compact-skip {
-    position: relative;
-    z-index: 1;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.08rem;
-    margin-top: 0.08rem;
-    padding: 0.15rem 0.25rem;
-    font-size: 0.58rem;
-  }
-
-  .ff-dark-workspace .ff-compact-pomodoro-controls,
-  .ff-light-workspace .ff-compact-pomodoro-controls {
-    z-index: 1;
-    margin-top: -0.2rem;
-    gap: 0.45rem;
-  }
-
-  .ff-dark-workspace .ff-compact-pomodoro-controls button,
-  .ff-light-workspace .ff-compact-pomodoro-controls button {
-    width: 2.05rem;
-    height: 2.05rem;
-  }
-
-  .ff-dark-workspace .ff-compact-task-progress-ring,
-  .ff-light-workspace .ff-compact-task-progress-ring {
-    width: 8.9rem;
-    height: 8.9rem;
-    margin-top: 0.35rem;
-  }
-
-  .ff-dark-workspace .ff-compact-task-completion,
-  .ff-light-workspace .ff-compact-task-completion {
-    border: 0 !important;
-    transform: translateY(0.35rem);
-  }
-
-  .ff-dark-workspace .ff-compact-relevant-task,
-  .ff-light-workspace .ff-compact-relevant-task {
-    padding-top: 0.15rem;
-  }
-
-  .ff-dark-workspace .ff-compact-calendar-month,
-  .ff-light-workspace .ff-compact-calendar-month {
-    font-family: inherit;
-    font-size: 1.08rem;
-    font-weight: 700;
-    line-height: normal;
-    letter-spacing: 0.01em;
-    text-transform: none;
-    font-feature-settings: normal;
-  }
-
-  .ff-dark-workspace .ff-compact-calendar-weekdays,
-  .ff-light-workspace .ff-compact-calendar-weekdays {
-    font-size: 0.68rem;
-    font-weight: 600;
-    line-height: normal;
-  }
-
-  .ff-dark-workspace .ff-compact-calendar-cell,
-  .ff-light-workspace .ff-compact-calendar-cell {
-    font-size: 0.78rem;
-    line-height: 1;
-  }
-
-  .ff-dark-workspace .ff-compact-weather-main,
-  .ff-light-workspace .ff-compact-weather-main {
-    gap: 0.85rem;
-  }
-
-  .ff-dark-workspace .ff-compact-weather-copy,
-  .ff-light-workspace .ff-compact-weather-copy {
-    display: grid;
-    gap: 0.15rem;
-  }
-
-  .ff-dark-workspace .ff-compact-weather-temperature,
-  .ff-light-workspace .ff-compact-weather-temperature {
-    font-size: 2.2rem;
-    font-weight: 700;
-    line-height: 1;
-    letter-spacing: normal;
-    font-variant-numeric: normal;
-  }
-
-  .ff-dark-workspace .ff-compact-weather-copy > p:first-of-type,
-  .ff-light-workspace .ff-compact-weather-copy > p:first-of-type {
-    font-size: 0.875rem;
-    font-weight: 500;
-    line-height: 1.25;
-  }
-
-  .ff-dark-workspace .ff-compact-weather-copy > p:last-of-type,
-  .ff-light-workspace .ff-compact-weather-copy > p:last-of-type {
-    font-size: 0.75rem;
-    line-height: 1rem;
-  }
-}
-.ff-light-workspace .ff-compact-kpi {
-  align-items: center;
-  gap: 0.45rem;
-  padding: 0.45rem 0.65rem;
-  text-align: center;
-}
-.ff-light-workspace .ff-compact-kpi-icon { width: 1.15rem; height: 1.15rem; margin-bottom: 0.15rem; filter: none; transform: translateY(-0.2rem); }
-
-.ff-light-workspace .ff-compact-card-bookmarks {
-  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 82%, 0 100%);
-  border: 0 !important;
-  border-radius: 1rem 1rem 0.8rem 0.8rem;
-}
-.ff-light-workspace .ff-compact-card-bookmarks > .ff-compact-object {
-  height: calc(100% - 2.5px);
-  margin: 1.25px;
-  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 82%, 0 100%);
-  padding-bottom: 1.75rem;
-}
-
-.ff-light-workspace .ff-compact-card-notes .ff-compact-object { padding: 0; }
-.ff-light-workspace .ff-compact-card-notes .ff-compact-note-paper {
-  padding: 1rem 1.55rem 1rem 1rem;
-  background: transparent !important;
-  box-shadow: none;
-}
+.ff-light-workspace .ff-compact-analytics-grid { background: rgba(73, 25, 64, 0.68); }
 
 @media (min-width: 640px) {
   .ff-light-workspace .ff-topbar .ff-header-action,
