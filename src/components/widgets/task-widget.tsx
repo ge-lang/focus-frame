@@ -146,7 +146,7 @@ function TaskCard({
 
       {isEditing ? (
         // Edit mode
-        <div className="ml-4 space-y-2">
+        <div className="ff-task-edit-form ml-4 space-y-2">
           <input
             type="text"
             value={editState.title}
@@ -194,7 +194,7 @@ function TaskCard({
               onChange={(event) => onEditChange({ dueDate: event.target.value })}
               className="min-w-0 flex-1 rounded border border-gray-300 p-1 text-sm"
             />
-            {editState.dueDate && <button type="button" onClick={() => onEditChange({ dueDate: '' })} className="rounded border border-slate-200 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50">Clear</button>}
+            {editState.dueDate && <button type="button" onClick={() => onEditChange({ dueDate: '' })} className="ff-task-edit-clear rounded border border-slate-200 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50">Clear</button>}
           </div>
           <div className="flex space-x-1">
             <button

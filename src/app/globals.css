@@ -3744,3 +3744,67 @@ html[data-ff-theme='light'] .ff-modal-panel label { color: #e5c5d5 !important; }
   .ff-light-workspace .ff-topbar .ff-header-action:focus-visible,
   .ff-light-workspace .ff-topbar .ff-theme-control:focus-within { outline: 2px solid rgba(255, 157, 201, 0.5); outline-offset: 3px; }
 }
+
+/* HOT task edit fields: keep the full Tasks form on the dark plum surface. */
+.ff-light-workspace .ff-task-edit-form input,
+.ff-light-workspace .ff-task-edit-form textarea,
+.ff-light-workspace .ff-task-edit-form select {
+  border-color: rgba(255, 159, 194, 0.38) !important;
+  background: rgba(48, 14, 43, 0.94) !important;
+  color: #fff4f8 !important;
+  color-scheme: dark;
+}
+
+.ff-light-workspace .ff-task-edit-form input::placeholder,
+.ff-light-workspace .ff-task-edit-form textarea::placeholder {
+  color: #c89eaf !important;
+  opacity: 1;
+}
+
+.ff-light-workspace .ff-task-edit-form input:focus,
+.ff-light-workspace .ff-task-edit-form textarea:focus,
+.ff-light-workspace .ff-task-edit-form select:focus {
+  border-color: #f18bab !important;
+  box-shadow: 0 0 0 2px rgba(241, 139, 171, 0.18), 0 0 12px rgba(239, 126, 148, 0.16) !important;
+  outline: none;
+}
+
+.ff-light-workspace .ff-task-edit-form input[type='date'] {
+  color-scheme: dark;
+}
+
+.ff-light-workspace .ff-task-edit-form input[type='date']::-webkit-calendar-picker-indicator {
+  opacity: 0.9;
+  filter: invert(86%) sepia(18%) saturate(780%) hue-rotate(292deg) brightness(105%);
+}
+
+.ff-light-workspace .ff-task-edit-form select option {
+  background: #30102b;
+  color: #fff4f8;
+}
+
+.ff-light-workspace .ff-task-edit-form .ff-task-edit-clear {
+  border-color: rgba(255, 159, 194, 0.38) !important;
+  background: transparent !important;
+  color: #f3b0c8 !important;
+}
+
+.ff-light-workspace .ff-task-edit-form .ff-task-edit-clear:hover,
+.ff-light-workspace .ff-task-edit-form .ff-task-edit-clear:focus-visible {
+  border-color: rgba(255, 178, 211, 0.7) !important;
+  background: rgba(91, 26, 67, 0.52) !important;
+  color: #fff1f7 !important;
+}
+
+.ff-light-workspace .ff-task-edit-form > .flex.space-x-1 button:last-child {
+  border-color: rgba(255, 159, 194, 0.34) !important;
+  background: transparent !important;
+  color: #e8c4d2 !important;
+}
+
+.ff-light-workspace .ff-task-edit-form > .flex.space-x-1 button:last-child:hover,
+.ff-light-workspace .ff-task-edit-form > .flex.space-x-1 button:last-child:focus-visible {
+  border-color: rgba(255, 178, 211, 0.66) !important;
+  background: rgba(91, 26, 67, 0.46) !important;
+  color: #fff1f7 !important;
+}
