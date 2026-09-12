@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useWeather, useWeatherSearch, type WeatherLocation } from '@/hooks/useWeather';
 import { countries } from '@/lib/countries';
 import { findCountryForCity, getPopularCitiesForCountry, getWeatherDisplayName, resolveCountrySelection } from '@/lib/weather-location';
-import { WeatherArtScene } from '@/components/weather-art-scene';
+import { WeatherArtScene, WeatherArtSurface } from '@/components/weather-art-scene';
 import { DayArc, UvGauge, WindCompass } from '@/components/weather-instruments';
 import { calculateMoonPhase, formatMoonPhase, getTargetLocationDate } from '@/lib/weather-visual';
 import { useEffect, useRef, useState } from 'react';
@@ -157,7 +157,7 @@ export default function WeatherWidget({
 
   return (
     <AnimatedWidget contentRef={contentRef} dataWidgetId={widgetId} className="ff-weather-widget h-full">
-      <div className="ff-weather-full">
+      <WeatherArtSurface condition={weather.condition} isDay={weather.isDay} className="ff-weather-full">
         <header className="ff-weather-header">
           <div className="ff-weather-location-group">
             <MapPin className="ff-weather-location-icon" size={24} aria-hidden="true" />
@@ -294,6 +294,7 @@ export default function WeatherWidget({
               className="ff-weather-hero-layout"
               visualClassName="ff-weather-hero-visual"
               ariaLabel="Current conditions"
+              renderBackdrop={false}
             >
               <div className="ff-weather-reading">
                 <div className="ff-weather-temperature">
@@ -359,7 +360,7 @@ export default function WeatherWidget({
             {weather.error}
           </div>
         )}
-      </div>
+      </WeatherArtSurface>
     </AnimatedWidget>
   );
 }
