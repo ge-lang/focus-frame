@@ -1235,7 +1235,6 @@ body.ff-document-body {
 
        .ff-topbar .ff-theme-control select { color: transparent; }
        .ff-topbar .ff-theme-icon,
-       .ff-topbar .ff-edit-icon,
        .ff-topbar .ff-widget-icon { display: none; }
        .ff-topbar .ff-account-trigger { background: transparent; }
 .ff-topbar .ff-brand-subtitle { display: none; }
@@ -1817,9 +1816,9 @@ body.ff-document-body {
   background: transparent;
 }
 .ff-dark-workspace .ff-compact-status-badge-done {
-  border-color: transparent;
-  color: #fff;
-  background: var(--ff-accent-green);
+  border-color: var(--ff-accent-green);
+  color: var(--ff-accent-green);
+  background: transparent;
 }
 .ff-light-workspace .ff-compact-status-badge-todo {
   border-color: #ed9bc7;
@@ -1832,9 +1831,9 @@ body.ff-document-body {
   background: transparent;
 }
 .ff-light-workspace .ff-compact-status-badge-done {
-  border-color: transparent;
-  color: #fff;
-  background: var(--ff-accent-green);
+  border-color: var(--ff-accent-green);
+  color: var(--ff-accent-green);
+  background: transparent;
 }
 
 /* HOT EVVA energy: warm paint only, with the shared object geometry untouched. */
@@ -2224,10 +2223,10 @@ html[data-ff-theme='light'] .ff-modal-panel textarea { border-color: rgba(239, 1
     position: relative;
     display: flex;
     min-width: 0;
-    align-items: flex-end;
+    flex: 1 1 auto;
+    align-items: center;
     justify-content: center;
     gap: 0.85rem;
-    transform: translateY(1.2rem);
     isolation: isolate;
   }
   .ff-page-shell .ff-compact-weather-main::before {
@@ -2268,7 +2267,15 @@ html[data-ff-theme='light'] .ff-modal-panel textarea { border-color: rgba(239, 1
   .ff-page-shell .ff-compact-card-notes .ff-compact-object { padding: 0; }
   .ff-page-shell .ff-compact-card-notes .ff-compact-note-paper { padding: 1rem 1.55rem 1rem 1rem; }
 
-  .ff-page-shell .ff-compact-news-story { align-items: center; padding-top: 0.5rem; padding-bottom: 0.5rem; }
+  .ff-page-shell .ff-compact-news-story {
+    height: 100%;
+    align-items: center;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+  .ff-page-shell .ff-compact-news-story > .min-w-0,
+  .ff-page-shell .ff-compact-news-story > .ff-compact-news-image,
+  .ff-page-shell .ff-compact-news-story > .ff-compact-news-chevron { align-self: center; }
   .ff-page-shell .ff-compact-news-story > .min-w-0 { flex: 1; }
   .ff-page-shell .ff-compact-news-image { width: clamp(6rem, 28%, 11rem); height: 4.6rem; max-width: 11rem; flex: 0 0 auto; border-radius: 0.55rem; object-fit: cover; opacity: 0.86; }
 
@@ -3504,8 +3511,7 @@ html[data-ff-theme='light'] .ff-modal-panel label { color: var(--ff-text-seconda
 
 @media (min-width: 640px) {
   .ff-topbar .ff-brand-subtitle { display: block; }
-  .ff-topbar .ff-widget-icon,
-  .ff-topbar .ff-edit-icon { display: inline-flex; }
+  .ff-topbar .ff-widget-icon { display: inline-flex; }
   .ff-page-signature {
     display: flex;
     align-items: center;
