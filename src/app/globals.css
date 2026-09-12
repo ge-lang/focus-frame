@@ -3915,6 +3915,82 @@ html[data-ff-theme='light'] .ff-modal-panel label { color: #e5c5d5 !important; }
   gap: 1.5rem;
 }
 
+.ff-weather-art-scene {
+  position: relative;
+  isolation: isolate;
+}
+
+.ff-weather-art-backdrop,
+.ff-weather-art-grade {
+  position: absolute;
+  z-index: -2;
+  pointer-events: none;
+}
+
+.ff-weather-art-backdrop {
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.ff-weather-art-grade { z-index: -1; }
+
+.ff-weather-art-scene-full.has-weather-art .ff-weather-art-backdrop,
+.ff-weather-art-scene-full.has-weather-art .ff-weather-art-grade {
+  inset: -0.35rem -4.75rem -0.75rem;
+  border-radius: 2rem;
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 16%, #000 76%, transparent), linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(180deg, transparent, #000 16%, #000 76%, transparent), linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  mask-composite: intersect;
+}
+
+.ff-weather-art-scene-full.has-weather-art .ff-weather-art-backdrop {
+  background-position: center 93%;
+  opacity: 0.74;
+  filter: saturate(0.94) contrast(1.04) brightness(1.04);
+}
+
+.ff-weather-art-scene-full.has-weather-art .ff-weather-art-grade {
+  background:
+    linear-gradient(90deg, rgba(13, 20, 48, 0.02) 0%, rgba(13, 20, 48, 0.08) 43%, rgba(13, 20, 48, 0.48) 74%, rgba(13, 20, 48, 0.76) 100%),
+    linear-gradient(180deg, rgba(13, 20, 48, 0.14) 0%, transparent 30%, rgba(13, 20, 48, 0.06) 58%, rgba(26, 29, 58, 0.56) 100%);
+}
+
+.ff-weather-art-scene-full.has-weather-art .ff-weather-hero-visual {
+  width: 17rem;
+  height: 13.2rem;
+}
+
+.ff-weather-art-scene-full.has-weather-art .ff-weather-visual-stage::before { opacity: 0.58; }
+.ff-weather-art-scene-full.has-weather-art .ff-weather-visual-stage::after { opacity: 0.16; }
+
+.ff-weather-art-scene-compact.has-weather-art .ff-weather-art-backdrop,
+.ff-weather-art-scene-compact.has-weather-art .ff-weather-art-grade {
+  inset: -0.8rem -1.15rem -0.7rem;
+  border-radius: 1rem;
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 18%, #000 76%, transparent), linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(180deg, transparent, #000 18%, #000 76%, transparent), linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  mask-composite: intersect;
+}
+
+.ff-page-shell .ff-weather-art-scene-compact > .ff-weather-art-backdrop,
+.ff-page-shell .ff-weather-art-scene-compact > .ff-weather-art-grade { position: absolute; }
+.ff-page-shell .ff-weather-art-scene-compact > .ff-weather-art-backdrop { z-index: -2; }
+.ff-page-shell .ff-weather-art-scene-compact > .ff-weather-art-grade { z-index: -1; }
+
+.ff-weather-art-scene-compact.has-weather-art .ff-weather-art-backdrop {
+  background-position: center 93%;
+  opacity: 0.44;
+  filter: saturate(0.84) brightness(0.88);
+}
+
+.ff-weather-art-scene-compact.has-weather-art .ff-weather-art-grade {
+  background:
+    linear-gradient(90deg, rgba(12, 20, 48, 0.1), rgba(12, 20, 48, 0.54) 70%, rgba(12, 20, 48, 0.76)),
+    linear-gradient(180deg, rgba(12, 20, 48, 0.1), rgba(18, 25, 55, 0.66));
+}
+
 .ff-weather-visual-stage {
   position: relative;
   display: grid;
@@ -4007,6 +4083,18 @@ html[data-ff-theme='light'] .ff-modal-panel label { color: #e5c5d5 !important; }
   --ff-weather-accent: #ee91bd;
   --ff-weather-warm: #ffc15f;
 }
+.ff-light-workspace .ff-weather-art-scene-full.has-weather-art .ff-weather-art-backdrop { opacity: 0.68; filter: saturate(0.74) contrast(0.96) brightness(0.9); }
+.ff-light-workspace .ff-weather-art-scene-full.has-weather-art .ff-weather-art-grade {
+  background:
+    linear-gradient(90deg, rgba(51, 17, 48, 0.08), rgba(70, 22, 61, 0.2) 42%, rgba(55, 17, 51, 0.6) 72%, rgba(50, 20, 47, 0.84)),
+    linear-gradient(180deg, rgba(83, 25, 67, 0.2), transparent 30%, rgba(50, 20, 47, 0.72));
+}
+.ff-light-workspace .ff-weather-art-scene-compact.has-weather-art .ff-weather-art-backdrop { opacity: 0.38; filter: saturate(0.62) brightness(0.78); }
+.ff-light-workspace .ff-weather-art-scene-compact.has-weather-art .ff-weather-art-grade {
+  background:
+    linear-gradient(90deg, rgba(52, 17, 49, 0.28), rgba(55, 17, 51, 0.74) 68%, rgba(42, 14, 40, 0.88)),
+    linear-gradient(180deg, rgba(93, 28, 75, 0.2), rgba(45, 15, 42, 0.82));
+}
 .ff-light-workspace .ff-weather-sun { color: #ffc15f; }
 .ff-light-workspace .ff-weather-moon-object { color: #ffe9d7; }
 .ff-light-workspace .ff-weather-moon-shadow { fill: #37162f; }
@@ -4031,6 +4119,10 @@ html[data-ff-theme='light'] .ff-modal-panel label { color: #e5c5d5 !important; }
   .ff-weather-hero-layout { min-height: 8.3rem; grid-template-columns: minmax(8rem, 0.95fr) minmax(8.5rem, 1.05fr); gap: 0.45rem; }
   .ff-weather-visual-stage { min-height: 8rem; }
   .ff-weather-hero-visual { width: 10.25rem; height: 8.2rem; }
+  .ff-weather-art-scene-full.has-weather-art .ff-weather-art-backdrop,
+  .ff-weather-art-scene-full.has-weather-art .ff-weather-art-grade { inset: -0.15rem -1rem -0.35rem; }
+  .ff-weather-art-scene-full.has-weather-art .ff-weather-art-backdrop { background-position: center 82%; opacity: 0.58; }
+  .ff-weather-art-scene-full.has-weather-art .ff-weather-hero-visual { width: 11.5rem; height: 9rem; }
   .ff-weather-temperature { font-size: clamp(2.35rem, 12vw, 3.1rem); }
   .ff-weather-reading-city { margin-top: 0.25rem; font-size: 0.78rem; }
   .ff-weather-condition { font-size: 0.85rem; }

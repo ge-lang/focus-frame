@@ -10,6 +10,7 @@ interface WeatherIconProps {
   className?: string;
   date?: Date;
   isDay?: boolean;
+  suppressStars?: boolean;
 }
 
 const cloudPath = 'M14 58c0-9 7-16 16-16 3 0 6 1 8 2 4-10 13-16 24-16 14 0 25 9 27 22 7 1 12 6 12 13 0 8-6 14-14 14H29c-8 0-15-6-15-14Z';
@@ -98,7 +99,7 @@ function Moon({ phase, gradientId, earthshineGradientId }: { phase: MoonPhase; g
   );
 }
 
-export const WeatherVisual: React.FC<WeatherIconProps> = ({ icon, conditionCode, className = '', date, isDay }) => {
+export const WeatherVisual: React.FC<WeatherIconProps> = ({ icon, conditionCode, className = '', date, isDay, suppressStars = false }) => {
   const model = getWeatherVisualModel(conditionCode, icon, date, isDay);
   const visualId = React.useId().replace(/:/g, '');
   const sunGradientId = `ff-weather-sun-${visualId}`;
@@ -114,7 +115,7 @@ export const WeatherVisual: React.FC<WeatherIconProps> = ({ icon, conditionCode,
       </defs>
       <ellipse className="ff-weather-horizon-haze" cx="58" cy="73" rx="53" ry="13" aria-hidden="true" />
       <circle className="ff-weather-atmosphere" cx="58" cy="44" r="42" aria-hidden="true" />
-      {model.showStars ? <g className="ff-weather-stars" aria-hidden="true"><circle cx="22" cy="18" r="1.4" /><circle cx="84" cy="15" r="1.2" />{model.starCount > 2 ? <><circle cx="96" cy="43" r="1.5" /><circle cx="31" cy="48" r="1" /></> : null}</g> : null}
+      {model.showStars && !suppressStars ? <g className="ff-weather-stars" aria-hidden="true"><circle cx="22" cy="18" r="1.4" /><circle cx="84" cy="15" r="1.2" />{model.starCount > 2 ? <><circle cx="96" cy="43" r="1.5" /><circle cx="31" cy="48" r="1" /></> : null}</g> : null}
       {model.condition === 'clear' || model.condition === 'partlyCloudy' ? (model.primaryObject === 'sun' ? <Sun gradientId={sunGradientId} centered={model.condition === 'clear'} /> : <Moon gradientId={moonGradientId} earthshineGradientId={moonEarthshineGradientId} phase={model.moonPhase ?? { phaseName: 'New Moon', illuminationPercent: 0, illumination: 0, phaseFraction: 0, waxing: false }} />) : null}
       {model.showCloud ? <Cloud effects={model.condition === 'cloudy' || model.condition === 'overcast' || model.condition === 'partlyCloudy' ? null : model.condition} /> : null}
     </svg>

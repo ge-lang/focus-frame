@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useWeather, useWeatherSearch, type WeatherLocation } from '@/hooks/useWeather';
 import { countries } from '@/lib/countries';
 import { findCountryForCity, getPopularCitiesForCountry, getWeatherDisplayName, resolveCountrySelection } from '@/lib/weather-location';
-import { WeatherVisual } from '@/components/weather-icon';
+import { WeatherArtScene } from '@/components/weather-art-scene';
 import { DayArc, UvGauge, WindCompass } from '@/components/weather-instruments';
 import { calculateMoonPhase, formatMoonPhase, getTargetLocationDate } from '@/lib/weather-visual';
 import { useEffect, useRef, useState } from 'react';
@@ -284,10 +284,17 @@ export default function WeatherWidget({
 
         {!isEditing && (
           <main className="ff-weather-composition">
-            <section className="ff-weather-hero-layout" aria-label="Current conditions">
-              <div className="ff-weather-visual-stage">
-                <WeatherVisual icon={weather.icon} conditionCode={weather.conditionCode} isDay={weather.isDay} date={targetWeatherDate} className="ff-weather-hero-visual" />
-              </div>
+            <WeatherArtScene
+              condition={weather.condition}
+              isDay={weather.isDay}
+              icon={weather.icon}
+              conditionCode={weather.conditionCode}
+              date={targetWeatherDate}
+              variant="full"
+              className="ff-weather-hero-layout"
+              visualClassName="ff-weather-hero-visual"
+              ariaLabel="Current conditions"
+            >
               <div className="ff-weather-reading">
                 <div className="ff-weather-temperature">
                   {displayTemp}°{unit === 'celsius' ? 'C' : 'F'}
@@ -297,7 +304,7 @@ export default function WeatherWidget({
                 <div className="ff-weather-feels-like">Feels like {displayFeelsLike}°</div>
                 {!weather.isDay && (weather.condition === 'clear' || weather.condition === 'partlyCloudy') ? <div className="ff-weather-moon-caption">{formatMoonPhase(calculateMoonPhase(targetWeatherDate))}</div> : null}
               </div>
-            </section>
+            </WeatherArtScene>
 
             <section className="ff-weather-primary-row" aria-label="Humidity and wind">
               <div className="ff-weather-primary-reading">
