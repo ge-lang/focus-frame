@@ -1204,6 +1204,9 @@ body.ff-document-body {
   .ff-topbar .ff-header-action,
   .ff-topbar .ff-theme-control {
     min-height: 2rem;
+    width: 4.25rem;
+    min-width: 4.25rem;
+    justify-content: center;
     border: 0 !important;
     border-radius: 0;
     padding: 0.35rem 0.45rem;
@@ -2528,8 +2531,8 @@ html[data-ff-theme='light'] body.ff-document-body { background: #120b18; }
 .ff-light-workspace .ff-compact-card .text-slate-500,
 .ff-light-workspace .ff-compact-card .text-slate-400 { color: #cba8b9 !important; }
 
-.ff-light-workspace .ff-compact-status-marker { border-color: #ed9bc7; color: #fff1f8; }
-.ff-light-workspace .ff-compact-status-marker-in-progress { border-color: #ef9b76; background: rgba(239, 155, 118, 0.14); }
+.ff-light-workspace .ff-compact-status-marker { border-color: #ed9bc7; background: transparent; color: #fff1f8; }
+.ff-light-workspace .ff-compact-status-marker-in-progress { border-color: #ef9b76; background: transparent; }
 .ff-light-workspace .ff-compact-status-marker-done { border-color: transparent; background: var(--ff-accent-green); color: #1b2730; }
 .ff-light-workspace .ff-compact-task-progress-track { stroke: rgba(224, 177, 201, 0.2); }
 .ff-light-workspace .ff-compact-task-progress-value { stroke: #df4d9e; }
