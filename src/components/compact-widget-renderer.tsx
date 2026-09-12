@@ -51,6 +51,11 @@ export function shouldOpenCompactFocusView(targetIsInteractive: boolean, didMove
   return !targetIsInteractive && !didMove;
 }
 
+export function compactPomodoroControlAction(isRunning: boolean, hasSelectedTask: boolean): 'pause' | 'start' | 'open' {
+  if (isRunning) return 'pause';
+  return hasSelectedTask ? 'start' : 'open';
+}
+
 function CompactShell({ widget, onOpen, icon, children }: CompactWidgetProps & { icon: ReactNode; children: ReactNode }) {
   const pointerRef = useRef<{ x: number; y: number } | null>(null);
   const suppressClickRef = useRef(false);
@@ -246,7 +251,7 @@ function CompactNews({ widget, onOpen }: CompactWidgetProps) {
         {article.image ? (
           // News image URLs come from the provider and are intentionally rendered without a remote Next image allowlist.
           // eslint-disable-next-line @next/next/no-img-element
-          <img className="ff-compact-news-image" src={article.image} alt="" />
+          <span className="ff-compact-news-image-wrap"><img className="ff-compact-news-image" src={article.image} alt="" /></span>
         ) : <span className="ff-compact-news-index">0{index + 1}</span>}
         <span className="min-w-0">
           <strong className="ff-compact-news-headline">{article.title}</strong>
@@ -262,24 +267,35 @@ function CompactPomodoro({ widget, onOpen }: CompactWidgetProps) {
   const { state, startTimer, pauseTimer, stopTimer, resetTimer, skipToNext } = usePomodoro();
   const { data: tasks = [] } = useTasks();
   const { mode, isRunning, remainingSeconds, selectedTaskId } = state;
-  const task = tasks.find((candidate) => candidate.id === selectedTaskId)
-    ?? tasks.find((candidate) => !candidate.isCompleted && candidate.status !== 'done');
+  const task = tasks.find((candidate) => candidate.id === selectedTaskId);
   const time = `${Math.floor(remainingSeconds / 60).toString().padStart(2, '0')}:${(remainingSeconds % 60).toString().padStart(2, '0')}`;
   return <CompactShell widget={widget} onOpen={onOpen} icon={<Timer size={16} className="text-indigo-600" />}>
     <div className="ff-compact-pomodoro-body">
       <div className="ff-compact-pomodoro-tools" data-no-drag>
-        <button type="button" onClick={onOpen} aria-label="Open Pomodoro sound settings" title="Sound settings"><Bell size={13} /></button>
-        <button type="button" onClick={onOpen} aria-label="Open Pomodoro settings" title="Pomodoro settings"><Settings size={13} /></button>
+        <button type="button" onClick={(event) => { event.stopPropagation(); onOpen(); }} aria-label="Open Pomodoro sound settings" title="Sound settings"><Bell size={13} /></button>
+        <button type="button" onClick={(event) => { event.stopPropagation(); onOpen(); }} aria-label="Open Pomodoro settings" title="Pomodoro settings"><Settings size={13} /></button>
       </div>
       <div className="ff-compact-timer-ring ff-compact-timer-ring-large" role="timer" aria-label={`${time}, ${task?.title || 'No task selected'}`}>
         <span>{time}</span>
-        <small>{task?.title || 'No task selected'}</small>
-        <button type="button" data-no-drag onClick={skipToNext} className="ff-compact-action ff-compact-skip">Skip to {mode === 'work' ? 'break' : 'work'} <ChevronRight size={11} aria-hidden="true" /></button>
+        {task ? <small
+          data-no-drag
+          role="button"
+          tabIndex={0}
+          onClick={(event) => { event.stopPropagation(); onOpen(); }}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              event.stopPropagation();
+              onOpen();
+            }
+          }}
+        >{task.title}</small> : <small>No task selected</small>}
+        <button type="button" data-no-drag onClick={(event) => { event.stopPropagation(); skipToNext(); }} className="ff-compact-action ff-compact-skip">Skip to {mode === 'work' ? 'break' : 'work'} <ChevronRight size={11} aria-hidden="true" /></button>
       </div>
       <div className="ff-compact-pomodoro-controls" data-no-drag>
-        <button type="button" onClick={resetTimer} aria-label="Reset focus timer" title="Reset"><RotateCcw size={15} /></button>
-        <button type="button" onClick={isRunning ? pauseTimer : startTimer} aria-label={isRunning ? 'Pause focus timer' : 'Start focus timer'} title={isRunning ? 'Pause' : 'Start'}>{isRunning ? <Pause size={16} /> : <Play size={16} />}</button>
-        <button type="button" onClick={stopTimer} aria-label="Stop focus timer" title="Stop"><Square size={15} /></button>
+        <button type="button" onClick={(event) => { event.stopPropagation(); resetTimer(); }} aria-label="Reset focus timer" title="Reset"><RotateCcw size={15} /></button>
+        <button type="button" onClick={(event) => { event.stopPropagation(); const action = compactPomodoroControlAction(isRunning, Boolean(task)); if (action === 'pause') pauseTimer(); else if (action === 'start') startTimer(); else onOpen(); }} aria-label={isRunning ? 'Pause focus timer' : 'Start focus timer'} title={isRunning ? 'Pause' : 'Start'}>{isRunning ? <Pause size={16} /> : <Play size={16} />}</button>
+        <button type="button" onClick={(event) => { event.stopPropagation(); stopTimer(); }} aria-label="Stop focus timer" title="Stop"><Square size={15} /></button>
       </div>
     </div>
   </CompactShell>;

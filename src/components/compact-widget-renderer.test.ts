@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { compactPresentationLimits, getCompactCalendarGrid, shouldOpenCompactFocusView, summarizeCompactTasks } from './compact-widget-renderer';
+import { compactPomodoroControlAction, compactPresentationLimits, getCompactCalendarGrid, shouldOpenCompactFocusView, summarizeCompactTasks } from './compact-widget-renderer';
 import type { Task } from '@/types/task';
 
 const task = (overrides: Partial<Task>): Task => ({
@@ -45,5 +45,12 @@ describe('compact widget presentation helpers', () => {
     expect(shouldOpenCompactFocusView(false, false)).toBe(true);
     expect(shouldOpenCompactFocusView(true, false)).toBe(false);
     expect(shouldOpenCompactFocusView(false, true)).toBe(false);
+  });
+
+  it('starts or resumes compact Pomodoro in place only when a selected task exists', () => {
+    expect(compactPomodoroControlAction(false, true)).toBe('start');
+    expect(compactPomodoroControlAction(true, true)).toBe('pause');
+    expect(compactPomodoroControlAction(false, false)).toBe('open');
+    expect(compactPomodoroControlAction(true, false)).toBe('pause');
   });
 });
