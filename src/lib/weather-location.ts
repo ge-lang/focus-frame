@@ -53,6 +53,24 @@ export function findCountryForCity(city: string): string | undefined {
   )?.[0];
 }
 
+const verboseLocationPrefixes = [
+  /^city\s+of\s+/i,
+  /^municipality\s+of\s+/i,
+  /^metropolitan\s+city\s+of\s+/i,
+];
+
+/**
+ * Returns a concise presentation label without changing the provider's
+ * canonical location name or the value persisted in widget configuration.
+ */
+export function getWeatherDisplayName(locationName: string): string {
+  const trimmedName = locationName.trim();
+  return verboseLocationPrefixes.reduce(
+    (displayName, prefix) => displayName.replace(prefix, ''),
+    trimmedName,
+  );
+}
+
 function normalizeLocationPart(value: string | null | undefined): string {
   return (value ?? '').trim().toLocaleLowerCase();
 }

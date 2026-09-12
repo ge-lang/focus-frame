@@ -4,6 +4,7 @@ import {
   findCountryForCity,
   getDefaultCityForCountry,
   getPopularCitiesForCountry,
+  getWeatherDisplayName,
   resolveCountrySelection,
 } from './weather-location';
 
@@ -24,6 +25,12 @@ describe('weather location helpers', () => {
   it('finds the country for known cities', () => {
     expect(findCountryForCity('Paris')).toBe('FR');
     expect(findCountryForCity('unknown city')).toBeUndefined();
+  });
+
+  it('creates concise display labels without changing valid city names', () => {
+    expect(getWeatherDisplayName('City of Brussels')).toBe('Brussels');
+    expect(getWeatherDisplayName('Municipality of Rotterdam')).toBe('Rotterdam');
+    expect(getWeatherDisplayName('Mexico City')).toBe('Mexico City');
   });
 
   it('removes duplicate provider rows by city, region and country', () => {

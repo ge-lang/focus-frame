@@ -33,14 +33,39 @@ function Cloud({ effects = null }: { effects?: WeatherCondition | null }) {
   );
 }
 
-function Sun({ gradientId }: { gradientId: string }) {
-  return <g className="ff-weather-sun"><circle className="ff-weather-sun-halo" cx="38" cy="31" r="27" /><path className="ff-weather-sun-rays" d="M38 2v10m0 38v10M9 31h11m36 0h11M17 10l8 8m26 26 8 8M59 10l-8 8M25 44l-8 8" /><circle className="ff-weather-sun-disc" cx="38" cy="31" r="16" fill={`url(#${gradientId})`} /></g>;
+const sunRayAngles = Array.from({ length: 12 }, (_, index) => (index * Math.PI) / 6);
+
+function Sun({ gradientId, centered }: { gradientId: string; centered: boolean }) {
+  const centerX = centered ? 58 : 39;
+  const centerY = centered ? 43 : 32;
+  const radius = centered ? 23 : 17;
+  const innerRay = radius + 7;
+  const outerRay = radius + (centered ? 17 : 13);
+
+  return (
+    <g className="ff-weather-sun">
+      <circle className="ff-weather-sun-halo" cx={centerX} cy={centerY} r={radius + 17} />
+      <g className="ff-weather-sun-rays">
+        {sunRayAngles.map((angle) => (
+          <line
+            key={angle}
+            x1={centerX + Math.cos(angle) * innerRay}
+            y1={centerY + Math.sin(angle) * innerRay}
+            x2={centerX + Math.cos(angle) * outerRay}
+            y2={centerY + Math.sin(angle) * outerRay}
+          />
+        ))}
+      </g>
+      <circle className="ff-weather-sun-disc" cx={centerX} cy={centerY} r={radius} fill={`url(#${gradientId})`} />
+      <circle className="ff-weather-sun-glint" cx={centerX - radius * 0.28} cy={centerY - radius * 0.3} r={radius * 0.22} />
+    </g>
+  );
 }
 
 function moonLitPath(phaseFraction: number) {
   const centerX = 58;
-  const centerY = 34;
-  const radius = 24;
+  const centerY = 42;
+  const radius = 29;
   const fraction = ((phaseFraction % 1) + 1) % 1;
   if (fraction < 0.0625 || fraction >= 0.9375) return '';
   if (fraction >= 0.4375 && fraction < 0.5625) return `M ${centerX - radius} ${centerY} A ${radius} ${radius} 0 1 0 ${centerX + radius} ${centerY} A ${radius} ${radius} 0 1 0 ${centerX - radius} ${centerY}Z`;
@@ -54,12 +79,21 @@ function moonLitPath(phaseFraction: number) {
   return `M ${centerX} ${centerY - radius} ${outerArc} ${innerArc}Z`;
 }
 
-function Moon({ phase, gradientId }: { phase: MoonPhase; gradientId: string }) {
+function Moon({ phase, gradientId, earthshineGradientId }: { phase: MoonPhase; gradientId: string; earthshineGradientId: string }) {
   const litPath = moonLitPath(phase.phaseFraction);
   return (
     <g className="ff-weather-moon-object">
-      <circle className="ff-weather-moon-shadow" cx="58" cy="34" r="24" />
+      <circle className="ff-weather-moon-halo" cx="58" cy="42" r="40" />
+      <circle className="ff-weather-moon-shadow" cx="58" cy="42" r="29" />
+      <circle className="ff-weather-moon-earthshine" cx="58" cy="42" r="28.5" fill={`url(#${earthshineGradientId})`} />
+      <g className="ff-weather-moon-texture" aria-hidden="true">
+        <circle cx="47" cy="31" r="4.8" />
+        <circle cx="67" cy="51" r="5.6" />
+        <circle cx="52" cy="58" r="3.2" />
+        <circle cx="72" cy="34" r="2.8" />
+      </g>
       {litPath ? <path className="ff-weather-moon-disc" d={litPath} fill={`url(#${gradientId})`} /> : null}
+      <circle className="ff-weather-moon-rim" cx="58" cy="42" r="29" />
     </g>
   );
 }
@@ -69,16 +103,19 @@ export const WeatherVisual: React.FC<WeatherIconProps> = ({ icon, conditionCode,
   const visualId = React.useId().replace(/:/g, '');
   const sunGradientId = `ff-weather-sun-${visualId}`;
   const moonGradientId = `ff-weather-moon-${visualId}`;
+  const moonEarthshineGradientId = `ff-weather-earthshine-${visualId}`;
 
   return (
     <svg className={`ff-weather-svg ff-weather-state-${model.condition} ff-weather-${model.isDay ? 'day' : 'night'} ${className}`} viewBox="0 0 120 96" role="img" aria-label={model.isDay ? model.condition : `${model.condition}, ${model.moonPhase?.phaseName ?? 'night'}`} focusable="false">
       <defs>
         <radialGradient id={sunGradientId} cx="35%" cy="30%" r="75%"><stop offset="0" stopColor="white" stopOpacity="0.96" /><stop offset="0.72" stopColor="currentColor" stopOpacity="0.94" /><stop offset="1" stopColor="currentColor" stopOpacity="0.7" /></radialGradient>
         <radialGradient id={moonGradientId} cx="35%" cy="28%" r="75%"><stop offset="0" stopColor="white" stopOpacity="0.92" /><stop offset="0.8" stopColor="currentColor" stopOpacity="0.9" /><stop offset="1" stopColor="currentColor" stopOpacity="0.65" /></radialGradient>
+        <radialGradient id={moonEarthshineGradientId} cx="28%" cy="32%" r="78%"><stop offset="0" stopColor="currentColor" stopOpacity="0.19" /><stop offset="0.7" stopColor="currentColor" stopOpacity="0.065" /><stop offset="1" stopColor="currentColor" stopOpacity="0.015" /></radialGradient>
       </defs>
-      <circle className="ff-weather-atmosphere" cx="58" cy="44" r="34" aria-hidden="true" />
+      <ellipse className="ff-weather-horizon-haze" cx="58" cy="73" rx="53" ry="13" aria-hidden="true" />
+      <circle className="ff-weather-atmosphere" cx="58" cy="44" r="42" aria-hidden="true" />
       {model.showStars ? <g className="ff-weather-stars" aria-hidden="true"><circle cx="22" cy="18" r="1.4" /><circle cx="84" cy="15" r="1.2" />{model.starCount > 2 ? <><circle cx="96" cy="43" r="1.5" /><circle cx="31" cy="48" r="1" /></> : null}</g> : null}
-      {model.condition === 'clear' || model.condition === 'partlyCloudy' ? (model.primaryObject === 'sun' ? <Sun gradientId={sunGradientId} /> : <Moon gradientId={moonGradientId} phase={model.moonPhase ?? { phaseName: 'New Moon', illuminationPercent: 0, illumination: 0, phaseFraction: 0, waxing: false }} />) : null}
+      {model.condition === 'clear' || model.condition === 'partlyCloudy' ? (model.primaryObject === 'sun' ? <Sun gradientId={sunGradientId} centered={model.condition === 'clear'} /> : <Moon gradientId={moonGradientId} earthshineGradientId={moonEarthshineGradientId} phase={model.moonPhase ?? { phaseName: 'New Moon', illuminationPercent: 0, illumination: 0, phaseFraction: 0, waxing: false }} />) : null}
       {model.showCloud ? <Cloud effects={model.condition === 'cloudy' || model.condition === 'overcast' || model.condition === 'partlyCloudy' ? null : model.condition} /> : null}
     </svg>
   );

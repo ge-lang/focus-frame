@@ -5,7 +5,7 @@ import { ModalPortal } from '@/components/modal-portal';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useWeather, useWeatherSearch, type WeatherLocation } from '@/hooks/useWeather';
 import { countries } from '@/lib/countries';
-import { findCountryForCity, getPopularCitiesForCountry, resolveCountrySelection } from '@/lib/weather-location';
+import { findCountryForCity, getPopularCitiesForCountry, getWeatherDisplayName, resolveCountrySelection } from '@/lib/weather-location';
 import { WeatherVisual } from '@/components/weather-icon';
 import { DayArc, UvGauge, WindCompass } from '@/components/weather-instruments';
 import { calculateMoonPhase, formatMoonPhase, getTargetLocationDate } from '@/lib/weather-visual';
@@ -40,8 +40,6 @@ export default function WeatherWidget({
   const [isEditing, setIsEditing] = useState(false);
   const [inputCity, setInputCity] = useState(initialCity);
   const [countryCode, setCountryCode] = useState(initialCountryCode ?? findCountryForCity(initialCity) ?? '');
-  const [showDetails, setShowDetails] = useState(false);
-  const [isDesktop, setIsDesktop] = useState(false);
   const [unit, setUnit] = useState<'celsius' | 'fahrenheit'>('celsius');
   const contentRef = useRef<HTMLDivElement>(null);
   const { suggestions, isSearching } = useWeatherSearch(isEditing ? inputCity : '', countryCode || undefined);
@@ -69,15 +67,7 @@ export default function WeatherWidget({
       window.cancelAnimationFrame(frame);
       window.clearTimeout(settleTimer);
     };
-  }, [isDesktop, isEditing, onContentHeightChange, showDetails, weather.city, weather.loading, widgetId]);
-
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(min-width: 640px)');
-    const updateViewport = () => setIsDesktop(mediaQuery.matches);
-    updateViewport();
-    mediaQuery.addEventListener('change', updateViewport);
-    return () => mediaQuery.removeEventListener('change', updateViewport);
-  }, []);
+  }, [isEditing, onContentHeightChange, weather.city, weather.loading, widgetId]);
 
   // Temperature conversion
   const displayTemp = unit === 'celsius' ? weather.temp : Math.round((weather.temp * 9/5) + 32);
@@ -85,7 +75,10 @@ export default function WeatherWidget({
   const targetWeatherDate = getTargetLocationDate(new Date(), weather.location?.timezone ?? 0);
   const uvIndex = Math.min(Math.max(weather.uvIndex, 0), 11);
   const uvLabel = uvIndex < 3 ? 'Low' : uvIndex < 6 ? 'Moderate' : uvIndex < 8 ? 'High' : uvIndex < 11 ? 'Very High' : 'Extreme';
-  const detailsVisible = isDesktop || showDetails;
+  const displayCity = getWeatherDisplayName(weather.city);
+  const displayCountry = weather.country && weather.country !== 'Demo'
+    ? countries.find((country) => country.code === weather.country)?.name ?? weather.country
+    : '';
 
   const handleCityChange = (newCity: string, selectedCountry = countryCode, selectedLocation?: WeatherLocation) => {
     setLocation(selectedLocation ?? { name: newCity, country: selectedCountry || '' });
@@ -164,28 +157,41 @@ export default function WeatherWidget({
 
   return (
     <AnimatedWidget contentRef={contentRef} dataWidgetId={widgetId} className="ff-weather-widget h-full">
-      <div className="h-full flex flex-col">
-        {/* Header and controls */}
-        <div className="flex justify-between items-center mb-4">
-          <div className="flex items-center">
-            <MapPin size={18} className="text-gray-600 mr-2" />
-            <h3 className="widget-drag-handle cursor-grab select-none font-semibold text-lg text-gray-800 active:cursor-grabbing">
-              {title || 'Weather'}
-            </h3>
-            {isDemo && <span className="ml-2 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-500">Demo</span>}
+      <div className="ff-weather-full">
+        <header className="ff-weather-header">
+          <div className="ff-weather-location-group">
+            <MapPin className="ff-weather-location-icon" size={24} aria-hidden="true" />
+            <div className="ff-weather-location-copy">
+              <div className="ff-weather-title-row">
+                <h3 className="widget-drag-handle cursor-grab select-none active:cursor-grabbing">{title || 'Weather'}</h3>
+                {isDemo && <span className="ff-weather-demo-badge">Demo</span>}
+              </div>
+              <button type="button" onClick={() => setIsEditing(true)} className="ff-weather-location-button">
+                {displayCity}{displayCountry ? `, ${displayCountry}` : ''}
+              </button>
+            </div>
           </div>
-          
-          <div className="flex space-x-1">
+
+          <div className="ff-weather-controls">
             <button
+              type="button"
+              onClick={toggleUnit}
+              aria-label={`Switch to degrees ${unit === 'celsius' ? 'Fahrenheit' : 'Celsius'}`}
+              className="ff-weather-unit-control"
+            >
+              °{unit === 'celsius' ? 'C' : 'F'}
+            </button>
+            <button
+              type="button"
               aria-label="Change weather location"
               onClick={() => setIsEditing(true)}
-              className="p-1 text-gray-600 hover:text-gray-800 transition-colors"
+              className="ff-weather-settings-control"
               title="Change city"
             >
-              <Settings size={16} />
+              <Settings size={21} />
             </button>
           </div>
-        </div>
+        </header>
 
         {/* City editing mode */}
         <AnimatePresence>
@@ -276,126 +282,74 @@ export default function WeatherWidget({
           )}
         </AnimatePresence>
 
-        {/* Main weather information */}
         {!isEditing && (
-          <div className="flex-1">
-            {/* City and unit switcher */}
-            <div className="flex justify-between items-center mb-4">
-              <div 
-                onClick={() => setIsEditing(true)}
-                className="flex items-center cursor-pointer group"
-              >
-                <MapPin size={14} className="text-gray-600 mr-1" />
-                <span className="text-sm text-gray-700 group-hover:text-gray-900 transition-colors">
-                  {weather.city}{weather.country && weather.country !== 'Demo' ? `, ${countries.find((country) => country.code === weather.country)?.name ?? weather.country}` : ''}
-                </span>
+          <main className="ff-weather-composition">
+            <section className="ff-weather-hero-layout" aria-label="Current conditions">
+              <div className="ff-weather-visual-stage">
+                <WeatherVisual icon={weather.icon} conditionCode={weather.conditionCode} isDay={weather.isDay} date={targetWeatherDate} className="ff-weather-hero-visual" />
               </div>
-              
-              <button
-                onClick={toggleUnit}
-                aria-label={`Switch to degrees ${unit === 'celsius' ? 'Fahrenheit' : 'Celsius'}`}
-                className="rounded-full border border-slate-200 bg-white px-2 py-1 text-xs text-slate-700 transition-colors hover:bg-slate-50"
-              >
-                °{unit === 'celsius' ? 'C' : 'F'}
-              </button>
-            </div>
-
-            {/* Primary weather scene */}
-            <div className="ff-weather-scene ff-weather-hero mb-6">
-              <div className="ff-weather-scene-visual">
-                <WeatherVisual icon={weather.icon} conditionCode={weather.conditionCode} isDay={weather.isDay} date={targetWeatherDate} className="ff-weather-hero-icon" />
-              </div>
-              <div className="ff-weather-scene-copy">
-                <div className="ff-weather-hero-temperature text-4xl font-bold text-gray-800">
+              <div className="ff-weather-reading">
+                <div className="ff-weather-temperature">
                   {displayTemp}°{unit === 'celsius' ? 'C' : 'F'}
                 </div>
-                <div className="ff-weather-hero-city text-lg font-medium text-gray-700">{weather.city}</div>
-                <div className="ff-weather-hero-condition text-sm font-medium text-gray-700 capitalize">{weather.description}</div>
-                <div className="ff-weather-feels-like text-sm text-gray-600">Feels like {displayFeelsLike}°</div>
+                <div className="ff-weather-reading-city">{displayCity}</div>
+                <div className="ff-weather-condition">{weather.description}</div>
+                <div className="ff-weather-feels-like">Feels like {displayFeelsLike}°</div>
                 {!weather.isDay && (weather.condition === 'clear' || weather.condition === 'partlyCloudy') ? <div className="ff-weather-moon-caption">{formatMoonPhase(calculateMoonPhase(targetWeatherDate))}</div> : null}
               </div>
-            </div>
+            </section>
 
-            {/* Quick metrics */}
-            <div className="ff-weather-quick-metrics grid grid-cols-2 gap-3 mb-4">
-              <div className="ff-weather-primary-metric ff-semantic-accent ff-accent-violet">
-                <Droplets size={16} className="mx-auto mb-1 text-indigo-600" />
-                <div className="text-sm font-medium">{weather.humidity}%</div>
-                <div className="text-xs text-gray-600">Humidity</div>
+            <section className="ff-weather-primary-row" aria-label="Humidity and wind">
+              <div className="ff-weather-primary-reading">
+                <Droplets size={32} aria-hidden="true" />
+                <div>
+                  <strong>{weather.humidity}%</strong>
+                  <span>Humidity</span>
+                </div>
               </div>
-              
-              <div className="ff-weather-primary-metric ff-semantic-accent ff-accent-cyan">
-                <Wind size={16} className="mx-auto mb-1 text-indigo-600" />
-                <div className="text-sm font-medium">{weather.windSpeed} m/s</div>
-                <div className="text-xs text-gray-600">Wind</div>
+              <div className="ff-weather-primary-reading">
+                <Wind size={34} aria-hidden="true" />
+                <div>
+                  <strong>{weather.windSpeed} m/s</strong>
+                  <span>Wind</span>
+                </div>
               </div>
-            </div>
+            </section>
 
-            {/* Details button */}
-            <button
-              onClick={() => setShowDetails(!showDetails)}
-              className="ff-weather-details-toggle mb-4 text-sm font-medium text-slate-700 transition-colors"
-            >
-              <span>{showDetails ? 'Hide details' : 'Show details'}</span><span aria-hidden="true">{showDetails ? '⌃' : '⌄'}</span>
-            </button>
+            <section className="ff-weather-secondary-row" aria-label="Weather details">
+              <div className="ff-weather-secondary-reading">
+                <Gauge size={22} aria-hidden="true" />
+                <strong>{weather.pressure} hPa</strong>
+                <span>Pressure</span>
+              </div>
+              <div className="ff-weather-secondary-reading">
+                <Eye size={23} aria-hidden="true" />
+                <strong>{weather.visibility / 1000} km</strong>
+                <span>Visibility</span>
+              </div>
+              <div className="ff-weather-secondary-reading ff-weather-wind-direction">
+                <WindCompass degrees={weather.windDirection} />
+                <strong>{getWindDirection(weather.windDirection)} · {Math.round(weather.windDirection)}°</strong>
+                <span>Wind direction</span>
+              </div>
+              <div className="ff-weather-secondary-reading ff-weather-uv-reading">
+                <UvGauge value={uvIndex} />
+                <strong>{uvIndex}</strong>
+                <span>{uvLabel} · UV Index</span>
+              </div>
+            </section>
 
-            {/* Detailed information */}
-            <AnimatePresence>
-              {detailsVisible && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="ff-weather-expanded-details overflow-hidden"
-                >
-                  <div className="ff-weather-details ff-weather-detail-grid">
-                    <div className="ff-weather-detail-block ff-weather-infographic-cell ff-semantic-accent ff-accent-violet">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-gray-600">Pressure</span>
-                        <Gauge size={12} className="text-indigo-600" />
-                      </div>
-                      <div className="text-sm font-medium">{weather.pressure} hPa</div>
-                    </div>
-                    
-                    <div className="ff-weather-detail-block ff-weather-infographic-cell ff-semantic-accent ff-accent-cyan">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-gray-600">Visibility</span>
-                        <Eye size={12} className="text-indigo-600" />
-                      </div>
-                      <div className="text-sm font-medium">{weather.visibility / 1000} km</div>
-                    </div>
-                  
-                    <div className="ff-weather-detail-block ff-weather-infographic-cell ff-semantic-accent ff-accent-cyan">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-xs text-gray-600">Wind Direction</span>
-                        <WindCompass degrees={weather.windDirection} />
-                      </div>
-                      <div className="text-sm font-medium">
-                        {getWindDirection(weather.windDirection)} ({weather.windDirection}°)
-                      </div>
-                    </div>
-
-                    <div className="ff-weather-detail-block ff-weather-infographic-cell ff-semantic-accent ff-accent-amber">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-xs text-gray-600">UV Index</span>
-                        <UvGauge value={uvIndex} />
-                      </div>
-                      <div className="text-sm font-medium">
-                        {uvIndex} - {uvLabel}
-                      </div>
-                    </div>
-                    {weather.sunrise > 0 && weather.sunset > 0 ? <div className="ff-weather-day-arc-cell"><DayArc sunrise={weather.sunrise} sunset={weather.sunset} timezoneOffsetSeconds={weather.location?.timezone ?? 0} /></div> : null}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+            {weather.sunrise > 0 && weather.sunset > 0 ? (
+              <section className="ff-weather-day-section" aria-label="Sunrise and sunset">
+                <DayArc sunrise={weather.sunrise} sunset={weather.sunset} timezoneOffsetSeconds={weather.location?.timezone ?? 0} />
+              </section>
+            ) : null}
+          </main>
         )}
 
-        {/* Error status */}
         {weather.error && (
-          <div className="mt-2 rounded-lg border border-sky-200 bg-sky-50 p-2 text-center text-xs text-sky-700">
-            ℹ️ {weather.error}
+          <div className="ff-weather-error" role="status">
+            {weather.error}
           </div>
         )}
       </div>
