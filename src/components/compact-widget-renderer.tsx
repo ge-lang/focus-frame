@@ -31,11 +31,12 @@ import {
   Wind,
 } from 'lucide-react';
 import { AnimatedWidget } from '@/components/animated-widget';
-import { useAnalytics, useCreateFocusSession } from '@/hooks/use-analytics';
+import { useAnalytics } from '@/hooks/use-analytics';
 import { useNews } from '@/hooks/use-news';
 import { useTasks } from '@/hooks/use-tasks';
 import { useWeather } from '@/hooks/useWeather';
 import { useBookmarks, useCreateBookmark, useCreateGoal, useGoals, useNote, useSaveNote } from '@/hooks/use-personal-widgets';
+import { usePomodoro } from '@/contexts/pomodoro-context';
 import type { Widget, WidgetType } from '@/types/dashboard';
 import type { Task } from '@/types/task';
 
@@ -44,7 +45,6 @@ interface CompactWidgetProps {
   onOpen: () => void;
 }
 
-const compactPomodoroDurations = { work: 25 * 60, break: 5 * 60, longBreak: 15 * 60 } as const;
 export const compactPresentationLimits = { news: 2, bookmarks: 3, goals: 2, relevantTasks: 1 } as const;
 
 export function shouldOpenCompactFocusView(targetIsInteractive: boolean, didMove: boolean): boolean {
@@ -259,58 +259,12 @@ function CompactNews({ widget, onOpen }: CompactWidgetProps) {
 }
 
 function CompactPomodoro({ widget, onOpen }: CompactWidgetProps) {
-  const [seconds, setSeconds] = useState(25 * 60);
-  const [running, setRunning] = useState(false);
-  const [mode, setMode] = useState<'work' | 'break' | 'longBreak'>('work');
-  const [pomodoroCount, setPomodoroCount] = useState(0);
+  const { state, startTimer, pauseTimer, stopTimer, resetTimer, skipToNext } = usePomodoro();
   const { data: tasks = [] } = useTasks();
-  const { mutate: createFocusSession } = useCreateFocusSession();
-  const task = tasks.find((candidate) => !candidate.isCompleted && candidate.status !== 'done');
-  useEffect(() => {
-    if (!running) return;
-    const id = window.setInterval(() => setSeconds((value) => {
-      if (value <= 1) {
-        setRunning(false);
-        if (mode === 'work') {
-          createFocusSession({ duration: compactPomodoroDurations.work, type: 'work', ...(task ? { taskId: task.id } : {}) });
-          const nextCount = pomodoroCount + 1;
-          setPomodoroCount(nextCount);
-          const nextMode = nextCount % 4 === 0 ? 'longBreak' : 'break';
-          setMode(nextMode);
-          return compactPomodoroDurations[nextMode];
-        }
-        setMode('work');
-        return compactPomodoroDurations.work;
-      }
-      return value - 1;
-    }), 1000);
-    return () => window.clearInterval(id);
-  }, [createFocusSession, mode, pomodoroCount, running, task]);
-
-  const resetTimer = () => {
-    setRunning(false);
-    setSeconds(compactPomodoroDurations[mode]);
-  };
-
-  const stopTimer = () => {
-    setRunning(false);
-    setSeconds(compactPomodoroDurations.work);
-    setMode('work');
-  };
-
-  const skipToNext = () => {
-    setRunning(false);
-    if (mode === 'work') {
-      const nextMode = pomodoroCount > 0 && pomodoroCount % 4 === 0 ? 'longBreak' : 'break';
-      setMode(nextMode);
-      setSeconds(compactPomodoroDurations[nextMode]);
-    } else {
-      setMode('work');
-      setSeconds(compactPomodoroDurations.work);
-    }
-  };
-
-  const time = `${Math.floor(seconds / 60).toString().padStart(2, '0')}:${(seconds % 60).toString().padStart(2, '0')}`;
+  const { mode, isRunning, remainingSeconds, selectedTaskId } = state;
+  const task = tasks.find((candidate) => candidate.id === selectedTaskId)
+    ?? tasks.find((candidate) => !candidate.isCompleted && candidate.status !== 'done');
+  const time = `${Math.floor(remainingSeconds / 60).toString().padStart(2, '0')}:${(remainingSeconds % 60).toString().padStart(2, '0')}`;
   return <CompactShell widget={widget} onOpen={onOpen} icon={<Timer size={16} className="text-indigo-600" />}>
     <div className="ff-compact-pomodoro-body">
       <div className="ff-compact-pomodoro-tools" data-no-drag>
@@ -324,7 +278,7 @@ function CompactPomodoro({ widget, onOpen }: CompactWidgetProps) {
       </div>
       <div className="ff-compact-pomodoro-controls" data-no-drag>
         <button type="button" onClick={resetTimer} aria-label="Reset focus timer" title="Reset"><RotateCcw size={15} /></button>
-        <button type="button" onClick={() => setRunning((value) => !value)} aria-label={running ? 'Pause focus timer' : 'Start focus timer'} title={running ? 'Pause' : 'Start'}>{running ? <Pause size={16} /> : <Play size={16} />}</button>
+        <button type="button" onClick={isRunning ? pauseTimer : startTimer} aria-label={isRunning ? 'Pause focus timer' : 'Start focus timer'} title={isRunning ? 'Pause' : 'Start'}>{isRunning ? <Pause size={16} /> : <Play size={16} />}</button>
         <button type="button" onClick={stopTimer} aria-label="Stop focus timer" title="Stop"><Square size={15} /></button>
       </div>
     </div>

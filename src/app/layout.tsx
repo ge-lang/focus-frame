@@ -5,6 +5,7 @@ import './globals.css';
 import { SessionProviderWrapper } from '@/components/session-provider-wrapper';
 import QueryProvider from '@/providers/query-provider';
 import { DashboardProvider } from '@/contexts/dashboard-context';
+import { PomodoroProvider } from '@/contexts/pomodoro-context';
 import { ToastProvider } from '@/components/toast-provider';
 import { ThemeProvider } from '@/components/theme-provider';
 
@@ -18,7 +19,7 @@ export const metadata: Metadata = {
 // Create a client-side wrapper component
 function ProvidersWrapper({ children }: { children: React.ReactNode }) {
   return (
-    <SessionProviderWrapper><ThemeProvider><QueryProvider><ToastProvider><DashboardProvider>{children}</DashboardProvider></ToastProvider></QueryProvider></ThemeProvider></SessionProviderWrapper>
+    <SessionProviderWrapper><ThemeProvider><QueryProvider><ToastProvider><PomodoroProvider><DashboardProvider>{children}</DashboardProvider></PomodoroProvider></ToastProvider></QueryProvider></ThemeProvider></SessionProviderWrapper>
   );
 }
 

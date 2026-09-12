@@ -2,201 +2,36 @@
 'use client';
 import { AnimatedWidget } from '@/components/animated-widget';
 import { ModalPortal } from '@/components/modal-portal';
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { Play, Pause, Square, RotateCcw, Settings, Bell, BellOff } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useCreateFocusSession } from '@/hooks/use-analytics';
 import { useTasks } from '@/hooks/use-tasks';
 import { useUpdateUserSettings, useUserSettings } from '@/hooks/use-settings';
+import { usePomodoro } from '@/contexts/pomodoro-context';
+import { defaultPomodoroSettings } from '@/lib/pomodoro-timer';
 
 interface PomodoroWidgetProps {
   widgetId: string;
   title?: string;
 }
 
-type TimerMode = 'work' | 'break' | 'longBreak';
-
-interface PomodoroSettings {
-  workTime: number; // In minutes
-  breakTime: number;
-  longBreakTime: number;
-  longBreakInterval: number;
-  autoStartBreaks: boolean;
-  autoStartPomodoros: boolean;
-  soundEnabled: boolean;
-}
-
-const defaultSettings: PomodoroSettings = {
-  workTime: 25,
-  breakTime: 5,
-  longBreakTime: 15,
-  longBreakInterval: 4,
-  autoStartBreaks: true,
-  autoStartPomodoros: false,
-  soundEnabled: true,
-};
-
 export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps) {
-  const [timeLeft, setTimeLeft] = useState(25 * 60); // In seconds
-  const [isRunning, setIsRunning] = useState(false);
-  const [mode, setMode] = useState<TimerMode>('work');
-  const [pomodoroCount, setPomodoroCount] = useState(0);
   const [showSettings, setShowSettings] = useState(false);
-  const [settings, setSettings] = useState<PomodoroSettings>(defaultSettings);
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const handleTimerCompleteRef = useRef<() => void>(() => {});
-  const { mutate: createFocusSession } = useCreateFocusSession();
+  const {
+    state: pomodoro,
+    startTimer,
+    pauseTimer,
+    stopTimer,
+    resetTimer,
+    skipToNext,
+    selectTask,
+    updateSettings,
+    setSoundEnabled,
+  } = usePomodoro();
+  const { mode, isRunning, remainingSeconds: timeLeft, pomodoroCount, selectedTaskId, settings } = pomodoro;
   const { data: tasks = [] } = useTasks();
-  const [selectedTaskId, setSelectedTaskId] = useState('');
   const { data: userSettings } = useUserSettings();
   const { mutate: updateUserSettings } = useUpdateUserSettings();
-
-  // Initialize the audio context on first interaction
-  useEffect(() => {
-    const initAudio = () => {
-      if (!audioContextRef.current) {
-        const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-        if (AudioContext) {
-          audioContextRef.current = new AudioContext();
-        }
-      }
-    };
-
-    // Initialize audio on the first widget click
-    const handleClick = () => {
-      initAudio();
-      document.removeEventListener('click', handleClick);
-    };
-
-    document.addEventListener('click', handleClick);
-    return () => document.removeEventListener('click', handleClick);
-  }, []);
-
-  // Initialize time from the settings
-  useEffect(() => {
-    setTimeLeft(settings.workTime * 60);
-  }, [settings.workTime]);
-
-  // Timer
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    
-    if (isRunning && timeLeft > 0) {
-      interval = setInterval(() => {
-        setTimeLeft(time => time - 1);
-      }, 1000);
-    } else if (isRunning && timeLeft === 0) {
-      // Timer completed
-      handleTimerCompleteRef.current();
-    }
-    
-    return () => clearInterval(interval);
-  }, [isRunning, timeLeft]);
-
-  // Play the built-in sound
-  const playNotificationSound = () => {
-    if (!settings.soundEnabled || !audioContextRef.current) return;
-
-    try {
-      const audioContext = audioContextRef.current;
-      
-      // Create an oscillator to generate sound
-      const oscillator = audioContext.createOscillator();
-      const gainNode = audioContext.createGain();
-      
-      // Connect the nodes
-      oscillator.connect(gainNode);
-      gainNode.connect(audioContext.destination);
-      
-      // Configure two short beeps
-      oscillator.frequency.value = 800; // Pitch (Hz)
-      oscillator.type = 'sine'; // Wave type (sine)
-      
-      // Configure volume with a smooth fade-out
-      const now = audioContext.currentTime;
-      gainNode.gain.setValueAtTime(0, now);
-      gainNode.gain.linearRampToValueAtTime(0.3, now + 0.1); // Ramps up quickly
-      gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.3); // Fades out smoothly
-      
-      // Play the sound
-      oscillator.start(now);
-      oscillator.stop(now + 0.3); // Short 300 ms sound
-      
-    } catch (error) {
-      console.log('Sound playback error:', error);
-    }
-  };
-
-  const handleTimerComplete = () => {
-    // Play the notification sound
-    playNotificationSound();
-
-    if (userSettings?.notificationsEnabled && typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-      new Notification(mode === 'work' ? 'Focus session completed' : 'Break completed', {
-        body: mode === 'work' ? 'Great work. Time for a break.' : 'Ready for another focus session?',
-      });
-    }
-
-    createFocusSession({
-      duration: (mode === 'work' ? settings.workTime : mode === 'break' ? settings.breakTime : settings.longBreakTime) * 60,
-      type: mode === 'longBreak' ? 'long_break' : mode,
-      ...(mode === 'work' && selectedTaskId ? { taskId: selectedTaskId } : {}),
-    });
-    
-    if (mode === 'work') {
-      const newPomodoroCount = pomodoroCount + 1;
-      setPomodoroCount(newPomodoroCount);
-      
-      // Determine the next mode
-      const nextMode = newPomodoroCount % settings.longBreakInterval === 0 ? 'longBreak' : 'break';
-      setMode(nextMode);
-      setTimeLeft((nextMode === 'longBreak' ? settings.longBreakTime : settings.breakTime) * 60);
-      
-      if (settings.autoStartBreaks) {
-        setIsRunning(true);
-      } else {
-        setIsRunning(false);
-      }
-    } else {
-      // The break is over — return to work
-      setMode('work');
-      setTimeLeft(settings.workTime * 60);
-      
-      if (settings.autoStartPomodoros) {
-        setIsRunning(true);
-      } else {
-        setIsRunning(false);
-      }
-    }
-  };
-
-  handleTimerCompleteRef.current = handleTimerComplete;
-
-  const startTimer = () => setIsRunning(true);
-  const pauseTimer = () => setIsRunning(false);
-  const stopTimer = () => {
-    setIsRunning(false);
-    setTimeLeft(settings.workTime * 60);
-    setMode('work');
-  };
-  const resetTimer = () => {
-    setIsRunning(false);
-    setTimeLeft(mode === 'work' ? settings.workTime * 60 : 
-                mode === 'break' ? settings.breakTime * 60 : 
-                settings.longBreakTime * 60);
-  };
-
-  const skipToNext = () => {
-    setIsRunning(false);
-    if (mode === 'work') {
-      const nextMode = pomodoroCount > 0 && pomodoroCount % settings.longBreakInterval === 0 ? 'longBreak' : 'break';
-      setMode(nextMode);
-      setTimeLeft((nextMode === 'longBreak' ? settings.longBreakTime : settings.breakTime) * 60);
-    } else {
-      setMode('work');
-      setTimeLeft(settings.workTime * 60);
-    }
-  };
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -204,9 +39,7 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const progress = (timeLeft / (mode === 'work' ? settings.workTime * 60 : 
-                               mode === 'break' ? settings.breakTime * 60 : 
-                               settings.longBreakTime * 60)) * 100;
+  const progress = (timeLeft / pomodoro.durationSeconds) * 100;
 
   const getModeColor = () => {
     switch (mode) {
@@ -248,7 +81,7 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
           <div className="flex space-x-2">
             <button
               aria-label={settings.soundEnabled ? 'Turn sound off' : 'Turn sound on'}
-              onClick={() => setSettings({ ...settings, soundEnabled: !settings.soundEnabled })}
+              onClick={() => setSoundEnabled(!settings.soundEnabled)}
               className={`p-1 rounded-full ${
                 settings.soundEnabled ? 'text-green-600' : 'text-gray-400'
               }`}
@@ -287,7 +120,7 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
                     min="1"
                     max="60"
                     value={settings.workTime}
-                    onChange={(e) => setSettings({ ...settings, workTime: parseInt(e.target.value) || 1 })}
+                    onChange={(e) => updateSettings({ workTime: parseInt(e.target.value) || 1 })}
                     className="w-full p-1 border border-gray-300 rounded text-center"
                   />
                 </div>
@@ -298,7 +131,7 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
                     min="1"
                     max="30"
                     value={settings.breakTime}
-                    onChange={(e) => setSettings({ ...settings, breakTime: parseInt(e.target.value) || 1 })}
+                    onChange={(e) => updateSettings({ breakTime: parseInt(e.target.value) || 1 })}
                     className="w-full p-1 border border-gray-300 rounded text-center"
                   />
                 </div>
@@ -309,7 +142,7 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
                     min="1"
                     max="60"
                     value={settings.longBreakTime}
-                    onChange={(e) => setSettings({ ...settings, longBreakTime: parseInt(e.target.value) || 1 })}
+                    onChange={(e) => updateSettings({ longBreakTime: parseInt(e.target.value) || 1 })}
                     className="w-full p-1 border border-gray-300 rounded text-center"
                   />
                 </div>
@@ -320,7 +153,7 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
                     min="1"
                     max="10"
                     value={settings.longBreakInterval}
-                    onChange={(e) => setSettings({ ...settings, longBreakInterval: parseInt(e.target.value) || 1 })}
+                    onChange={(e) => updateSettings({ longBreakInterval: parseInt(e.target.value) || 1 })}
                     className="w-full p-1 border border-gray-300 rounded text-center"
                   />
                 </div>
@@ -330,7 +163,7 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
                   <input
                     type="checkbox"
                     checked={settings.autoStartBreaks}
-                    onChange={(e) => setSettings({ ...settings, autoStartBreaks: e.target.checked })}
+                    onChange={(e) => updateSettings({ autoStartBreaks: e.target.checked })}
                     className="mr-2"
                   />
                   Auto-start breaks
@@ -339,7 +172,7 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
                   <input
                     type="checkbox"
                     checked={settings.autoStartPomodoros}
-                    onChange={(e) => setSettings({ ...settings, autoStartPomodoros: e.target.checked })}
+                    onChange={(e) => updateSettings({ autoStartPomodoros: e.target.checked })}
                     className="mr-2"
                   />
                   Auto-start work sessions
@@ -380,7 +213,7 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
               </div>
               <div className="flex space-x-2 mt-3">
                 <button
-                  onClick={() => setSettings(defaultSettings)}
+                  onClick={() => updateSettings(defaultPomodoroSettings)}
                   className="flex-1 rounded-md border border-slate-200 bg-white px-2 py-1 text-xs text-slate-700 hover:bg-slate-50"
                 >
                   Reset to Defaults
@@ -458,7 +291,7 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
           {mode === 'work' && (
             <select
               value={selectedTaskId}
-              onChange={(event) => setSelectedTaskId(event.target.value)}
+              onChange={(event) => selectTask(event.target.value)}
               className="mb-4 w-full max-w-xs rounded-lg border border-slate-200 bg-slate-50 p-2 text-sm"
               aria-label="Task for this focus session"
             >
