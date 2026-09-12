@@ -6,15 +6,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useWeather, useWeatherSearch, type WeatherLocation } from '@/hooks/useWeather';
 import { countries } from '@/lib/countries';
 import { findCountryForCity, getPopularCitiesForCountry, resolveCountrySelection } from '@/lib/weather-location';
-import { WeatherIcon } from '@/components/weather-icon';
+import { WeatherVisual } from '@/components/weather-icon';
+import { calculateMoonPhase, formatMoonPhase } from '@/lib/weather-visual';
 import { useEffect, useRef, useState } from 'react';
 import { useDashboard } from '@/contexts/dashboard-context';
 import { 
   MapPin, 
   Settings, 
-  RefreshCw, 
-  Sunrise, 
-  Sunset, 
   Eye, 
   Wind, 
   Gauge,
@@ -39,11 +37,10 @@ export default function WeatherWidget({
   onContentHeightChange,
 }: WeatherWidgetProps) {
   const { updateWidgetConfig } = useDashboard();
-  const { weather, selectedLocation, setLocation, refresh, isDemo } = useWeather(initialCity, initialCountryCode);
+  const { weather, selectedLocation, setLocation, isDemo } = useWeather(initialCity, initialCountryCode);
   const [isEditing, setIsEditing] = useState(false);
   const [inputCity, setInputCity] = useState(initialCity);
   const [countryCode, setCountryCode] = useState(initialCountryCode ?? findCountryForCity(initialCity) ?? '');
-  const [isRefreshing, setIsRefreshing] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [unit, setUnit] = useState<'celsius' | 'fahrenheit'>('celsius');
   const contentRef = useRef<HTMLDivElement>(null);
@@ -96,12 +93,6 @@ export default function WeatherWidget({
     if (inputCity.trim()) {
       handleCityChange(inputCity.trim());
     }
-  };
-
-  const handleRefresh = async () => {
-    setIsRefreshing(true);
-    refresh();
-    window.setTimeout(() => setIsRefreshing(false), 400);
   };
 
   const resetLocationForm = () => {
@@ -179,15 +170,6 @@ export default function WeatherWidget({
           </div>
           
           <div className="flex space-x-1">
-            <button
-              aria-label="Refresh weather"
-              onClick={handleRefresh}
-              disabled={isRefreshing}
-              className="p-1 text-gray-600 hover:text-gray-800 transition-colors"
-              title="Refresh"
-            >
-              <RefreshCw size={16} className={isRefreshing ? 'animate-spin' : ''} />
-            </button>
             <button
               aria-label="Change weather location"
               onClick={() => setIsEditing(true)}
@@ -314,7 +296,7 @@ export default function WeatherWidget({
 
             {/* Primary metrics */}
             <div className="ff-weather-hero text-center mb-6">
-              <WeatherIcon icon={weather.icon} conditionCode={weather.conditionCode} className="ff-weather-hero-icon text-5xl mb-2 mx-auto" />
+              <WeatherVisual icon={weather.icon} conditionCode={weather.conditionCode} isDay={weather.isDay} className="ff-weather-hero-icon text-5xl mb-2 mx-auto" />
               
               <div className="ff-weather-hero-temperature text-4xl font-bold text-gray-800 mb-1">
                 {displayTemp}°{unit === 'celsius' ? 'C' : 'F'}
@@ -327,6 +309,7 @@ export default function WeatherWidget({
               <div className="ff-weather-feels-like text-sm text-gray-600">
                 Feels like {displayFeelsLike}°
               </div>
+              {!weather.isDay && weather.condition === 'clear' ? <div className="ff-weather-moon-caption">{formatMoonPhase(calculateMoonPhase())}</div> : null}
             </div>
 
             {/* Quick metrics */}
@@ -359,7 +342,7 @@ export default function WeatherWidget({
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
-                  className="ff-weather-expanded-details space-y-3 overflow-hidden"
+                  className="ff-weather-expanded-details overflow-hidden"
                 >
                   <div className="ff-weather-details grid grid-cols-2 gap-3">
                     <div className="ff-weather-detail-block ff-semantic-accent ff-accent-violet rounded-lg border border-slate-200 bg-slate-50 p-3">
@@ -377,29 +360,29 @@ export default function WeatherWidget({
                       </div>
                       <div className="text-sm font-medium">{weather.visibility / 1000} km</div>
                     </div>
-                  </div>
                   
-                  <div className="ff-weather-detail-block ff-semantic-accent ff-accent-cyan rounded-lg border border-slate-200 bg-slate-50 p-3">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs text-gray-600">Wind Direction</span>
-                      <Compass size={12} className="text-indigo-600" />
+                    <div className="ff-weather-detail-block ff-semantic-accent ff-accent-cyan rounded-lg border border-slate-200 bg-slate-50 p-3">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs text-gray-600">Wind Direction</span>
+                        <Compass size={12} className="text-indigo-600" />
+                      </div>
+                      <div className="text-sm font-medium">
+                        {getWindDirection(weather.windDirection)} ({weather.windDirection}°)
+                      </div>
                     </div>
-                    <div className="text-sm font-medium">
-                      {getWindDirection(weather.windDirection)} ({weather.windDirection}°)
-                    </div>
-                  </div>
 
-                  <div className="ff-weather-detail-block ff-semantic-accent ff-accent-amber rounded-lg border border-slate-200 bg-slate-50 p-3">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs text-gray-600">UV Index</span>
-                      <Thermometer size={12} className="text-amber-600" />
-                    </div>
-                    <div className="text-sm font-medium">
-                      {getUVIndex(weather.temp)} - {
-                        getUVIndex(weather.temp) < 3 ? 'Low' :
-                        getUVIndex(weather.temp) < 6 ? 'Moderate' :
-                        getUVIndex(weather.temp) < 8 ? 'High' : 'Very High'
-                      }
+                    <div className="ff-weather-detail-block ff-semantic-accent ff-accent-amber rounded-lg border border-slate-200 bg-slate-50 p-3">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs text-gray-600">UV Index</span>
+                        <Thermometer size={12} className="text-amber-600" />
+                      </div>
+                      <div className="text-sm font-medium">
+                        {getUVIndex(weather.temp)} - {
+                          getUVIndex(weather.temp) < 3 ? 'Low' :
+                          getUVIndex(weather.temp) < 6 ? 'Moderate' :
+                          getUVIndex(weather.temp) < 8 ? 'High' : 'Very High'
+                        }
+                      </div>
                     </div>
                   </div>
                 </motion.div>
