@@ -1423,7 +1423,7 @@ body.ff-document-body {
   display: flex;
   min-width: 0;
   flex-direction: column;
-  gap: 0.05rem;
+  gap: 0.28rem;
 }
 
 .ff-compact-status-summary span {
@@ -1438,6 +1438,25 @@ body.ff-document-body {
   color: var(--ff-text-primary, #18213b);
   font-size: 0.9rem;
   font-weight: 700;
+}
+
+.ff-compact-status-label {
+  color: var(--ff-text-muted, #7b849b);
+  font-size: 0.67rem;
+  line-height: 1;
+}
+
+.ff-compact-status-badge {
+  display: grid;
+  width: 1.75rem;
+  height: 1.75rem;
+  place-items: center;
+  border: 1.5px solid currentColor;
+  border-radius: 9999px;
+  color: var(--ff-text-primary, #18213b);
+  font-size: 0.85rem;
+  font-weight: 700;
+  line-height: 1;
 }
 
 .ff-compact-task-completion {
@@ -1650,7 +1669,7 @@ body.ff-document-body {
 .ff-compact-news-story {
   display: flex;
   min-width: 0;
-  align-items: flex-start;
+  align-items: center;
   gap: 0.7rem;
   padding: 0.3rem 0.75rem 0.3rem 0;
   color: inherit;
@@ -1784,6 +1803,38 @@ body.ff-document-body {
   }
   .ff-light-workspace .ff-topbar .ff-header-action:focus-visible,
   .ff-light-workspace .ff-topbar .ff-theme-control:focus-within { outline: 2px solid rgba(255, 157, 201, 0.5); outline-offset: 3px; }
+}
+
+/* Shared status-badge geometry; themes provide paint only. */
+.ff-dark-workspace .ff-compact-status-badge-todo {
+  border-color: #8fa7ff;
+  color: #dce5ff;
+  background: transparent;
+}
+.ff-dark-workspace .ff-compact-status-badge-in-progress {
+  border-color: var(--ff-accent-cyan);
+  color: #b9f0f2;
+  background: transparent;
+}
+.ff-dark-workspace .ff-compact-status-badge-done {
+  border-color: transparent;
+  color: #fff;
+  background: var(--ff-accent-green);
+}
+.ff-light-workspace .ff-compact-status-badge-todo {
+  border-color: #ed9bc7;
+  color: #fff1f8;
+  background: transparent;
+}
+.ff-light-workspace .ff-compact-status-badge-in-progress {
+  border-color: #f09a5b;
+  color: #ffe8dc;
+  background: transparent;
+}
+.ff-light-workspace .ff-compact-status-badge-done {
+  border-color: transparent;
+  color: #fff;
+  background: var(--ff-accent-green);
 }
 
 /* HOT EVVA energy: warm paint only, with the shared object geometry untouched. */
@@ -2011,7 +2062,7 @@ html[data-ff-theme='light'] .ff-modal-panel textarea { border-color: rgba(239, 1
     min-width: 0;
     align-items: center;
     flex-direction: column;
-    gap: 0.04rem;
+    gap: 0.28rem;
     padding-inline: 0.18rem;
     line-height: 1;
   }
@@ -2021,16 +2072,6 @@ html[data-ff-theme='light'] .ff-modal-panel textarea { border-color: rgba(239, 1
   .ff-page-shell .ff-compact-status-summary::after,
   .ff-page-shell .ff-compact-task-completion::before,
   .ff-page-shell .ff-compact-task-completion::after { display: none; }
-
-  .ff-page-shell .ff-compact-status-marker {
-    display: grid;
-    width: 1.1rem;
-    height: 1.1rem;
-    margin: 0 auto 0.12rem;
-    flex: 0 0 auto;
-    place-items: center;
-    line-height: 1;
-  }
 
   .ff-page-shell .ff-compact-task-completion {
     display: flex;
@@ -2183,7 +2224,7 @@ html[data-ff-theme='light'] .ff-modal-panel textarea { border-color: rgba(239, 1
     position: relative;
     display: flex;
     min-width: 0;
-    align-items: center;
+    align-items: flex-end;
     justify-content: center;
     gap: 0.85rem;
     transform: translateY(1.2rem);

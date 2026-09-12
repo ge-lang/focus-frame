@@ -6,7 +6,6 @@ import {
   BarChart3,
   Bookmark,
   CalendarDays,
-  Check,
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
@@ -200,9 +199,8 @@ function CompactTasks({ widget, onOpen }: CompactWidgetProps) {
         <div className="ff-compact-status-summary" aria-label="Task status summary">
           {([['To Do', summary.counts.todo, 'todo'], ['In Progress', summary.counts.in_progress, 'in-progress'], ['Done', summary.counts.done, 'done']] as const).map(([label, count, status]) => (
             <div key={label}>
-              <span className={`ff-compact-status-marker ff-compact-status-marker-${status}`} aria-hidden="true">{status === 'done' && <Check size={10} strokeWidth={3} />}</span>
-              <span>{label}</span>
-              <strong>{count}</strong>
+              <span className="ff-compact-status-label">{label}</span>
+              <span className={`ff-compact-status-badge ff-compact-status-badge-${status}`}>{count}</span>
             </div>
           ))}
         </div>
