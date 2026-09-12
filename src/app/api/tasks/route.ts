@@ -7,6 +7,31 @@ import { prisma } from '@/lib/prisma';
 import { InvalidRequestError, isOneOf, parseOptionalDate, parseOptionalString, readJsonObject } from '@/lib/api-validation';
 import { createdTaskHistoryEvent, normalizeTaskHistory } from '@/lib/task-history';
 
+const taskSelect = {
+  id: true,
+  title: true,
+  description: true,
+  isCompleted: true,
+  status: true,
+  priority: true,
+  dueDate: true,
+  createdAt: true,
+  updatedAt: true,
+  userId: true,
+} as const;
+
+async function readTaskHistories(userId: string) {
+  try {
+    const rows = await prisma.$queryRaw<Array<{ id: string; history: Prisma.JsonValue | null }>>(
+      Prisma.sql`SELECT "id", "history" FROM "Task" WHERE "userId" = ${userId}`,
+    );
+    return new Map(rows.map((row) => [row.id, normalizeTaskHistory(row.history)]));
+  } catch {
+    // The history migration is additive; legacy databases can still serve core task data.
+    return new Map<string, ReturnType<typeof normalizeTaskHistory>>();
+  }
+}
+
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
@@ -14,14 +39,14 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const tasks = await prisma.task.findMany({
+    const [tasks, histories] = await Promise.all([prisma.task.findMany({
       where: { userId: session.user.id },
       orderBy: { createdAt: 'desc' },
-      include: { focusSessions: { select: { duration: true } } },
-    });
+      select: { ...taskSelect, focusSessions: { select: { duration: true } } },
+    }), readTaskHistories(session.user.id)]);
     return NextResponse.json(tasks.map(({ focusSessions, ...task }) => ({
       ...task,
-      history: normalizeTaskHistory(task.history),
+      history: histories.get(task.id) ?? [],
       focusSeconds: focusSessions.reduce((total, session) => total + session.duration, 0),
     })));
   } catch (error) {
@@ -67,12 +92,23 @@ export async function POST(req: NextRequest) {
         status: parsedStatus,
         dueDate: dueDate ?? null,
         isCompleted: parsedStatus === TaskStatus.done,
-        history: [createdTaskHistoryEvent('task', createdAt)] as unknown as Prisma.InputJsonValue,
         userId: session.user.id,
       },
+      select: taskSelect,
     });
-    
-    return NextResponse.json(task);
+
+    const history = [createdTaskHistoryEvent(task.id, createdAt)];
+    try {
+      await prisma.task.update({
+        where: { id: task.id },
+        data: { history: history as unknown as Prisma.InputJsonValue },
+        select: { id: true },
+      });
+    } catch {
+      // A pending additive migration must never make the task itself disappear.
+    }
+
+    return NextResponse.json({ ...task, history });
   } catch (error) {
     if (error instanceof InvalidRequestError) {
       return NextResponse.json({ error: error.message }, { status: 400 });

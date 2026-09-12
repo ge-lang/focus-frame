@@ -38,9 +38,9 @@ describe('/api/tasks/[id] ownership', () => {
     const response = await PUT(requestFor('PUT'));
 
     expect(response.status).toBe(404);
-    expect(mocks.findFirst).toHaveBeenCalledWith({
+    expect(mocks.findFirst).toHaveBeenCalledWith(expect.objectContaining({
       where: { id: 'task-owned-by-b', userId: 'user-a' },
-    });
+    }));
     expect(mocks.update).not.toHaveBeenCalled();
   });
 
@@ -76,7 +76,8 @@ describe('/api/tasks/[id] ownership', () => {
     }));
 
     expect(response.status).toBe(200);
-    const updateCall = mocks.update.mock.calls[0][0];
+    const updateCall = mocks.update.mock.calls.find(([call]) => !call.data.history)?.[0];
+    const historyCall = mocks.update.mock.calls.find(([call]) => call.data.history)?.[0];
     expect(updateCall.data).toMatchObject({
       title: 'Updated task',
       description: 'Details',
@@ -84,7 +85,7 @@ describe('/api/tasks/[id] ownership', () => {
       priority: 'high',
       dueDate: new Date('2026-09-18T00:00:00.000Z'),
     });
-    expect(updateCall.data.history).toEqual(expect.arrayContaining([
+    expect(historyCall.data.history).toEqual(expect.arrayContaining([
       expect.objectContaining({ type: 'deadline_changed', from: null, to: '2026-09-18' }),
       expect.objectContaining({ type: 'priority_changed', from: 'medium', to: 'high' }),
       expect.objectContaining({ type: 'completed', from: 'todo', to: 'done' }),

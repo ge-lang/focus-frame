@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { normalizeTaskHistory, taskHistoryChanges } from './task-history';
+import { normalizeTaskHistory, normalizeTaskList, normalizeTaskRecord, taskHistoryChanges } from './task-history';
 
 const snapshot = (overrides: Partial<{ status: 'todo' | 'in_progress' | 'done'; priority: 'low' | 'medium' | 'high'; dueDate: string | null }> = {}) => ({
   status: 'todo' as const,
@@ -48,5 +48,8 @@ describe('task history changes', () => {
     expect(normalizeTaskHistory(undefined)).toEqual([]);
     expect(normalizeTaskHistory(null)).toEqual([]);
     expect(normalizeTaskHistory([{ id: 'event-1', type: 'created', createdAt: '2026-09-12T10:00:00.000Z' }])).toHaveLength(1);
+    const legacyTask = normalizeTaskRecord({ id: 'legacy-1', title: 'Legacy task', description: 'Keep me', dueDate: null, isCompleted: false });
+    expect(legacyTask).toMatchObject({ id: 'legacy-1', title: 'Legacy task', priority: 'medium', status: 'todo', history: [] });
+    expect(normalizeTaskList([legacyTask, { id: 'bad' }, { id: 'new-1', title: 'New task', status: 'done' }])).toHaveLength(2);
   });
 });

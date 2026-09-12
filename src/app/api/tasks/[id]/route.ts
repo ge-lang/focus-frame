@@ -6,6 +6,31 @@ import { prisma } from '@/lib/prisma';
 import { InvalidRequestError, isOneOf, parseOptionalDate, parseOptionalString, readJsonObject } from '@/lib/api-validation';
 import { normalizeTaskHistory, taskHistoryChanges } from '@/lib/task-history';
 
+const taskSelect = {
+  id: true,
+  title: true,
+  description: true,
+  isCompleted: true,
+  status: true,
+  priority: true,
+  dueDate: true,
+  createdAt: true,
+  updatedAt: true,
+  userId: true,
+} as const;
+
+async function readTaskHistory(userId: string, taskId: string) {
+  try {
+    const rows = await prisma.$queryRaw<Array<{ history: Prisma.JsonValue | null }>>(
+      Prisma.sql`SELECT "history" FROM "Task" WHERE "id" = ${taskId} AND "userId" = ${userId}`,
+    );
+    return normalizeTaskHistory(rows[0]?.history);
+  } catch {
+    // The history migration is additive; legacy databases can still update core task data.
+    return [];
+  }
+}
+
 function getTaskId(request: NextRequest) {
   return new URL(request.url).pathname.split('/').pop();
 }
@@ -42,6 +67,7 @@ export async function PUT(request: NextRequest) {
 
     const existingTask = await prisma.task.findFirst({
       where: { id, userId: session.user.id },
+      select: taskSelect,
     });
     if (!existingTask) {
       return NextResponse.json({ error: 'Task not found' }, { status: 404 });
@@ -51,6 +77,7 @@ export async function PUT(request: NextRequest) {
     const nextPriority = parsedPriority ?? existingTask.priority;
     const nextDueDate = dueDate === undefined ? existingTask.dueDate : dueDate;
     const historyTimestamp = new Date().toISOString();
+    const existingHistory = await readTaskHistory(session.user.id, existingTask.id);
     const historyEvents = taskHistoryChanges(
       { status: existingTask.status, priority: existingTask.priority, dueDate: existingTask.dueDate?.toISOString() ?? null },
       { status: nextStatus, priority: nextPriority, dueDate: nextDueDate?.toISOString() ?? null },
@@ -67,11 +94,24 @@ export async function PUT(request: NextRequest) {
         ...(dueDate !== undefined && { dueDate }),
         ...(parsedStatus !== undefined && { status: parsedStatus, isCompleted: parsedStatus === TaskStatus.done }),
         ...(isCompleted !== undefined && { isCompleted }),
-        ...(historyEvents.length > 0 && { history: [...normalizeTaskHistory(existingTask.history), ...historyEvents] as unknown as Prisma.InputJsonValue }),
       },
+      select: taskSelect,
     });
 
-    return NextResponse.json(task);
+    const history = [...existingHistory, ...historyEvents];
+    if (historyEvents.length > 0) {
+      try {
+        await prisma.task.update({
+          where: { id: existingTask.id },
+          data: { history: history as unknown as Prisma.InputJsonValue },
+          select: { id: true },
+        });
+      } catch {
+        // History is supplementary; the edited task has already been persisted.
+      }
+    }
+
+    return NextResponse.json({ ...task, history });
   } catch (error) {
     if (error instanceof InvalidRequestError) {
       return NextResponse.json({ error: error.message }, { status: 400 });

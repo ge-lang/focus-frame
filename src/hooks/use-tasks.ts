@@ -2,6 +2,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import type { Task, TaskStatus } from '@/types/task';
 import { showToast } from '@/lib/toast';
+import { normalizeTaskList, normalizeTaskRecord } from '@/lib/task-history';
 
 type TaskInput = {
   title: string;
@@ -14,9 +15,11 @@ type TaskInput = {
 export function useTasks() {
   return useQuery<Task[]>({
     queryKey: ['tasks'],
-    queryFn: () => fetch('/api/tasks').then((res) => {
+    queryFn: () => fetch('/api/tasks').then(async (res) => {
       if (!res.ok) throw new Error('Failed to fetch tasks');
-      return res.json();
+      const payload: unknown = await res.json();
+      if (!Array.isArray(payload)) throw new Error('Task response was invalid');
+      return normalizeTaskList(payload);
     }),
   });
 }
@@ -32,8 +35,9 @@ export function useCreateTask() {
       });
       const payload = await response.json().catch(() => null) as Task | { error?: string } | null;
       if (!response.ok) throw new Error(payload && 'error' in payload && payload.error ? payload.error : 'Failed to create task');
-      if (!payload || !('id' in payload) || typeof payload.id !== 'string') throw new Error('Task response was invalid');
-      return payload as Task;
+      const normalized = normalizeTaskRecord(payload);
+      if (!normalized) throw new Error('Task response was invalid');
+      return normalized;
     },
     onSuccess: (createdTask) => {
       queryClient.setQueryData<Task[]>(['tasks'], (current = []) => [createdTask, ...current.filter((task) => task.id !== createdTask.id)]);
@@ -56,9 +60,12 @@ export function useUpdateTask() {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updates),
-      }).then((res) => {
+      }).then(async (res) => {
         if (!res.ok) throw new Error('Failed to update task');
-        return res.json();
+        const payload: unknown = await res.json();
+        const normalized = normalizeTaskRecord(payload);
+        if (!normalized) throw new Error('Task response was invalid');
+        return normalized;
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
