@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
 import { normalizeWeatherCondition, isWeatherDay, type WeatherCondition } from '@/lib/weather-condition';
+import { isDayAtTargetLocation } from '@/lib/weather-visual';
 
 export interface WeatherLocation {
   name: string;
@@ -168,7 +169,7 @@ function readStoredLocation() {
 function demoWeather(location: WeatherLocation, error: string | null = null): WeatherData {
   const now = Date.now();
   const baseTemp = 15 + Math.sin(now / 10_000_000) * 10;
-  const isDay = new Date().getHours() > 6 && new Date().getHours() < 20;
+  const isDay = isDayAtTargetLocation(new Date(), location.timezone ?? 0);
   const icon = isDay ? '01d' : '01n';
   return {
     ...emptyWeather,

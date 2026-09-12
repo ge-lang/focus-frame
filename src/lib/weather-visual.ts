@@ -13,7 +13,9 @@ export type MoonPhaseName =
 export interface MoonPhase {
   phaseName: MoonPhaseName;
   illuminationPercent: number;
+  illumination: number;
   phaseFraction: number;
+  waxing: boolean;
 }
 
 export interface WeatherVisualModel {
@@ -22,6 +24,7 @@ export interface WeatherVisualModel {
   primaryObject: 'sun' | 'moon';
   showCloud: boolean;
   showStars: boolean;
+  starCount: number;
   moonPhase: MoonPhase | null;
 }
 
@@ -31,10 +34,11 @@ const KNOWN_NEW_MOON_UTC = Date.UTC(2000, 0, 6, 18, 14);
 export function calculateMoonPhase(date = new Date()): MoonPhase {
   const elapsedDays = (date.getTime() - KNOWN_NEW_MOON_UTC) / 86_400_000;
   const phaseFraction = ((elapsedDays / SYNODIC_MONTH_DAYS) % 1 + 1) % 1;
-  const illuminationPercent = Math.round((0.5 * (1 - Math.cos(2 * Math.PI * phaseFraction))) * 100);
+  const illumination = 0.5 * (1 - Math.cos(2 * Math.PI * phaseFraction));
+  const illuminationPercent = Math.round(illumination * 100);
   const phaseName = phaseNameForFraction(phaseFraction);
 
-  return { phaseName, illuminationPercent, phaseFraction };
+  return { phaseName, illuminationPercent, illumination, phaseFraction, waxing: phaseFraction > 0 && phaseFraction < 0.5 };
 }
 
 export function phaseNameForFraction(phaseFraction: number): MoonPhaseName {
@@ -58,9 +62,20 @@ export function getWeatherVisualModel(conditionCode?: number | null, icon = '', 
     isDay,
     primaryObject: isDay ? 'sun' : 'moon',
     showCloud: condition !== 'clear',
-    showStars: !isDay && condition === 'clear',
+    showStars: !isDay && (condition === 'clear' || condition === 'partlyCloudy'),
+    starCount: condition === 'partlyCloudy' ? 2 : 4,
     moonPhase: isDay ? null : calculateMoonPhase(date),
   };
+}
+
+export function getTargetLocationDate(now = new Date(), timezoneOffsetSeconds = 0): Date {
+  return new Date(now.getTime() + timezoneOffsetSeconds * 1000);
+}
+
+export function isDayAtTargetLocation(now = new Date(), timezoneOffsetSeconds = 0): boolean {
+  const targetDate = getTargetLocationDate(now, timezoneOffsetSeconds);
+  const hour = targetDate.getUTCHours();
+  return hour >= 6 && hour < 20;
 }
 
 export function formatMoonPhase(phase: MoonPhase): string {

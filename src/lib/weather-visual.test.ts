@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatMoonPhase, getWeatherVisualModel, phaseNameForFraction } from './weather-visual';
+import { formatMoonPhase, getTargetLocationDate, getWeatherVisualModel, isDayAtTargetLocation, phaseNameForFraction } from './weather-visual';
 
 describe('weather visual model', () => {
   it('selects a substantial sun object for a clear day', () => {
@@ -15,6 +15,9 @@ describe('weather visual model', () => {
 
     expect(model.primaryObject).toBe('moon');
     expect(model.moonPhase).not.toBeNull();
+    expect(model.moonPhase?.illumination).toBeGreaterThanOrEqual(0);
+    expect(model.moonPhase?.illumination).toBeLessThanOrEqual(1);
+    expect(typeof model.moonPhase?.waxing).toBe('boolean');
     expect(model.showCloud).toBe(false);
     expect(model.showStars).toBe(true);
     expect(formatMoonPhase(model.moonPhase!)).toMatch(/%$/);
@@ -34,15 +37,25 @@ describe('weather visual model', () => {
     const night = getWeatherVisualModel(801, '02n', new Date('2026-09-12T00:00:00Z'));
 
     expect(day).toMatchObject({ condition: 'partlyCloudy', primaryObject: 'sun', showCloud: true, showStars: false });
-    expect(night).toMatchObject({ condition: 'partlyCloudy', primaryObject: 'moon', showCloud: true, showStars: false });
+    expect(night).toMatchObject({ condition: 'partlyCloudy', primaryObject: 'moon', showCloud: true, showStars: true, starCount: 2 });
   });
 
   it('preserves visual mappings for rain, snow, storm, and fog', () => {
     expect(getWeatherVisualModel(500, '10d').condition).toBe('rain');
+    expect(getWeatherVisualModel(300, '09d').condition).toBe('drizzle');
     expect(getWeatherVisualModel(601, '13d').condition).toBe('snow');
     expect(getWeatherVisualModel(201, '11d').condition).toBe('thunderstorm');
     expect(getWeatherVisualModel(741, '50d').condition).toBe('fog');
     expect(getWeatherVisualModel(500, '10n').showStars).toBe(false);
+  });
+
+  it('uses target-location time for local day/night calculations', () => {
+    const utcMorning = new Date('2026-09-12T07:00:00Z');
+
+    expect(isDayAtTargetLocation(utcMorning, -7 * 3600)).toBe(false);
+    expect(isDayAtTargetLocation(utcMorning, 10 * 3600)).toBe(true);
+    expect(getTargetLocationDate(utcMorning, -7 * 3600).getUTCHours()).toBe(0);
+    expect(getWeatherVisualModel(800, '01n', utcMorning, false).primaryObject).toBe('moon');
   });
 
   it('keeps the model shared by compact and full consumers', () => {

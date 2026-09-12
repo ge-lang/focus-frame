@@ -3910,6 +3910,107 @@ html[data-ff-theme='light'] .ff-modal-panel label { color: #e5c5d5 !important; }
   color: #fff1f7 !important;
 }
 
+/* Weather V3: one shared sky scene with compact infographic instruments. */
+.ff-weather-scene {
+  display: grid;
+  grid-template-columns: minmax(8rem, 0.9fr) minmax(8rem, 1.1fr);
+  align-items: center;
+  gap: 1rem;
+  text-align: left;
+}
+
+.ff-weather-scene-visual {
+  display: grid;
+  min-width: 0;
+  min-height: 7rem;
+  place-items: center;
+}
+
+.ff-weather-scene-copy {
+  display: grid;
+  min-width: 0;
+  align-content: center;
+  gap: 0.18rem;
+}
+
+.ff-weather-hero-city { line-height: 1.25; }
+.ff-weather-hero-condition { line-height: 1.25; }
+
+.ff-weather-instrument-track {
+  fill: none;
+  stroke: rgba(148, 163, 184, 0.32);
+  stroke-linecap: round;
+  stroke-width: 2;
+}
+
+.ff-weather-instrument-center { fill: var(--ff-accent-violet, #8d80ff); }
+.ff-weather-compass-pointer { fill: var(--ff-accent-cyan, #67d7e5); transform-box: fill-box; transform-origin: center; }
+.ff-weather-uv-progress { fill: none; stroke: var(--ff-accent-amber, #f2b765); stroke-linecap: round; stroke-width: 3; }
+.ff-weather-wind-compass { width: 2rem; height: 2rem; flex: 0 0 auto; }
+.ff-weather-uv-gauge { width: 2.2rem; height: 1.6rem; flex: 0 0 auto; }
+
+.ff-weather-day-arc {
+  display: grid;
+  gap: 0.15rem;
+  margin: 0.1rem 0 0.55rem;
+  padding: 0 0.15rem;
+}
+
+.ff-weather-day-arc svg { width: 100%; height: 2.1rem; overflow: visible; }
+.ff-weather-day-progress { fill: var(--ff-accent-amber, #f2b765); filter: drop-shadow(0 0 4px currentColor); }
+.ff-weather-day-times { display: flex; justify-content: space-between; color: var(--ff-text-muted, #8f96b8); font-size: 0.65rem; }
+
+.ff-weather-expanded-details .ff-weather-detail-block {
+  border-radius: 0.55rem;
+  padding: 0.55rem 0.65rem !important;
+}
+
+.ff-weather-expanded-details .ff-weather-detail-block > .flex { gap: 0.4rem; }
+
+@media (max-width: 639px) {
+  .ff-weather-scene { grid-template-columns: minmax(7rem, 0.85fr) minmax(7rem, 1.15fr); gap: 0.6rem; }
+  .ff-weather-scene-visual { min-height: 6rem; }
+}
+
+.ff-weather-atmosphere {
+  animation: ff-weather-atmosphere-breathe 8s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@keyframes ff-weather-atmosphere-breathe {
+  0%, 100% { opacity: 0.72; transform: scale(0.98); }
+  50% { opacity: 1; transform: scale(1.02); }
+}
+
+.ff-dark-workspace .ff-weather-instrument-track { stroke: rgba(174, 190, 230, 0.3); }
+.ff-dark-workspace .ff-weather-compass-pointer { fill: #72e0e5; }
+.ff-dark-workspace .ff-weather-uv-progress { stroke: #ffd978; }
+.ff-dark-workspace .ff-weather-day-progress { fill: #ffd978; }
+.ff-dark-workspace .ff-weather-cloud-drizzle { stroke-width: 2; }
+.ff-dark-workspace svg.ff-weather-state-overcast .ff-weather-atmosphere,
+.ff-dark-workspace svg.ff-weather-state-cloudy .ff-weather-atmosphere { fill: rgba(190, 207, 225, 0.12); }
+.ff-dark-workspace svg.ff-weather-state-drizzle .ff-weather-atmosphere { fill: rgba(102, 177, 223, 0.12); }
+.ff-dark-workspace svg.ff-weather-state-mist .ff-weather-atmosphere,
+.ff-dark-workspace svg.ff-weather-state-haze .ff-weather-atmosphere,
+.ff-dark-workspace svg.ff-weather-state-fog .ff-weather-atmosphere { fill: rgba(207, 218, 232, 0.14); }
+
+.ff-light-workspace .ff-weather-instrument-track { stroke: rgba(255, 202, 220, 0.34); }
+.ff-light-workspace .ff-weather-compass-pointer { fill: #e17aa9; }
+.ff-light-workspace .ff-weather-uv-progress { stroke: #ffc15f; }
+.ff-light-workspace .ff-weather-day-progress { fill: #ffc15f; }
+.ff-light-workspace .ff-weather-cloud-drizzle { stroke-width: 2; }
+.ff-light-workspace svg.ff-weather-state-overcast .ff-weather-atmosphere,
+.ff-light-workspace svg.ff-weather-state-cloudy .ff-weather-atmosphere { fill: rgba(238, 197, 218, 0.13); }
+.ff-light-workspace svg.ff-weather-state-drizzle .ff-weather-atmosphere { fill: rgba(193, 143, 205, 0.13); }
+.ff-light-workspace svg.ff-weather-state-mist .ff-weather-atmosphere,
+.ff-light-workspace svg.ff-weather-state-haze .ff-weather-atmosphere,
+.ff-light-workspace svg.ff-weather-state-fog .ff-weather-atmosphere { fill: rgba(242, 180, 184, 0.16); }
+
+@media (prefers-reduced-motion: reduce) {
+  .ff-weather-atmosphere { animation: none; }
+}
+
 /* Shared WeatherVisual object language. Geometry is identical in compact and full Weather. */
 .ff-weather-svg {
   width: 5.1rem;

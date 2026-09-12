@@ -7,7 +7,8 @@ import { useWeather, useWeatherSearch, type WeatherLocation } from '@/hooks/useW
 import { countries } from '@/lib/countries';
 import { findCountryForCity, getPopularCitiesForCountry, resolveCountrySelection } from '@/lib/weather-location';
 import { WeatherVisual } from '@/components/weather-icon';
-import { calculateMoonPhase, formatMoonPhase } from '@/lib/weather-visual';
+import { DayArc, UvGauge, WindCompass } from '@/components/weather-instruments';
+import { calculateMoonPhase, formatMoonPhase, getTargetLocationDate } from '@/lib/weather-visual';
 import { useEffect, useRef, useState } from 'react';
 import { useDashboard } from '@/contexts/dashboard-context';
 import { 
@@ -16,9 +17,7 @@ import {
   Eye, 
   Wind, 
   Gauge,
-  Thermometer,
   Droplets,
-  Compass
 } from 'lucide-react';
 
 interface WeatherWidgetProps {
@@ -74,6 +73,9 @@ export default function WeatherWidget({
   // Temperature conversion
   const displayTemp = unit === 'celsius' ? weather.temp : Math.round((weather.temp * 9/5) + 32);
   const displayFeelsLike = unit === 'celsius' ? weather.feelsLike : Math.round((weather.feelsLike * 9/5) + 32);
+  const targetWeatherDate = getTargetLocationDate(new Date(), weather.location?.timezone ?? 0);
+  const uvIndex = Math.min(Math.max(weather.uvIndex, 0), 11);
+  const uvLabel = uvIndex < 3 ? 'Low' : uvIndex < 6 ? 'Moderate' : uvIndex < 8 ? 'High' : uvIndex < 11 ? 'Very High' : 'Extreme';
 
   const handleCityChange = (newCity: string, selectedCountry = countryCode, selectedLocation?: WeatherLocation) => {
     setLocation(selectedLocation ?? { name: newCity, country: selectedCountry || '' });
@@ -108,12 +110,6 @@ export default function WeatherWidget({
   const getWindDirection = (degrees: number) => {
     const directions = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
     return directions[Math.round(degrees / 22.5) % 16];
-  };
-
-  const getUVIndex = (temp: number) => {
-    // Simple UV index simulation based on temperature.
-    const baseUV = Math.min(Math.max(Math.floor(temp / 10), 1), 11);
-    return baseUV;
   };
 
   if (weather.loading) {
@@ -294,22 +290,20 @@ export default function WeatherWidget({
               </button>
             </div>
 
-            {/* Primary metrics */}
-            <div className="ff-weather-hero text-center mb-6">
-              <WeatherVisual icon={weather.icon} conditionCode={weather.conditionCode} isDay={weather.isDay} className="ff-weather-hero-icon text-5xl mb-2 mx-auto" />
-              
-              <div className="ff-weather-hero-temperature text-4xl font-bold text-gray-800 mb-1">
-                {displayTemp}°{unit === 'celsius' ? 'C' : 'F'}
+            {/* Primary weather scene */}
+            <div className="ff-weather-scene ff-weather-hero mb-6">
+              <div className="ff-weather-scene-visual">
+                <WeatherVisual icon={weather.icon} conditionCode={weather.conditionCode} isDay={weather.isDay} date={targetWeatherDate} className="ff-weather-hero-icon" />
               </div>
-              
-              <div className="text-lg font-medium text-gray-700 mb-2 capitalize">
-                {weather.description}
+              <div className="ff-weather-scene-copy">
+                <div className="ff-weather-hero-temperature text-4xl font-bold text-gray-800">
+                  {displayTemp}°{unit === 'celsius' ? 'C' : 'F'}
+                </div>
+                <div className="ff-weather-hero-city text-lg font-medium text-gray-700">{weather.city}</div>
+                <div className="ff-weather-hero-condition text-sm font-medium text-gray-700 capitalize">{weather.description}</div>
+                <div className="ff-weather-feels-like text-sm text-gray-600">Feels like {displayFeelsLike}°</div>
+                {!weather.isDay && (weather.condition === 'clear' || weather.condition === 'partlyCloudy') ? <div className="ff-weather-moon-caption">{formatMoonPhase(calculateMoonPhase(targetWeatherDate))}</div> : null}
               </div>
-              
-              <div className="ff-weather-feels-like text-sm text-gray-600">
-                Feels like {displayFeelsLike}°
-              </div>
-              {!weather.isDay && weather.condition === 'clear' ? <div className="ff-weather-moon-caption">{formatMoonPhase(calculateMoonPhase())}</div> : null}
             </div>
 
             {/* Quick metrics */}
@@ -344,6 +338,7 @@ export default function WeatherWidget({
                   exit={{ opacity: 0, height: 0 }}
                   className="ff-weather-expanded-details overflow-hidden"
                 >
+                  {weather.sunrise > 0 && weather.sunset > 0 ? <DayArc sunrise={weather.sunrise} sunset={weather.sunset} timezoneOffsetSeconds={weather.location?.timezone ?? 0} /> : null}
                   <div className="ff-weather-details grid grid-cols-2 gap-3">
                     <div className="ff-weather-detail-block ff-semantic-accent ff-accent-violet rounded-lg border border-slate-200 bg-slate-50 p-3">
                       <div className="flex items-center justify-between">
@@ -364,7 +359,7 @@ export default function WeatherWidget({
                     <div className="ff-weather-detail-block ff-semantic-accent ff-accent-cyan rounded-lg border border-slate-200 bg-slate-50 p-3">
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-xs text-gray-600">Wind Direction</span>
-                        <Compass size={12} className="text-indigo-600" />
+                        <WindCompass degrees={weather.windDirection} />
                       </div>
                       <div className="text-sm font-medium">
                         {getWindDirection(weather.windDirection)} ({weather.windDirection}°)
@@ -374,14 +369,10 @@ export default function WeatherWidget({
                     <div className="ff-weather-detail-block ff-semantic-accent ff-accent-amber rounded-lg border border-slate-200 bg-slate-50 p-3">
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-xs text-gray-600">UV Index</span>
-                        <Thermometer size={12} className="text-amber-600" />
+                        <UvGauge value={uvIndex} />
                       </div>
                       <div className="text-sm font-medium">
-                        {getUVIndex(weather.temp)} - {
-                          getUVIndex(weather.temp) < 3 ? 'Low' :
-                          getUVIndex(weather.temp) < 6 ? 'Moderate' :
-                          getUVIndex(weather.temp) < 8 ? 'High' : 'Very High'
-                        }
+                        {uvIndex} - {uvLabel}
                       </div>
                     </div>
                   </div>

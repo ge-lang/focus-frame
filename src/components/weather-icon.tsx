@@ -22,6 +22,7 @@ function Cloud({ effects = null }: { effects?: WeatherCondition | null }) {
       <path className="ff-weather-cloud-shadow" d={cloudShadowPath} />
       <path className="ff-weather-cloud-body" d={cloudPath} />
       <path className="ff-weather-cloud-highlight" d={cloudHighlightPath} />
+      {effects === 'drizzle' ? <path className="ff-weather-cloud-rain ff-weather-cloud-drizzle" d="m42 76-2 5m18-5-2 5m16-5-2 5" /> : null}
       {effects === 'rain' ? <path className="ff-weather-cloud-rain" d="m40 76-4 8m17-8-4 8m18-8-4 8" /> : null}
       {effects === 'showers' ? <path className="ff-weather-cloud-rain" d="m34 76-3 7m14-7-3 7m14-7-3 7m14-7-3 7" /> : null}
       {effects === 'thunderstorm' ? <path className="ff-weather-cloud-rain" d="m39 76-3 7m38-7-3 7" /> : null}
@@ -69,9 +70,9 @@ export const WeatherVisual: React.FC<WeatherIconProps> = ({ icon, conditionCode,
   return (
     <svg className={`ff-weather-svg ff-weather-state-${model.condition} ff-weather-${model.isDay ? 'day' : 'night'} ${className}`} viewBox="0 0 120 96" role="img" aria-label={model.isDay ? model.condition : `${model.condition}, ${model.moonPhase?.phaseName ?? 'night'}`} focusable="false">
       <circle className="ff-weather-atmosphere" cx="58" cy="44" r="34" aria-hidden="true" />
-      {model.showStars ? <g className="ff-weather-stars" aria-hidden="true"><circle cx="22" cy="18" r="1.4" /><circle cx="84" cy="15" r="1.2" /><circle cx="96" cy="43" r="1.5" /><circle cx="31" cy="48" r="1" /></g> : null}
-      {model.primaryObject === 'sun' ? <Sun /> : <Moon phase={model.moonPhase ?? { phaseName: 'New Moon', illuminationPercent: 0, phaseFraction: 0 }} />}
-      {model.showCloud ? <Cloud effects={model.condition === 'cloudy' || model.condition === 'partlyCloudy' ? null : model.condition} /> : null}
+      {model.showStars ? <g className="ff-weather-stars" aria-hidden="true"><circle cx="22" cy="18" r="1.4" /><circle cx="84" cy="15" r="1.2" />{model.starCount > 2 ? <><circle cx="96" cy="43" r="1.5" /><circle cx="31" cy="48" r="1" /></> : null}</g> : null}
+      {model.condition === 'clear' || model.condition === 'partlyCloudy' ? (model.primaryObject === 'sun' ? <Sun /> : <Moon phase={model.moonPhase ?? { phaseName: 'New Moon', illuminationPercent: 0, illumination: 0, phaseFraction: 0, waxing: false }} />) : null}
+      {model.showCloud ? <Cloud effects={model.condition === 'cloudy' || model.condition === 'overcast' || model.condition === 'partlyCloudy' ? null : model.condition} /> : null}
     </svg>
   );
 };
