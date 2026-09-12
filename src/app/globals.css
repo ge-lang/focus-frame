@@ -2819,6 +2819,77 @@ html[data-ff-theme='light'] body.ff-document-body { background: #120b18; }
 .ff-light-workspace .ff-pomodoro-ring-shell { box-shadow: inset 0 0 0 1px rgba(241, 112, 168, 0.24), inset 0 0 18px rgba(217, 79, 156, 0.12), 0 0 24px rgba(213, 57, 137, 0.12); }
 .ff-light-workspace .ff-pomodoro-ring-shell::after { border-top-color: rgba(240, 138, 119, 0.62); }
 
+/* HOT Energy V2: stronger local warmth, paint only; shared geometry remains unchanged. */
+.ff-light-workspace .ff-compact-timer-ring-large {
+  border-top-color: #d9419b;
+  border-right-color: #ef835f;
+  border-bottom-color: #f6b84a;
+  border-left-color: rgba(184, 66, 137, 0.7);
+  box-shadow: 0 0 0 4px rgba(225, 72, 153, 0.1), 0 0 0 8px rgba(239, 131, 95, 0.08), 0 0 32px rgba(244, 184, 74, 0.2);
+}
+.ff-light-workspace .ff-compact-timer-ring-large::before {
+  filter: drop-shadow(0 0 2px rgba(239, 131, 95, 0.7));
+}
+.ff-light-workspace .ff-compact-timer-ring-large::after {
+  background: repeating-conic-gradient(from -2deg, #fff0d8 0 4deg, transparent 4deg 30deg);
+  filter: drop-shadow(0 0 2px rgba(246, 184, 74, 0.82));
+}
+.ff-light-workspace .ff-compact-pomodoro-controls button:nth-child(2) {
+  background: linear-gradient(135deg, #dc3f9e 0%, #ed796b 62%, #f6b84a 100%);
+  box-shadow: 0 0 20px rgba(219, 62, 146, 0.36), 0 0 22px rgba(246, 184, 74, 0.24);
+}
+
+.ff-light-workspace .ff-compact-goals-outer { stroke: #e04aa3; }
+.ff-light-workspace .ff-compact-goals-middle { stroke: #ef875f; }
+.ff-light-workspace .ff-compact-goals-inner { stroke: #f4b84a; }
+.ff-light-workspace .ff-compact-goals-ring { filter: drop-shadow(0 0 14px rgba(244, 184, 74, 0.22)); }
+
+.ff-light-workspace .ff-compact-status-marker {
+  border-color: #ed9bc7;
+  background: transparent;
+  box-shadow: inset 0 0 0 1px #ed9bc7, 0 0 8px rgba(237, 155, 199, 0.3);
+}
+.ff-light-workspace .ff-compact-status-marker-in-progress {
+  border-color: #f09a5b;
+  background: transparent;
+  box-shadow: inset 0 0 0 1px #f09a5b, 0 0 8px rgba(240, 154, 91, 0.34);
+}
+.ff-light-workspace .ff-compact-status-marker-done {
+  border-color: transparent;
+  background: var(--ff-accent-green);
+  box-shadow: none;
+}
+.ff-light-workspace .ff-compact-task-progress-value { stroke: #df4d9e; filter: drop-shadow(0 0 4px rgba(239, 126, 93, 0.28)); }
+
+.ff-light-workspace .ff-compact-kpi:nth-child(1) .ff-compact-kpi-icon { color: #e45aa9 !important; }
+.ff-light-workspace .ff-compact-kpi:nth-child(2) .ff-compact-kpi-icon { color: #f29a4a !important; }
+.ff-light-workspace .ff-compact-kpi:nth-child(3) .ff-compact-kpi-icon { color: var(--ff-accent-green) !important; }
+.ff-light-workspace .ff-compact-kpi:nth-child(4) .ff-compact-kpi-icon { color: #f4b84a !important; }
+
+.ff-light-workspace .ff-compact-weather-main::before {
+  background:
+    radial-gradient(ellipse at 34% 50%, rgba(226, 78, 135, 0.38), rgba(226, 78, 135, 0.18) 38%, transparent 68%),
+    radial-gradient(ellipse at 67% 52%, rgba(239, 137, 83, 0.34), rgba(239, 137, 83, 0.18) 42%, transparent 74%),
+    radial-gradient(circle at 74% 43%, rgba(247, 184, 74, 0.3), transparent 48%);
+  filter: blur(17px);
+}
+.ff-light-workspace .ff-compact-weather-meta span:last-child svg { color: #f09a5b; }
+
+.ff-light-workspace .ff-compact-calendar-cell-today {
+  background: linear-gradient(135deg, #df4ea6 0%, #ef8469 68%, #f4b84a 100%);
+  box-shadow: 0 0 0 3px rgba(225, 80, 148, 0.18), 0 0 18px rgba(244, 184, 74, 0.3);
+}
+
+.ff-light-workspace .ff-compact-card-bookmarks {
+  background: linear-gradient(148deg, #e45baa 0%, #ed7a77 58%, #f5b74b 100%) !important;
+  filter: drop-shadow(0 0 10px rgba(245, 183, 75, 0.28));
+}
+
+.ff-light-workspace .ff-compact-note-paper::after {
+  background: linear-gradient(135deg, #b3536d 0%, #e77e6b 64%, #f4b84a 100%);
+  box-shadow: -1px 1px 0 rgba(255, 214, 175, 0.46), 0 0 8px rgba(244, 184, 74, 0.22);
+}
+
 html[data-ff-theme='light'] .ff-modal-backdrop { background: rgba(18, 7, 25, 0.68) !important; }
 html[data-ff-theme='light'] .ff-modal-panel {
   border-color: rgba(255, 157, 201, 0.24) !important;
