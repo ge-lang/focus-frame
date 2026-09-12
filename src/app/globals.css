@@ -1285,6 +1285,13 @@ body.ff-document-body {
 }
 
 .ff-compact-weather-main svg { flex: 0 0 auto; color: var(--ff-accent-cyan, #22d3ee); }
+.ff-weather-svg { display: block; width: 4rem; height: 3.2rem; overflow: visible; }
+.ff-weather-sun { fill: none; stroke: currentColor; stroke-linecap: round; stroke-width: 3; }
+.ff-weather-moon { fill: currentColor; }
+.ff-weather-cloud-lightning { fill: currentColor; }
+.ff-weather-cloud-fog { fill: none; stroke: currentColor; stroke-linecap: round; stroke-width: 2.5; }
+.ff-weather-cloud-snow { fill: currentColor; }
+.ff-weather-hero-icon { width: 4rem; height: 3.2rem; }
 .ff-compact-weather-meta {
   display: flex;
   justify-content: space-between;
@@ -1952,6 +1959,11 @@ html[data-ff-theme='light'] body.ff-document-body {
 .ff-light-workspace .ff-weather-cloud-highlight { fill: rgba(255, 253, 247, 0.84); }
 .ff-light-workspace .ff-weather-cloud-rain,
 .ff-light-workspace .ff-weather-cloud-snow { stroke: #ee9e9f; }
+.ff-light-workspace .ff-weather-sun { stroke: #ffc15f; }
+.ff-light-workspace .ff-weather-moon { fill: #ffe9d7; }
+.ff-light-workspace .ff-weather-cloud-lightning { fill: #ffb35e; }
+.ff-light-workspace .ff-weather-cloud-fog { stroke: #f2b4b8; }
+.ff-light-workspace .ff-weather-cloud-snow { fill: #ffe8e0; stroke: none; }
 .ff-light-workspace .ff-compact-weather-meta span:first-child svg { color: #bac5ee; }
 .ff-light-workspace .ff-compact-weather-meta span:last-child svg { color: #f09b72; }
 
@@ -3420,6 +3432,11 @@ html[data-ff-theme='light'] .ff-modal-panel label { color: var(--ff-text-seconda
 .ff-dark-workspace .ff-weather-cloud-highlight { fill: rgba(255, 255, 255, 0.72); }
 .ff-dark-workspace .ff-weather-cloud-rain,
 .ff-dark-workspace .ff-weather-cloud-snow { fill: none; stroke: #a8dcff; stroke-linecap: round; stroke-width: 3; }
+.ff-dark-workspace .ff-weather-sun { stroke: #ffd978; }
+.ff-dark-workspace .ff-weather-moon { fill: #dfeaff; }
+.ff-dark-workspace .ff-weather-cloud-lightning { fill: #9bc5ff; }
+.ff-dark-workspace .ff-weather-cloud-fog { stroke: #b8d8ff; }
+.ff-dark-workspace .ff-weather-cloud-snow { fill: #dcefff; stroke: none; }
 
 .ff-dark-workspace .ff-compact-card-notes {
   background:

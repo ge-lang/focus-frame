@@ -2,6 +2,7 @@ import axios from 'axios';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { deduplicateWeatherResults, type WeatherSearchResult } from '@/lib/weather-location';
+import { isWeatherDay, normalizeWeatherCondition } from '@/lib/weather-condition';
 
 const WEATHER_API_URL = 'https://api.openweathermap.org/data/2.5';
 const GEO_API_URL = 'https://api.openweathermap.org/geo/1.0/direct';
@@ -12,6 +13,8 @@ export async function GET(request: NextRequest) {
   const city = searchParams.get('city')?.trim();
   const country = searchParams.get('country')?.trim().toUpperCase();
   const search = searchParams.get('search')?.trim();
+  const latitude = Number(searchParams.get('lat'));
+  const longitude = Number(searchParams.get('lon'));
 
   if (!apiKey) return NextResponse.json({ error: 'Weather service is not configured' }, { status: 503 });
 
@@ -33,18 +36,24 @@ export async function GET(request: NextRequest) {
 
     if (!city) return NextResponse.json({ error: 'A city is required' }, { status: 400 });
     const query = country ? `${city},${country}` : city;
+    const coordinates = Number.isFinite(latitude) && Number.isFinite(longitude) ? { lat: latitude, lon: longitude } : { q: query };
     const [currentResponse, forecastResponse] = await Promise.all([
-      axios.get(`${WEATHER_API_URL}/weather`, { params: { q: query, units: 'metric', lang: 'en', appid: apiKey } }),
-      axios.get(`${WEATHER_API_URL}/forecast`, { params: { q: query, units: 'metric', cnt: 5, appid: apiKey } }),
+      axios.get(`${WEATHER_API_URL}/weather`, { params: { ...coordinates, units: 'metric', lang: 'en', appid: apiKey } }),
+      axios.get(`${WEATHER_API_URL}/forecast`, { params: { ...coordinates, units: 'metric', cnt: 5, appid: apiKey } }),
     ]);
     const current = currentResponse.data;
+    const icon = current.weather[0].icon;
+    const conditionCode = current.weather[0].id;
 
     return NextResponse.json({
       weather: {
         temp: Math.round(current.main.temp),
         feelsLike: Math.round(current.main.feels_like),
         description: current.weather[0].description,
-        icon: current.weather[0].icon,
+        icon,
+        condition: normalizeWeatherCondition(conditionCode, icon),
+        conditionCode,
+        isDay: isWeatherDay(icon),
         city: current.name,
         country: current.sys.country,
         humidity: current.main.humidity,
@@ -60,6 +69,13 @@ export async function GET(request: NextRequest) {
         loading: false,
         error: null,
         lastUpdated: Date.now(),
+        location: {
+          name: current.name,
+          country: current.sys.country,
+          lat: current.coord?.lat,
+          lon: current.coord?.lon,
+          timezone: current.timezone,
+        },
       },
       forecast: forecastResponse.data.list.map((item: { dt: number; main: { temp: number }; weather: { icon: string; description: string }[] }) => ({
         dt: item.dt,

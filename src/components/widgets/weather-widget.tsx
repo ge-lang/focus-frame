@@ -3,7 +3,7 @@
 import { AnimatedWidget } from '@/components/animated-widget';
 import { ModalPortal } from '@/components/modal-portal';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useWeather, useWeatherSearch } from '@/hooks/useWeather';
+import { useWeather, useWeatherSearch, type WeatherLocation } from '@/hooks/useWeather';
 import { countries } from '@/lib/countries';
 import { findCountryForCity, getPopularCitiesForCountry, resolveCountrySelection } from '@/lib/weather-location';
 import { WeatherIcon } from '@/components/weather-icon';
@@ -39,7 +39,7 @@ export default function WeatherWidget({
   onContentHeightChange,
 }: WeatherWidgetProps) {
   const { updateWidgetConfig } = useDashboard();
-  const { weather, setLocation, refresh, isDemo } = useWeather(initialCity, initialCountryCode);
+  const { weather, selectedLocation, setLocation, refresh, isDemo } = useWeather(initialCity, initialCountryCode);
   const [isEditing, setIsEditing] = useState(false);
   const [inputCity, setInputCity] = useState(initialCity);
   const [countryCode, setCountryCode] = useState(initialCountryCode ?? findCountryForCity(initialCity) ?? '');
@@ -49,6 +49,13 @@ export default function WeatherWidget({
   const contentRef = useRef<HTMLDivElement>(null);
   const { suggestions, isSearching } = useWeatherSearch(isEditing ? inputCity : '', countryCode || undefined);
   const popularCities = getPopularCitiesForCountry(countryCode);
+
+  useEffect(() => {
+    if (!isEditing && selectedLocation) {
+      setInputCity(selectedLocation.name);
+      setCountryCode(selectedLocation.country);
+    }
+  }, [isEditing, selectedLocation]);
 
   useEffect(() => {
     const element = contentRef.current;
@@ -71,8 +78,8 @@ export default function WeatherWidget({
   const displayTemp = unit === 'celsius' ? weather.temp : Math.round((weather.temp * 9/5) + 32);
   const displayFeelsLike = unit === 'celsius' ? weather.feelsLike : Math.round((weather.feelsLike * 9/5) + 32);
 
-  const handleCityChange = (newCity: string, selectedCountry = countryCode) => {
-    setLocation(newCity, selectedCountry || undefined);
+  const handleCityChange = (newCity: string, selectedCountry = countryCode, selectedLocation?: WeatherLocation) => {
+    setLocation(selectedLocation ?? { name: newCity, country: selectedCountry || '' });
     updateWidgetConfig(widgetId, { city: newCity, country: selectedCountry || '' });
     setCountryCode(selectedCountry);
     setIsEditing(false);
@@ -249,7 +256,7 @@ export default function WeatherWidget({
                       <button
                         key={`${location.name}-${location.state}-${location.country}-${location.lat}`}
                         type="button"
-                        onClick={() => handleCityChange(location.name, location.country)}
+                        onClick={() => handleCityChange(location.name, location.country, location)}
                         className="flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-indigo-50"
                       >
                         <span>{location.name}{location.state ? `, ${location.state}` : ''}</span>
@@ -307,7 +314,7 @@ export default function WeatherWidget({
 
             {/* Primary metrics */}
             <div className="ff-weather-hero text-center mb-6">
-              <WeatherIcon icon={weather.icon} className="ff-weather-hero-icon text-5xl mb-2 mx-auto" />
+              <WeatherIcon icon={weather.icon} conditionCode={weather.conditionCode} className="ff-weather-hero-icon text-5xl mb-2 mx-auto" />
               
               <div className="ff-weather-hero-temperature text-4xl font-bold text-gray-800 mb-1">
                 {displayTemp}°{unit === 'celsius' ? 'C' : 'F'}

@@ -31,6 +31,7 @@ import {
   Wind,
 } from 'lucide-react';
 import { AnimatedWidget } from '@/components/animated-widget';
+import { WeatherIcon } from '@/components/weather-icon';
 import { useAnalytics } from '@/hooks/use-analytics';
 import { useNews } from '@/hooks/use-news';
 import { useTasks } from '@/hooks/use-tasks';
@@ -306,22 +307,8 @@ function CompactWeather({ widget, onOpen }: CompactWidgetProps) {
   const country = typeof widget.config?.country === 'string' ? widget.config.country : undefined;
   const { weather, isLoading, isDemo } = useWeather(city, country);
   return <CompactShell widget={widget} onOpen={onOpen} icon={<CloudSun size={16} className="text-indigo-600" />}>
-    {isLoading ? <p className="text-xs text-slate-500">Loading weather…</p> : !weather.city ? <div className="ff-compact-weather-empty">Choose a location to see weather.</div> : <div className="ff-compact-weather-object"><div className="ff-compact-weather-main"><CompactWeatherVisual icon={weather.icon} /><div className="ff-compact-weather-copy min-w-0"><strong className="ff-compact-weather-temperature block leading-none text-slate-900">{Math.round(weather.temp)}°C</strong><p className="mt-1 truncate text-sm font-medium text-slate-800">{weather.city}</p><p className="truncate text-xs capitalize text-slate-500">{weather.description}{isDemo ? ' · Demo' : ''}</p></div></div><div className="ff-compact-weather-meta"><span><Droplet size={15} aria-hidden="true" />{weather.humidity}%</span><span><Wind size={15} aria-hidden="true" />{weather.windSpeed} m/s</span></div></div>}
+    {isLoading ? <p className="text-xs text-slate-500">Loading weather…</p> : !weather.city ? <div className="ff-compact-weather-empty">Choose a location to see weather.</div> : <div className="ff-compact-weather-object"><div className="ff-compact-weather-main"><div className="ff-compact-weather-visual" aria-hidden="true"><WeatherIcon icon={weather.icon} conditionCode={weather.conditionCode} /></div><div className="ff-compact-weather-copy min-w-0"><strong className="ff-compact-weather-temperature block leading-none text-slate-900">{Math.round(weather.temp)}°C</strong><p className="mt-1 truncate text-sm font-medium text-slate-800">{weather.city}</p><p className="truncate text-xs capitalize text-slate-500">{weather.description}{isDemo ? ' · Demo' : ''}</p></div></div><div className="ff-compact-weather-meta"><span><Droplet size={15} aria-hidden="true" />{weather.humidity}%</span><span><Wind size={15} aria-hidden="true" />{weather.windSpeed} m/s</span></div></div>}
   </CompactShell>;
-}
-
-function CompactWeatherVisual({ icon }: { icon: string }) {
-  const isRain = icon.startsWith('09') || icon.startsWith('10');
-  const isSnow = icon.startsWith('13');
-  return <div className="ff-compact-weather-visual" aria-hidden="true">
-    <svg viewBox="0 0 120 86" role="img">
-      <path className="ff-weather-cloud-shadow" d="M19 61c0-10 8-18 18-18 3 0 6 1 9 2 4-11 14-18 26-18 15 0 27 10 29 24 8 1 14 7 14 15 0 9-7 16-16 16H35c-9 0-16-7-16-16Z" />
-      <path className="ff-weather-cloud-body" d="M14 58c0-9 7-16 16-16 3 0 6 1 8 2 4-10 13-16 24-16 14 0 25 9 27 22 7 1 12 6 12 13 0 8-6 14-14 14H29c-8 0-15-6-15-14Z" />
-      <path className="ff-weather-cloud-highlight" d="M29 48c3-3 7-4 11-4 4-9 12-13 21-13 9 0 17 4 21 11-4-2-8-3-13-3-10 0-18 4-23 11-5-3-11-3-17-2Z" />
-      {isRain && <path className="ff-weather-cloud-rain" d="m40 76-4 8m17-8-4 8m18-8-4 8" />}
-      {isSnow && <path className="ff-weather-cloud-snow" d="M41 78h0m13 0h0m13 0h0" />}
-    </svg>
-  </div>;
 }
 
 function CompactCalendar({ widget, onOpen }: CompactWidgetProps) {
