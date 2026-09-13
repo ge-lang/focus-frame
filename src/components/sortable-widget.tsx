@@ -50,8 +50,8 @@ export function SortableWidget({ id, type, compact = false, onContentHeightChang
 
     {isOpen && compact && (
       <ModalPortal>
-        <div className="ff-modal-backdrop fixed inset-0 z-[var(--ff-z-modal)] flex items-start justify-center overflow-y-auto p-4 pt-[max(4rem,10vh)]" onClick={() => setIsOpen(false)}>
-          <div className="ff-focus-view flex w-full max-w-[1020px] max-h-[85vh] flex-col overflow-hidden" data-no-drag role="dialog" aria-modal="true" aria-labelledby={`${id}-focus-view-title`} onClick={(event) => event.stopPropagation()}>
+        <div data-widget-type={type} className="ff-modal-backdrop fixed inset-0 z-[var(--ff-z-modal)] flex items-start justify-center overflow-y-auto p-4 pt-[max(4rem,10vh)]" onClick={() => setIsOpen(false)}>
+          <div data-widget-type={type} className="ff-focus-view flex w-full max-w-[1020px] max-h-[85vh] flex-col overflow-hidden" data-no-drag role="dialog" aria-modal="true" aria-labelledby={`${id}-focus-view-title`} onClick={(event) => event.stopPropagation()}>
             <div className="mb-2 flex shrink-0 items-center justify-between">
               <h2 id={`${id}-focus-view-title`} className="sr-only">{type} focus view</h2>
               <span aria-hidden="true" />

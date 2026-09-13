@@ -302,7 +302,6 @@ export default function WeatherWidget({
                 <div className="ff-weather-temperature">
                   {displayTemp}°{unit === 'celsius' ? 'C' : 'F'}
                 </div>
-                <div className="ff-weather-reading-city">{displayCity}</div>
                 <div className="ff-weather-condition">{weather.description}</div>
                 <div className="ff-weather-feels-like">Feels like {displayFeelsLike}°</div>
                 {!weather.isDay && (weather.condition === 'clear' || weather.condition === 'partlyCloudy' || weather.condition === 'scatteredClouds') ? <div className="ff-weather-moon-caption">{formatMoonPhase(calculateMoonPhase(targetWeatherDate))}</div> : null}

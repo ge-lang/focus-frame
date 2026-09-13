@@ -30,6 +30,9 @@ describe('weather location helpers', () => {
   it('creates concise display labels without changing valid city names', () => {
     expect(getWeatherDisplayName('City of Brussels')).toBe('Brussels');
     expect(getWeatherDisplayName('Municipality of Rotterdam')).toBe('Rotterdam');
+    expect(getWeatherDisplayName('Arrondissement Brussel-Hoofdstad')).toBe('Brussels');
+    expect(getWeatherDisplayName('Arrondissement de Paris')).toBe('Paris');
+    expect(getWeatherDisplayName('Bruxelles-Capitale')).toBe('Brussels');
     expect(getWeatherDisplayName('Mexico City')).toBe('Mexico City');
   });
 

@@ -57,7 +57,16 @@ const verboseLocationPrefixes = [
   /^city\s+of\s+/i,
   /^municipality\s+of\s+/i,
   /^metropolitan\s+city\s+of\s+/i,
+  /^arrondissement(?:\s+(?:of|de|du|des))?\s+/i,
 ];
+
+const weatherDisplayAliases: Record<string, string> = {
+  'arrondissement brussel-hoofdstad': 'Brussels',
+  'arrondissement de bruxelles-capitale': 'Brussels',
+  'arrondissement of brussels-capital': 'Brussels',
+  'brussel-hoofdstad': 'Brussels',
+  'bruxelles-capitale': 'Brussels',
+};
 
 /**
  * Returns a concise presentation label without changing the provider's
@@ -65,6 +74,9 @@ const verboseLocationPrefixes = [
  */
 export function getWeatherDisplayName(locationName: string): string {
   const trimmedName = locationName.trim();
+  const aliasedName = weatherDisplayAliases[trimmedName.toLocaleLowerCase()];
+  if (aliasedName) return aliasedName;
+
   return verboseLocationPrefixes.reduce(
     (displayName, prefix) => displayName.replace(prefix, ''),
     trimmedName,
