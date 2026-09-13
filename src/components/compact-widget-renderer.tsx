@@ -31,7 +31,7 @@ import {
   Wind,
 } from 'lucide-react';
 import { AnimatedWidget } from '@/components/animated-widget';
-import { WeatherArtScene } from '@/components/weather-art-scene';
+import { WeatherArtScene, WeatherArtSurface } from '@/components/weather-art-scene';
 import { useAnalytics } from '@/hooks/use-analytics';
 import { useNews } from '@/hooks/use-news';
 import { useTasks } from '@/hooks/use-tasks';
@@ -309,8 +309,10 @@ function CompactWeather({ widget, onOpen }: CompactWidgetProps) {
   const country = typeof widget.config?.country === 'string' ? widget.config.country : undefined;
   const { weather, isLoading, isDemo } = useWeather(city, country);
   const targetWeatherDate = getTargetLocationDate(new Date(), weather.location?.timezone ?? 0);
+  const displayCity = getWeatherDisplayName(weather.city);
+  const sceneLocation = weather.country ? `${displayCity}, ${weather.country}` : displayCity;
   return <CompactShell widget={widget} onOpen={onOpen} icon={<CloudSun size={16} className="text-indigo-600" />}>
-    {isLoading ? <p className="text-xs text-slate-500">Loading weather…</p> : !weather.city ? <div className="ff-compact-weather-empty">Choose a location to see weather.</div> : <div className="ff-compact-weather-object"><WeatherArtScene condition={weather.condition} isDay={weather.isDay} icon={weather.icon} conditionCode={weather.conditionCode} date={targetWeatherDate} variant="compact" className="ff-compact-weather-main"><div className="ff-compact-weather-copy min-w-0"><strong className="ff-compact-weather-temperature block leading-none text-slate-900">{Math.round(weather.temp)}°C</strong><p className="mt-1 truncate text-sm font-medium text-slate-800">{getWeatherDisplayName(weather.city)}</p><p className="truncate text-xs capitalize text-slate-500">{weather.description}{isDemo ? ' · Demo' : ''}</p></div></WeatherArtScene><div className="ff-compact-weather-meta"><span><Droplet size={15} aria-hidden="true" />{weather.humidity}%</span><span><Wind size={15} aria-hidden="true" />{weather.windSpeed} m/s</span></div></div>}
+    {isLoading ? <p className="text-xs text-slate-500">Loading weather…</p> : !weather.city ? <div className="ff-compact-weather-empty">Choose a location to see weather.</div> : <WeatherArtSurface condition={weather.condition} isDay={weather.isDay} variant="compact" location={sceneLocation} localDate={targetWeatherDate} className="ff-compact-weather-object"><WeatherArtScene condition={weather.condition} isDay={weather.isDay} icon={weather.icon} conditionCode={weather.conditionCode} date={targetWeatherDate} location={sceneLocation} variant="compact" className="ff-compact-weather-main" renderBackdrop={false}><div className="ff-compact-weather-copy min-w-0"><strong className="ff-compact-weather-temperature block leading-none text-slate-900">{Math.round(weather.temp)}°C</strong><p className="mt-1 truncate text-sm font-medium text-slate-800">{displayCity}</p><p className="truncate text-xs capitalize text-slate-500">{weather.description}{isDemo ? ' · Demo' : ''}</p></div></WeatherArtScene><div className="ff-compact-weather-meta"><span><Droplet size={15} aria-hidden="true" />{weather.humidity}%</span><span><Wind size={15} aria-hidden="true" />{weather.windSpeed} m/s</span></div></WeatherArtSurface>}
   </CompactShell>;
 }
 

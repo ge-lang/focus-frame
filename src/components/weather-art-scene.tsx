@@ -3,31 +3,20 @@
 import type { ReactNode } from 'react';
 import { WeatherVisual } from '@/components/weather-icon';
 import type { WeatherCondition } from '@/lib/weather-condition';
+import { getWeatherScene, type WeatherScene } from '@/lib/weather-scene';
 
-type WeatherArtSceneKey = `${WeatherCondition}-${'day' | 'night'}`;
-
-export interface WeatherArtAsset {
-  key: WeatherArtSceneKey;
-  src: string;
-  suppressProceduralStars?: boolean;
-}
-
-const weatherArtAssets: Partial<Record<WeatherArtSceneKey, WeatherArtAsset>> = {
-  'clear-night': {
-    key: 'clear-night',
-    src: '/weather/backgrounds/clear-night.png',
-    suppressProceduralStars: true,
-  },
-};
-
-export function resolveWeatherArtScene(condition: WeatherCondition, isDay: boolean): WeatherArtAsset | null {
-  return weatherArtAssets[`${condition}-${isDay ? 'day' : 'night'}`] ?? null;
-}
-
-function WeatherArtLayers({ art }: { art: WeatherArtAsset }) {
+function WeatherArtLayers({ scene, variant }: { scene: WeatherScene; variant: 'full' | 'compact' }) {
   return (
     <>
-      <span className="ff-weather-art-backdrop" style={{ backgroundImage: `url(${art.src})` }} aria-hidden="true" />
+      <span
+        className="ff-weather-art-backdrop"
+        style={{
+          backgroundImage: `url(${scene.asset})`,
+          backgroundPosition: variant === 'compact' ? scene.compactPosition : scene.fullPosition,
+        }}
+        aria-hidden="true"
+      />
+      <span className={`ff-weather-art-effect ff-weather-art-effect-${scene.effect}`} aria-hidden="true" />
       <span className="ff-weather-art-grade" aria-hidden="true" />
     </>
   );
@@ -36,19 +25,33 @@ function WeatherArtLayers({ art }: { art: WeatherArtAsset }) {
 interface WeatherArtSurfaceProps {
   condition: WeatherCondition;
   isDay: boolean;
+  variant?: 'full' | 'compact';
+  location?: string;
+  localDate?: Date;
   className: string;
   children: ReactNode;
 }
 
-export function WeatherArtSurface({ condition, isDay, className, children }: WeatherArtSurfaceProps) {
-  const art = resolveWeatherArtScene(condition, isDay);
+export function WeatherArtSurface({
+  condition,
+  isDay,
+  variant = 'full',
+  location,
+  localDate,
+  className,
+  children,
+}: WeatherArtSurfaceProps) {
+  const scene = getWeatherScene({ condition, isDay, location, localDate });
 
   return (
     <div
-      className={`ff-weather-art-surface ff-weather-art-surface-full ${art ? `has-weather-art ff-weather-art-${art.key}` : 'uses-weather-visual'} ${className}`}
-      data-weather-art={art?.key}
+      className={`ff-weather-art-surface ff-weather-art-surface-${variant} has-weather-art ff-weather-art-${scene.state} ${className}`}
+      data-weather-art={scene.state}
+      data-weather-effect={scene.effect}
+      data-weather-readability={scene.readability}
+      data-weather-variant={scene.variant}
     >
-      {art ? <WeatherArtLayers art={art} /> : null}
+      <WeatherArtLayers scene={scene} variant={variant} />
       {children}
     </div>
   );
@@ -60,6 +63,7 @@ interface WeatherArtSceneProps {
   icon: string;
   conditionCode?: number | null;
   date?: Date;
+  location?: string;
   variant: 'full' | 'compact';
   className: string;
   visualClassName?: string;
@@ -74,6 +78,7 @@ export function WeatherArtScene({
   icon,
   conditionCode,
   date,
+  location,
   variant,
   className,
   visualClassName = '',
@@ -81,25 +86,25 @@ export function WeatherArtScene({
   ariaLabel,
   renderBackdrop = true,
 }: WeatherArtSceneProps) {
-  const art = resolveWeatherArtScene(condition, isDay);
+  const scene = getWeatherScene({ condition, isDay, location, localDate: date });
   const visualWrapperClass = variant === 'full' ? 'ff-weather-visual-stage' : 'ff-compact-weather-visual';
   const SceneElement = variant === 'full' ? 'section' : 'div';
 
   return (
     <SceneElement
-      className={`ff-weather-art-scene ff-weather-art-scene-${variant} ${art ? `has-weather-art ff-weather-art-${art.key}` : 'uses-weather-visual'} ${className}`}
-      data-weather-art={art?.key}
+      className={`ff-weather-art-scene ff-weather-art-scene-${variant} has-weather-art ff-weather-art-${scene.state} ${className}`}
+      data-weather-art={scene.state}
       aria-label={ariaLabel}
       role={ariaLabel ? 'group' : undefined}
     >
-      {art && renderBackdrop ? <WeatherArtLayers art={art} /> : null}
+      {renderBackdrop ? <WeatherArtLayers scene={scene} variant={variant} /> : null}
       <div className={visualWrapperClass} aria-hidden={variant === 'compact' ? true : undefined}>
         <WeatherVisual
           icon={icon}
           conditionCode={conditionCode}
           isDay={isDay}
           date={date}
-          suppressStars={art?.suppressProceduralStars}
+          suppressStars={scene.suppressProceduralStars}
           className={visualClassName}
         />
       </div>

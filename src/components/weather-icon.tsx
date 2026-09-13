@@ -109,15 +109,15 @@ export const WeatherVisual: React.FC<WeatherIconProps> = ({ icon, conditionCode,
   return (
     <svg className={`ff-weather-svg ff-weather-state-${model.condition} ff-weather-${model.isDay ? 'day' : 'night'} ${className}`} viewBox="0 0 120 96" role="img" aria-label={model.isDay ? model.condition : `${model.condition}, ${model.moonPhase?.phaseName ?? 'night'}`} focusable="false">
       <defs>
-        <radialGradient id={sunGradientId} cx="35%" cy="30%" r="75%"><stop offset="0" stopColor="white" stopOpacity="0.96" /><stop offset="0.72" stopColor="currentColor" stopOpacity="0.94" /><stop offset="1" stopColor="currentColor" stopOpacity="0.7" /></radialGradient>
-        <radialGradient id={moonGradientId} cx="35%" cy="28%" r="75%"><stop offset="0" stopColor="white" stopOpacity="0.92" /><stop offset="0.8" stopColor="currentColor" stopOpacity="0.9" /><stop offset="1" stopColor="currentColor" stopOpacity="0.65" /></radialGradient>
-        <radialGradient id={moonEarthshineGradientId} cx="28%" cy="32%" r="78%"><stop offset="0" stopColor="currentColor" stopOpacity="0.19" /><stop offset="0.7" stopColor="currentColor" stopOpacity="0.065" /><stop offset="1" stopColor="currentColor" stopOpacity="0.015" /></radialGradient>
+        <radialGradient id={sunGradientId} cx="35%" cy="30%" r="75%"><stop offset="0" stopColor="white" stopOpacity="0.98" /><stop offset="0.72" stopColor="#ffd26f" stopOpacity="0.96" /><stop offset="1" stopColor="#edae45" stopOpacity="0.78" /></radialGradient>
+        <radialGradient id={moonGradientId} cx="35%" cy="28%" r="75%"><stop offset="0" stopColor="white" stopOpacity="0.94" /><stop offset="0.8" stopColor="#dce8ff" stopOpacity="0.92" /><stop offset="1" stopColor="#9fbbe8" stopOpacity="0.7" /></radialGradient>
+        <radialGradient id={moonEarthshineGradientId} cx="28%" cy="32%" r="78%"><stop offset="0" stopColor="#dce8ff" stopOpacity="0.36" /><stop offset="0.7" stopColor="#b9cef8" stopOpacity="0.14" /><stop offset="1" stopColor="#8ca9d8" stopOpacity="0.045" /></radialGradient>
       </defs>
       <ellipse className="ff-weather-horizon-haze" cx="58" cy="73" rx="53" ry="13" aria-hidden="true" />
       <circle className="ff-weather-atmosphere" cx="58" cy="44" r="42" aria-hidden="true" />
       {model.showStars && !suppressStars ? <g className="ff-weather-stars" aria-hidden="true"><circle cx="22" cy="18" r="1.4" /><circle cx="84" cy="15" r="1.2" />{model.starCount > 2 ? <><circle cx="96" cy="43" r="1.5" /><circle cx="31" cy="48" r="1" /></> : null}</g> : null}
-      {model.condition === 'clear' || model.condition === 'partlyCloudy' ? (model.primaryObject === 'sun' ? <Sun gradientId={sunGradientId} centered={model.condition === 'clear'} /> : <Moon gradientId={moonGradientId} earthshineGradientId={moonEarthshineGradientId} phase={model.moonPhase ?? { phaseName: 'New Moon', illuminationPercent: 0, illumination: 0, phaseFraction: 0, waxing: false }} />) : null}
-      {model.showCloud ? <Cloud effects={model.condition === 'cloudy' || model.condition === 'overcast' || model.condition === 'partlyCloudy' ? null : model.condition} /> : null}
+      {model.condition === 'clear' || model.condition === 'partlyCloudy' || model.condition === 'scatteredClouds' ? (model.primaryObject === 'sun' ? <Sun gradientId={sunGradientId} centered={model.condition === 'clear'} /> : <Moon gradientId={moonGradientId} earthshineGradientId={moonEarthshineGradientId} phase={model.moonPhase ?? { phaseName: 'New Moon', illuminationPercent: 0, illumination: 0, phaseFraction: 0, waxing: false }} />) : null}
+      {model.showCloud ? <Cloud effects={model.condition === 'cloudy' || model.condition === 'overcast' || model.condition === 'partlyCloudy' || model.condition === 'scatteredClouds' ? null : model.condition} /> : null}
     </svg>
   );
 };

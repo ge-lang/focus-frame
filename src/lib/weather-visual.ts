@@ -62,8 +62,8 @@ export function getWeatherVisualModel(conditionCode?: number | null, icon = '', 
     isDay,
     primaryObject: isDay ? 'sun' : 'moon',
     showCloud: condition !== 'clear',
-    showStars: !isDay && (condition === 'clear' || condition === 'partlyCloudy'),
-    starCount: condition === 'partlyCloudy' ? 2 : 4,
+    showStars: !isDay && (condition === 'clear' || condition === 'partlyCloudy' || condition === 'scatteredClouds'),
+    starCount: condition === 'partlyCloudy' || condition === 'scatteredClouds' ? 2 : 4,
     moonPhase: isDay ? null : calculateMoonPhase(date),
   };
 }

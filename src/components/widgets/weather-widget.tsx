@@ -79,6 +79,7 @@ export default function WeatherWidget({
   const displayCountry = weather.country && weather.country !== 'Demo'
     ? countries.find((country) => country.code === weather.country)?.name ?? weather.country
     : '';
+  const sceneLocation = displayCountry ? `${displayCity}, ${displayCountry}` : displayCity;
 
   const handleCityChange = (newCity: string, selectedCountry = countryCode, selectedLocation?: WeatherLocation) => {
     setLocation(selectedLocation ?? { name: newCity, country: selectedCountry || '' });
@@ -157,7 +158,7 @@ export default function WeatherWidget({
 
   return (
     <AnimatedWidget contentRef={contentRef} dataWidgetId={widgetId} className="ff-weather-widget h-full">
-      <WeatherArtSurface condition={weather.condition} isDay={weather.isDay} className="ff-weather-full">
+      <WeatherArtSurface condition={weather.condition} isDay={weather.isDay} location={sceneLocation} localDate={targetWeatherDate} className="ff-weather-full">
         <header className="ff-weather-header">
           <div className="ff-weather-location-group">
             <MapPin className="ff-weather-location-icon" size={24} aria-hidden="true" />
@@ -290,6 +291,7 @@ export default function WeatherWidget({
               icon={weather.icon}
               conditionCode={weather.conditionCode}
               date={targetWeatherDate}
+              location={sceneLocation}
               variant="full"
               className="ff-weather-hero-layout"
               visualClassName="ff-weather-hero-visual"
@@ -303,7 +305,7 @@ export default function WeatherWidget({
                 <div className="ff-weather-reading-city">{displayCity}</div>
                 <div className="ff-weather-condition">{weather.description}</div>
                 <div className="ff-weather-feels-like">Feels like {displayFeelsLike}°</div>
-                {!weather.isDay && (weather.condition === 'clear' || weather.condition === 'partlyCloudy') ? <div className="ff-weather-moon-caption">{formatMoonPhase(calculateMoonPhase(targetWeatherDate))}</div> : null}
+                {!weather.isDay && (weather.condition === 'clear' || weather.condition === 'partlyCloudy' || weather.condition === 'scatteredClouds') ? <div className="ff-weather-moon-caption">{formatMoonPhase(calculateMoonPhase(targetWeatherDate))}</div> : null}
               </div>
             </WeatherArtScene>
 

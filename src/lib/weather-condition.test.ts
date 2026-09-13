@@ -6,7 +6,9 @@ describe('weather condition normalization', () => {
     [800, '01d', 'clear'],
     [800, '01n', 'clear'],
     [801, '02d', 'partlyCloudy'],
-    [802, '03d', 'cloudy'],
+    [802, '03d', 'scatteredClouds'],
+    [803, '04d', 'cloudy'],
+    [804, '04d', 'overcast'],
     [500, '10d', 'rain'],
     [300, '09d', 'drizzle'],
     [520, '09d', 'showers'],
@@ -19,6 +21,8 @@ describe('weather condition normalization', () => {
 
   it('uses the icon as a safe fallback when a provider code is missing', () => {
     expect(normalizeWeatherCondition(null, '01n')).toBe('clear');
+    expect(normalizeWeatherCondition(undefined, '03n')).toBe('scatteredClouds');
+    expect(normalizeWeatherCondition(undefined, '04n')).toBe('cloudy');
     expect(normalizeWeatherCondition(undefined, '11d')).toBe('thunderstorm');
     expect(normalizeWeatherCondition(undefined, 'unknown')).toBe('cloudy');
   });
