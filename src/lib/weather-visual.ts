@@ -31,6 +31,15 @@ export interface WeatherVisualModel {
 const SYNODIC_MONTH_DAYS = 29.530588853;
 const KNOWN_NEW_MOON_UTC = Date.UTC(2000, 0, 6, 18, 14);
 
+export function formatWeatherVisibility(meters: number): string {
+  if (!Number.isFinite(meters) || meters < 0) return '—';
+  if (meters < 1000) return `${Math.round(meters)} m`;
+
+  const kilometers = meters / 1000;
+  const rounded = kilometers < 10 ? Number(kilometers.toFixed(1)) : Math.round(kilometers);
+  return `${rounded} km`;
+}
+
 /** Shared phase mask used by the SVG fallback and future external Moon texture. */
 export function getMoonIlluminationPath(phaseFraction: number, centerX = 58, centerY = 42, radius = 29): string {
   const fraction = ((phaseFraction % 1) + 1) % 1;

@@ -8,7 +8,7 @@ import { countries } from '@/lib/countries';
 import { findCountryForCity, getPopularCitiesForCountry, getWeatherDisplayName, resolveCountrySelection } from '@/lib/weather-location';
 import { WeatherArtScene, WeatherArtSurface } from '@/components/weather-art-scene';
 import { DayArc, UvGauge, WindCompass } from '@/components/weather-instruments';
-import { calculateMoonPhase, formatMoonPhase, getTargetLocationDate } from '@/lib/weather-visual';
+import { calculateMoonPhase, formatMoonPhase, formatWeatherVisibility, getTargetLocationDate } from '@/lib/weather-visual';
 import { useEffect, useRef, useState } from 'react';
 import { useDashboard } from '@/contexts/dashboard-context';
 import { 
@@ -333,7 +333,7 @@ export default function WeatherWidget({
               <div className="ff-weather-metric-cell">
                 <Eye size={23} aria-hidden="true" />
                 <div>
-                  <strong>{weather.visibility / 1000} km</strong>
+                  <strong>{formatWeatherVisibility(weather.visibility)}</strong>
                   <span>Visibility</span>
                 </div>
               </div>
@@ -348,7 +348,7 @@ export default function WeatherWidget({
                 <UvGauge value={uvIndex} />
                 <div>
                   <strong>{uvIndex}</strong>
-                  <span>{uvLabel} · UV Index</span>
+                  <span>{uvLabel} · UV</span>
                 </div>
               </div>
             </section>

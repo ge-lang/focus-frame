@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="1024"
+     height="1024"
+     viewBox="0 0 1024 1024"
+     fill="none"
+     role="img"
+     aria-labelledby="ff-sun-title ff-sun-description"
+     shape-rendering="geometricPrecision">
+  <title id="ff-sun-title">Warm cinematic sun</title>
+  <desc id="ff-sun-description">A natural warm solar disc with a soft atmospheric glow and restrained radial rays on a transparent background.</desc>
+
+  <defs>
+    <radialGradient id="ff-sun-atmosphere" cx="0" cy="0" r="1"
+                    gradientUnits="userSpaceOnUse"
+                    gradientTransform="translate(512 512) rotate(90) scale(480)">
+      <stop offset="0" stop-color="#FFF8D2" stop-opacity="0.38"/>
+      <stop offset="0.28" stop-color="#FFD56B" stop-opacity="0.28"/>
+      <stop offset="0.55" stop-color="#FFAA3B" stop-opacity="0.12"/>
+      <stop offset="0.78" stop-color="#FF8A28" stop-opacity="0.035"/>
+      <stop offset="1" stop-color="#FF7A1A" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="ff-sun-corona" cx="0" cy="0" r="1"
+                    gradientUnits="userSpaceOnUse"
+                    gradientTransform="translate(512 512) rotate(90) scale(244)">
+      <stop offset="0.54" stop-color="#FFF7CB" stop-opacity="0.98"/>
+      <stop offset="0.67" stop-color="#FFD86D" stop-opacity="0.76"/>
+      <stop offset="0.82" stop-color="#FFA73C" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#FF8C27" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="ff-sun-disc" cx="0" cy="0" r="1"
+                    gradientUnits="userSpaceOnUse"
+                    gradientTransform="translate(489 482) rotate(49) scale(224 215)">
+      <stop offset="0" stop-color="#FFFFF0"/>
+      <stop offset="0.24" stop-color="#FFFBD4"/>
+      <stop offset="0.55" stop-color="#FFE990"/>
+      <stop offset="0.78" stop-color="#FFCC58"/>
+      <stop offset="0.94" stop-color="#F6A93D"/>
+      <stop offset="1" stop-color="#D97824"/>
+    </radialGradient>
+
+    <radialGradient id="ff-sun-inner-light" cx="0" cy="0" r="1"
+                    gradientUnits="userSpaceOnUse"
+                    gradientTransform="translate(472 458) rotate(51) scale(195 184)">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.72"/>
+      <stop offset="0.4" stop-color="#FFFDE2" stop-opacity="0.28"/>
+      <stop offset="0.76" stop-color="#FFF4B2" stop-opacity="0.04"/>
+      <stop offset="1" stop-color="#FFF0A1" stop-opacity="0"/>
+    </radialGradient>
+
+    <linearGradient id="ff-sun-ray" x1="512" y1="335" x2="512" y2="91"
+                    gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFE99D" stop-opacity="0.58"/>
+      <stop offset="0.42" stop-color="#FFD16C" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#FFB746" stop-opacity="0"/>
+    </linearGradient>
+
+    <clipPath id="ff-sun-disc-clip">
+      <circle cx="512" cy="512" r="158"/>
+    </clipPath>
+
+    <filter id="ff-sun-blur-wide" x="0" y="0" width="1024" height="1024"
+            filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="34"/>
+    </filter>
+
+    <filter id="ff-sun-blur-medium" x="0" y="0" width="1024" height="1024"
+            filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="12"/>
+    </filter>
+
+    <filter id="ff-sun-blur-ray" x="0" y="0" width="1024" height="1024"
+            filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="5"/>
+    </filter>
+
+    <filter id="ff-sun-surface" x="340" y="340" width="344" height="344"
+            filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.018 0.024"
+                    numOctaves="3" seed="17" result="noise"/>
+      <feColorMatrix in="noise" type="matrix"
+                     values="0.85 0 0 0 0.15
+                             0 0.58 0 0 0.18
+                             0 0 0.12 0 0.04
+                             0 0 0 0.22 0" result="warmNoise"/>
+      <feGaussianBlur in="warmNoise" stdDeviation="1.2" result="softNoise"/>
+      <feBlend in="SourceGraphic" in2="softNoise" mode="soft-light"/>
+    </filter>
+  </defs>
+
+  <circle cx="512" cy="512" r="458" fill="url(#ff-sun-atmosphere)"
+          filter="url(#ff-sun-blur-wide)"/>
+
+  <g stroke="url(#ff-sun-ray)" stroke-linecap="round"
+     filter="url(#ff-sun-blur-ray)" opacity="0.6">
+    <path d="M512 334C512 272 512 172 512 76" stroke-width="12"/>
+    <path d="M512 343C510 286 511 218 512 162" stroke-width="6" transform="rotate(31 512 512)" opacity="0.72"/>
+    <path d="M512 337C514 277 513 198 512 121" stroke-width="9" transform="rotate(63 512 512)" opacity="0.62"/>
+    <path d="M512 344C511 294 512 234 512 178" stroke-width="5" transform="rotate(94 512 512)" opacity="0.52"/>
+    <path d="M512 338C514 280 513 205 512 135" stroke-width="8" transform="rotate(126 512 512)" opacity="0.68"/>
+    <path d="M512 345C510 299 511 240 512 184" stroke-width="5" transform="rotate(158 512 512)" opacity="0.48"/>
+    <path d="M512 335C511 270 511 172 512 91" stroke-width="11" transform="rotate(189 512 512)" opacity="0.62"/>
+    <path d="M512 343C513 290 513 222 512 158" stroke-width="6" transform="rotate(221 512 512)" opacity="0.54"/>
+    <path d="M512 337C511 279 511 201 512 127" stroke-width="9" transform="rotate(253 512 512)" opacity="0.66"/>
+    <path d="M512 345C514 300 513 240 512 181" stroke-width="5" transform="rotate(284 512 512)" opacity="0.5"/>
+    <path d="M512 338C510 281 511 205 512 137" stroke-width="8" transform="rotate(316 512 512)" opacity="0.7"/>
+    <path d="M512 343C513 290 513 224 512 166" stroke-width="6" transform="rotate(344 512 512)" opacity="0.52"/>
+  </g>
+
+  <g stroke="url(#ff-sun-ray)" stroke-linecap="round" opacity="0.3">
+    <path d="M512 347L512 212" stroke-width="2.2" transform="rotate(15 512 512)"/>
+    <path d="M512 348L512 228" stroke-width="1.8" transform="rotate(47 512 512)"/>
+    <path d="M512 347L512 196" stroke-width="2.1" transform="rotate(79 512 512)"/>
+    <path d="M512 349L512 236" stroke-width="1.7" transform="rotate(110 512 512)"/>
+    <path d="M512 347L512 205" stroke-width="2.2" transform="rotate(142 512 512)"/>
+    <path d="M512 349L512 233" stroke-width="1.7" transform="rotate(174 512 512)"/>
+    <path d="M512 347L512 199" stroke-width="2.1" transform="rotate(205 512 512)"/>
+    <path d="M512 349L512 232" stroke-width="1.7" transform="rotate(237 512 512)"/>
+    <path d="M512 347L512 207" stroke-width="2.2" transform="rotate(269 512 512)"/>
+    <path d="M512 349L512 238" stroke-width="1.7" transform="rotate(300 512 512)"/>
+    <path d="M512 347L512 194" stroke-width="2.1" transform="rotate(332 512 512)"/>
+  </g>
+
+  <circle cx="512" cy="512" r="214" fill="url(#ff-sun-corona)"
+          filter="url(#ff-sun-blur-medium)"/>
+  <circle cx="512" cy="512" r="178" fill="#FFD565" fill-opacity="0.24"
+          filter="url(#ff-sun-blur-medium)"/>
+  <circle cx="512" cy="512" r="158" fill="url(#ff-sun-disc)"/>
+  <g clip-path="url(#ff-sun-disc-clip)" filter="url(#ff-sun-surface)" opacity="0.32">
+    <circle cx="512" cy="512" r="158" fill="#F2A83D"/>
+  </g>
+  <circle cx="512" cy="512" r="158" fill="url(#ff-sun-inner-light)"/>
+  <circle cx="512" cy="512" r="157.25" stroke="#FFF2B2" stroke-opacity="0.38" stroke-width="1.5"/>
+</svg>

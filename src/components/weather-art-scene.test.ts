@@ -74,9 +74,11 @@ describe('weather scene selection', () => {
     expect(clearDay.layers.readability.full.bottom).toBeGreaterThan(clearDay.layers.readability.full.top);
   });
 
-  it('keeps external slots empty so current code visuals remain the fallback', () => {
+  it('activates the clear-sun pilot while preserving uninstalled layer fallbacks', () => {
+    const clearDay = getWeatherScene({ condition: 'clear', isDay: true });
     const scene = getWeatherScene({ condition: 'clear', isDay: false });
 
+    expect(clearDay.layers.celestial.primary?.asset).toBe('/weather/elements/sun-clear.svg');
     expect(scene.layers.celestial.primary?.asset).toBeUndefined();
     expect(scene.layers.celestial.earthshine?.asset).toBeUndefined();
     expect(scene.layers.celestial.halo?.asset).toBeUndefined();

@@ -74,7 +74,7 @@ interface WeatherLayerAssetRegistry {
 }
 
 const celestialPlacement = {
-  full: { x: '34%', y: '31%', scale: 1 },
+  full: { x: '68%', y: '31%', scale: 1.06 },
   compact: { x: '27%', y: '35%', scale: 0.72 },
 } satisfies Record<WeatherLayerVariant, WeatherAssetPlacement>;
 
@@ -98,7 +98,10 @@ function slot(
  */
 export const weatherLayerAssetRegistry: WeatherLayerAssetRegistry = {
   celestial: {
-    sunClear: slot(celestialPlacement, 1, 'screen'),
+    sunClear: {
+      ...slot(celestialPlacement, 0.92, 'normal'),
+      asset: '/weather/elements/sun-clear.svg',
+    },
     sunHazy: slot(celestialPlacement, 0.86, 'screen'),
     sunPartlyClouded: slot(celestialPlacement, 0.94, 'screen'),
     sunLowWarm: slot(
