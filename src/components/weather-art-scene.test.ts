@@ -55,4 +55,31 @@ describe('weather scene selection', () => {
     expect(firstScene.asset).toBe(secondScene.asset);
     expect(calculateMoonPhase(firstDate).phaseFraction).not.toBe(calculateMoonPhase(secondDate).phaseFraction);
   });
+
+  it('exposes explicit celestial, atmosphere, and readability layer plans', () => {
+    const clearDay = getWeatherScene({ condition: 'clear', isDay: true });
+    const clearNight = getWeatherScene({ condition: 'clear', isDay: false });
+    const partlyCloudy = getWeatherScene({ condition: 'partlyCloudy', isDay: true });
+    const haze = getWeatherScene({ condition: 'haze', isDay: true });
+    const storm = getWeatherScene({ condition: 'thunderstorm', isDay: false });
+
+    expect(clearDay.layers.celestial).toMatchObject({ kind: 'sun', slot: 'sun-clear', phaseMask: null });
+    expect(clearDay.layers.celestial.lowWarm).toBeDefined();
+    expect(partlyCloudy.layers.celestial.slot).toBe('sun-partly-clouded');
+    expect(partlyCloudy.layers.atmosphere.foreground?.slot).toBe('thin-cloud-veil');
+    expect(haze.layers.celestial.slot).toBe('sun-hazy');
+    expect(clearNight.layers.celestial).toMatchObject({ kind: 'moon', slot: 'moon-texture', phaseMask: 'data-driven' });
+    expect(clearNight.layers.atmosphere.effects.map(({ slot }) => slot)).toContain('stars');
+    expect(storm.layers.atmosphere.effects.map(({ slot }) => slot)).toEqual(['heavy-rain', 'lightning']);
+    expect(clearDay.layers.readability.full.bottom).toBeGreaterThan(clearDay.layers.readability.full.top);
+  });
+
+  it('keeps external slots empty so current code visuals remain the fallback', () => {
+    const scene = getWeatherScene({ condition: 'clear', isDay: false });
+
+    expect(scene.layers.celestial.primary?.asset).toBeUndefined();
+    expect(scene.layers.celestial.earthshine?.asset).toBeUndefined();
+    expect(scene.layers.celestial.halo?.asset).toBeUndefined();
+    expect(scene.layers.atmosphere.effects.every(({ config }) => config.asset === undefined)).toBe(true);
+  });
 });

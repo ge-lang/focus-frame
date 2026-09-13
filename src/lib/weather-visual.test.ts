@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatMoonPhase, getTargetLocationDate, getWeatherVisualModel, isDayAtTargetLocation, phaseNameForFraction } from './weather-visual';
+import { formatMoonPhase, getMoonIlluminationPath, getTargetLocationDate, getWeatherVisualModel, isDayAtTargetLocation, phaseNameForFraction } from './weather-visual';
 
 describe('weather visual model', () => {
   it('selects a substantial sun object for a clear day', () => {
@@ -30,6 +30,12 @@ describe('weather visual model', () => {
     expect(first?.phaseFraction).not.toBe(second?.phaseFraction);
     expect(phaseNameForFraction(0)).toBe('New Moon');
     expect(phaseNameForFraction(0.5)).toBe('Full Moon');
+  });
+
+  it('creates a data-driven illumination mask shared by fallback and external Moon textures', () => {
+    expect(getMoonIlluminationPath(0)).toBe('');
+    expect(getMoonIlluminationPath(0.5)).toContain('A 29 29');
+    expect(getMoonIlluminationPath(0.18)).not.toBe(getMoonIlluminationPath(0.32));
   });
 
   it('uses the same object language for partly cloudy day and night', () => {

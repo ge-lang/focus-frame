@@ -308,43 +308,48 @@ export default function WeatherWidget({
               </div>
             </WeatherArtScene>
 
-            <section className="ff-weather-primary-row" aria-label="Humidity and wind">
-              <div className="ff-weather-primary-reading">
-                <Droplets size={32} aria-hidden="true" />
+            <section className="ff-weather-metric-band" aria-label="Weather metrics">
+              <div className="ff-weather-metric-cell">
+                <Droplets size={24} aria-hidden="true" />
                 <div>
                   <strong>{weather.humidity}%</strong>
                   <span>Humidity</span>
                 </div>
               </div>
-              <div className="ff-weather-primary-reading">
-                <Wind size={34} aria-hidden="true" />
+              <div className="ff-weather-metric-cell">
+                <Wind size={25} aria-hidden="true" />
                 <div>
                   <strong>{weather.windSpeed} m/s</strong>
                   <span>Wind</span>
                 </div>
               </div>
-            </section>
-
-            <section className="ff-weather-secondary-row" aria-label="Weather details">
-              <div className="ff-weather-secondary-reading">
+              <div className="ff-weather-metric-cell">
                 <Gauge size={22} aria-hidden="true" />
-                <strong>{weather.pressure} hPa</strong>
-                <span>Pressure</span>
+                <div>
+                  <strong>{weather.pressure} hPa</strong>
+                  <span>Pressure</span>
+                </div>
               </div>
-              <div className="ff-weather-secondary-reading">
+              <div className="ff-weather-metric-cell">
                 <Eye size={23} aria-hidden="true" />
-                <strong>{weather.visibility / 1000} km</strong>
-                <span>Visibility</span>
+                <div>
+                  <strong>{weather.visibility / 1000} km</strong>
+                  <span>Visibility</span>
+                </div>
               </div>
-              <div className="ff-weather-secondary-reading ff-weather-wind-direction">
+              <div className="ff-weather-metric-cell ff-weather-wind-direction">
                 <WindCompass degrees={weather.windDirection} />
-                <strong>{getWindDirection(weather.windDirection)} · {Math.round(weather.windDirection)}°</strong>
-                <span>Wind direction</span>
+                <div>
+                  <strong>{getWindDirection(weather.windDirection)} · {Math.round(weather.windDirection)}°</strong>
+                  <span>Wind direction</span>
+                </div>
               </div>
-              <div className="ff-weather-secondary-reading ff-weather-uv-reading">
+              <div className="ff-weather-metric-cell ff-weather-uv-reading">
                 <UvGauge value={uvIndex} />
-                <strong>{uvIndex}</strong>
-                <span>{uvLabel} · UV Index</span>
+                <div>
+                  <strong>{uvIndex}</strong>
+                  <span>{uvLabel} · UV Index</span>
+                </div>
               </div>
             </section>
 

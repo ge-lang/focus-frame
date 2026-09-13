@@ -31,6 +31,23 @@ export interface WeatherVisualModel {
 const SYNODIC_MONTH_DAYS = 29.530588853;
 const KNOWN_NEW_MOON_UTC = Date.UTC(2000, 0, 6, 18, 14);
 
+/** Shared phase mask used by the SVG fallback and future external Moon texture. */
+export function getMoonIlluminationPath(phaseFraction: number, centerX = 58, centerY = 42, radius = 29): string {
+  const fraction = ((phaseFraction % 1) + 1) % 1;
+  if (fraction < 0.0625 || fraction >= 0.9375) return '';
+  if (fraction >= 0.4375 && fraction < 0.5625) {
+    return `M ${centerX - radius} ${centerY} A ${radius} ${radius} 0 1 0 ${centerX + radius} ${centerY} A ${radius} ${radius} 0 1 0 ${centerX - radius} ${centerY}Z`;
+  }
+
+  const waxing = fraction < 0.5;
+  const outerSweep = waxing ? 1 : 0;
+  const terminatorRadius = Math.max(0.2, Math.abs(Math.cos(2 * Math.PI * fraction)) * radius);
+  const innerSweep = waxing ? (fraction < 0.25 ? 0 : 1) : (fraction < 0.75 ? 0 : 1);
+  const outerArc = `A ${radius} ${radius} 0 0 ${outerSweep} ${centerX} ${centerY + radius}`;
+  const innerArc = `A ${terminatorRadius} ${radius} 0 0 ${innerSweep} ${centerX} ${centerY - radius}`;
+  return `M ${centerX} ${centerY - radius} ${outerArc} ${innerArc}Z`;
+}
+
 export function calculateMoonPhase(date = new Date()): MoonPhase {
   const elapsedDays = (date.getTime() - KNOWN_NEW_MOON_UTC) / 86_400_000;
   const phaseFraction = ((elapsedDays / SYNODIC_MONTH_DAYS) % 1 + 1) % 1;

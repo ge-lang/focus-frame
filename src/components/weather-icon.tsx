@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { getWeatherVisualModel, type MoonPhase } from '@/lib/weather-visual';
+import { getMoonIlluminationPath, getWeatherVisualModel, type MoonPhase } from '@/lib/weather-visual';
 import type { WeatherCondition } from '@/lib/weather-condition';
 
 interface WeatherIconProps {
@@ -11,6 +11,8 @@ interface WeatherIconProps {
   date?: Date;
   isDay?: boolean;
   suppressStars?: boolean;
+  suppressCelestial?: boolean;
+  suppressCloud?: boolean;
 }
 
 const cloudPath = 'M14 58c0-9 7-16 16-16 3 0 6 1 8 2 4-10 13-16 24-16 14 0 25 9 27 22 7 1 12 6 12 13 0 8-6 14-14 14H29c-8 0-15-6-15-14Z';
@@ -63,25 +65,8 @@ function Sun({ gradientId, centered }: { gradientId: string; centered: boolean }
   );
 }
 
-function moonLitPath(phaseFraction: number) {
-  const centerX = 58;
-  const centerY = 42;
-  const radius = 29;
-  const fraction = ((phaseFraction % 1) + 1) % 1;
-  if (fraction < 0.0625 || fraction >= 0.9375) return '';
-  if (fraction >= 0.4375 && fraction < 0.5625) return `M ${centerX - radius} ${centerY} A ${radius} ${radius} 0 1 0 ${centerX + radius} ${centerY} A ${radius} ${radius} 0 1 0 ${centerX - radius} ${centerY}Z`;
-
-  const waxing = fraction < 0.5;
-  const outerSweep = waxing ? 1 : 0;
-  const terminatorRadius = Math.max(0.2, Math.abs(Math.cos(2 * Math.PI * fraction)) * radius);
-  const innerSweep = waxing ? (fraction < 0.25 ? 0 : 1) : (fraction < 0.75 ? 0 : 1);
-  const outerArc = `A ${radius} ${radius} 0 0 ${outerSweep} ${centerX} ${centerY + radius}`;
-  const innerArc = `A ${terminatorRadius} ${radius} 0 0 ${innerSweep} ${centerX} ${centerY - radius}`;
-  return `M ${centerX} ${centerY - radius} ${outerArc} ${innerArc}Z`;
-}
-
 function Moon({ phase, gradientId, earthshineGradientId }: { phase: MoonPhase; gradientId: string; earthshineGradientId: string }) {
-  const litPath = moonLitPath(phase.phaseFraction);
+  const litPath = getMoonIlluminationPath(phase.phaseFraction);
   return (
     <g className="ff-weather-moon-object">
       <circle className="ff-weather-moon-halo" cx="58" cy="42" r="40" />
@@ -99,7 +84,16 @@ function Moon({ phase, gradientId, earthshineGradientId }: { phase: MoonPhase; g
   );
 }
 
-export const WeatherVisual: React.FC<WeatherIconProps> = ({ icon, conditionCode, className = '', date, isDay, suppressStars = false }) => {
+export const WeatherVisual: React.FC<WeatherIconProps> = ({
+  icon,
+  conditionCode,
+  className = '',
+  date,
+  isDay,
+  suppressStars = false,
+  suppressCelestial = false,
+  suppressCloud = false,
+}) => {
   const model = getWeatherVisualModel(conditionCode, icon, date, isDay);
   const visualId = React.useId().replace(/:/g, '');
   const sunGradientId = `ff-weather-sun-${visualId}`;
@@ -116,8 +110,8 @@ export const WeatherVisual: React.FC<WeatherIconProps> = ({ icon, conditionCode,
       <ellipse className="ff-weather-horizon-haze" cx="58" cy="73" rx="53" ry="13" aria-hidden="true" />
       <circle className="ff-weather-atmosphere" cx="58" cy="44" r="42" aria-hidden="true" />
       {model.showStars && !suppressStars ? <g className="ff-weather-stars" aria-hidden="true"><circle cx="22" cy="18" r="1.4" /><circle cx="84" cy="15" r="1.2" />{model.starCount > 2 ? <><circle cx="96" cy="43" r="1.5" /><circle cx="31" cy="48" r="1" /></> : null}</g> : null}
-      {model.condition === 'clear' || model.condition === 'partlyCloudy' || model.condition === 'scatteredClouds' ? (model.primaryObject === 'sun' ? <Sun gradientId={sunGradientId} centered={model.condition === 'clear'} /> : <Moon gradientId={moonGradientId} earthshineGradientId={moonEarthshineGradientId} phase={model.moonPhase ?? { phaseName: 'New Moon', illuminationPercent: 0, illumination: 0, phaseFraction: 0, waxing: false }} />) : null}
-      {model.showCloud ? <Cloud effects={model.condition === 'cloudy' || model.condition === 'overcast' || model.condition === 'partlyCloudy' || model.condition === 'scatteredClouds' ? null : model.condition} /> : null}
+      {!suppressCelestial && (model.condition === 'clear' || model.condition === 'partlyCloudy' || model.condition === 'scatteredClouds') ? (model.primaryObject === 'sun' ? <Sun gradientId={sunGradientId} centered={model.condition === 'clear'} /> : <Moon gradientId={moonGradientId} earthshineGradientId={moonEarthshineGradientId} phase={model.moonPhase ?? { phaseName: 'New Moon', illuminationPercent: 0, illumination: 0, phaseFraction: 0, waxing: false }} />) : null}
+      {!suppressCloud && model.showCloud ? <Cloud effects={model.condition === 'cloudy' || model.condition === 'overcast' || model.condition === 'partlyCloudy' || model.condition === 'scatteredClouds' ? null : model.condition} /> : null}
     </svg>
   );
 };

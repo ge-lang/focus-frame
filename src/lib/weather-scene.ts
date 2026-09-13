@@ -1,4 +1,5 @@
 import type { WeatherCondition } from './weather-condition';
+import { getWeatherLayerPlan, type WeatherLayerPlan } from './weather-layer-registry';
 
 export type WeatherScenePeriod = 'day' | 'night';
 export type WeatherSceneState =
@@ -48,6 +49,7 @@ interface WeatherSceneDefinition {
 
 export interface WeatherScene extends Omit<WeatherSceneDefinition, 'variants'>, WeatherSceneVariant {
   variant: number;
+  layers: WeatherLayerPlan;
 }
 
 export interface WeatherSceneInput {
@@ -72,6 +74,13 @@ const stateByCondition = {
   mist: { day: 'mist-day', night: 'mist-night' },
   haze: { day: 'haze-day', night: 'haze-night' },
 } as const satisfies Record<WeatherCondition, Record<WeatherScenePeriod, WeatherSceneState>>;
+
+const conditionByState = Object.fromEntries(
+  Object.entries(stateByCondition).flatMap(([condition, periods]) => [
+    [periods.day, condition],
+    [periods.night, condition],
+  ]),
+) as Record<WeatherSceneState, WeatherCondition>;
 
 function variant(
   state: WeatherSceneState,
@@ -151,6 +160,7 @@ export function getWeatherScene(input: WeatherSceneInput): WeatherScene {
     readability: definition.readability,
     suppressProceduralStars: definition.suppressProceduralStars,
     variant: selectedVariant,
+    layers: getWeatherLayerPlan(conditionByState[state], input.isDay),
     ...definition.variants[selectedVariant],
   };
 }
