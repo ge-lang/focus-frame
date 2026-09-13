@@ -1,11 +1,16 @@
 import { describe, expect, it } from 'vitest';
-import { formatMoonPhase, formatWeatherVisibility, getMoonIlluminationPath, getTargetLocationDate, getWeatherVisualModel, isDayAtTargetLocation, phaseNameForFraction } from './weather-visual';
+import { formatMoonPhase, formatTargetLocationDateTime, formatWeatherVisibility, getMoonIlluminationPath, getTargetLocationDate, getWeatherVisualModel, isDayAtTargetLocation, phaseNameForFraction } from './weather-visual';
 
 describe('weather visual model', () => {
   it('formats visibility without provider precision noise', () => {
     expect(formatWeatherVisibility(10_000)).toBe('10 km');
     expect(formatWeatherVisibility(1_756)).toBe('1.8 km');
     expect(formatWeatherVisibility(850)).toBe('850 m');
+  });
+
+  it('formats a concise target-location timestamp in its shifted UTC representation', () => {
+    expect(formatTargetLocationDateTime(new Date('2026-09-13T14:27:00Z'))).toBe('Sun, 13 Sept · 14:27');
+    expect(formatTargetLocationDateTime(new Date('invalid'))).toBe('');
   });
 
   it('selects a substantial sun object for a clear day', () => {

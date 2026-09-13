@@ -123,11 +123,21 @@ function WeatherReadabilityLayer({ scene, variant }: { scene: WeatherScene; vari
   return <span className="ff-weather-layer ff-weather-readability-layer" style={style} aria-hidden="true" />;
 }
 
-function WeatherLayerStack({ scene, variant, date }: { scene: WeatherScene; variant: WeatherLayerVariant; date?: Date }) {
+function WeatherLayerStack({
+  scene,
+  variant,
+  date,
+  renderCelestial = false,
+}: {
+  scene: WeatherScene;
+  variant: WeatherLayerVariant;
+  date?: Date;
+  renderCelestial?: boolean;
+}) {
   return (
     <>
-      <WeatherBaseScene scene={scene} variant={variant} />
-      <WeatherCelestialLayer scene={scene} variant={variant} date={date} />
+      <WeatherBaseScene key={scene.asset} scene={scene} variant={variant} />
+      {renderCelestial ? <WeatherCelestialLayer scene={scene} variant={variant} date={date} /> : null}
       <WeatherAtmosphereLayer scene={scene} variant={variant} />
       <WeatherReadabilityLayer scene={scene} variant={variant} />
     </>
@@ -165,7 +175,7 @@ export function WeatherArtSurface({
       data-weather-celestial-slot={scene.layers.celestial.slot}
       data-weather-foreground-slot={scene.layers.atmosphere.foreground?.slot}
     >
-      <WeatherLayerStack scene={scene} variant={variant} date={localDate} />
+      <WeatherLayerStack scene={scene} variant={variant} date={localDate} renderCelestial={variant === 'compact'} />
       {children}
     </div>
   );
@@ -184,6 +194,7 @@ interface WeatherArtSceneProps {
   children: ReactNode;
   ariaLabel?: string;
   renderBackdrop?: boolean;
+  showVisual?: boolean;
 }
 
 export function WeatherArtScene({
@@ -199,6 +210,7 @@ export function WeatherArtScene({
   children,
   ariaLabel,
   renderBackdrop = true,
+  showVisual = true,
 }: WeatherArtSceneProps) {
   const scene = getWeatherScene({ condition, isDay, location, localDate: date });
   const visualWrapperClass = variant === 'full' ? 'ff-weather-visual-stage' : 'ff-compact-weather-visual';
@@ -213,18 +225,20 @@ export function WeatherArtScene({
       role={ariaLabel ? 'group' : undefined}
     >
       {renderBackdrop ? <WeatherLayerStack scene={scene} variant={variant} date={date} /> : null}
-      <div className={visualWrapperClass} aria-hidden={variant === 'compact' ? true : undefined}>
-        <WeatherVisual
-          icon={icon}
-          conditionCode={conditionCode}
-          isDay={isDay}
-          date={date}
-          suppressStars={scene.suppressProceduralStars}
-          suppressCelestial={Boolean(scene.layers.celestial.primary?.asset)}
-          suppressCloud={Boolean(scene.layers.atmosphere.foreground?.config.asset)}
-          className={visualClassName}
-        />
-      </div>
+      {showVisual ? (
+        <div className={visualWrapperClass} aria-hidden={variant === 'compact' ? true : undefined}>
+          <WeatherVisual
+            icon={icon}
+            conditionCode={conditionCode}
+            isDay={isDay}
+            date={date}
+            suppressStars={scene.suppressProceduralStars}
+            suppressCelestial={variant === 'compact' && Boolean(scene.layers.celestial.primary?.asset)}
+            suppressCloud={Boolean(scene.layers.atmosphere.foreground?.config.asset)}
+            className={visualClassName}
+          />
+        </div>
+      ) : null}
       {children}
     </SceneElement>
   );

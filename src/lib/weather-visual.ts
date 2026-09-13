@@ -98,6 +98,25 @@ export function getTargetLocationDate(now = new Date(), timezoneOffsetSeconds = 
   return new Date(now.getTime() + timezoneOffsetSeconds * 1000);
 }
 
+export function formatTargetLocationDateTime(date: Date): string {
+  if (Number.isNaN(date.getTime())) return '';
+
+  const dateLabel = new Intl.DateTimeFormat('en-GB', {
+    weekday: 'short',
+    day: '2-digit',
+    month: 'short',
+    timeZone: 'UTC',
+  }).format(date);
+  const timeLabel = new Intl.DateTimeFormat('en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+    timeZone: 'UTC',
+  }).format(date);
+
+  return `${dateLabel.replace(/^(\S+)/, '$1,')} · ${timeLabel}`;
+}
+
 export function isDayAtTargetLocation(now = new Date(), timezoneOffsetSeconds = 0): boolean {
   const targetDate = getTargetLocationDate(now, timezoneOffsetSeconds);
   const hour = targetDate.getUTCHours();

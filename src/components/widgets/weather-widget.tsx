@@ -8,7 +8,8 @@ import { countries } from '@/lib/countries';
 import { findCountryForCity, getPopularCitiesForCountry, getWeatherDisplayName, resolveCountrySelection } from '@/lib/weather-location';
 import { WeatherArtScene, WeatherArtSurface } from '@/components/weather-art-scene';
 import { DayArc, UvGauge, WindCompass } from '@/components/weather-instruments';
-import { calculateMoonPhase, formatMoonPhase, formatWeatherVisibility, getTargetLocationDate } from '@/lib/weather-visual';
+import { calculateMoonPhase, formatMoonPhase, formatTargetLocationDateTime, formatWeatherVisibility, getTargetLocationDate } from '@/lib/weather-visual';
+import type { WeatherCondition } from '@/lib/weather-condition';
 import { useEffect, useRef, useState } from 'react';
 import { useDashboard } from '@/contexts/dashboard-context';
 import { 
@@ -18,7 +19,44 @@ import {
   Wind, 
   Gauge,
   Droplets,
+  Cloud,
+  CloudDrizzle,
+  CloudFog,
+  CloudLightning,
+  CloudMoon,
+  CloudRain,
+  CloudSnow,
+  CloudSun,
+  Moon,
+  Sun,
+  type LucideIcon,
 } from 'lucide-react';
+
+function weatherConditionGlyph(condition: WeatherCondition, isDay: boolean): LucideIcon {
+  switch (condition) {
+    case 'clear':
+      return isDay ? Sun : Moon;
+    case 'partlyCloudy':
+    case 'scatteredClouds':
+      return isDay ? CloudSun : CloudMoon;
+    case 'drizzle':
+      return CloudDrizzle;
+    case 'rain':
+    case 'showers':
+      return CloudRain;
+    case 'snow':
+      return CloudSnow;
+    case 'thunderstorm':
+      return CloudLightning;
+    case 'fog':
+    case 'mist':
+    case 'haze':
+      return CloudFog;
+    case 'cloudy':
+    case 'overcast':
+      return Cloud;
+  }
+}
 
 interface WeatherWidgetProps {
   widgetId: string;
@@ -80,6 +118,8 @@ export default function WeatherWidget({
     ? countries.find((country) => country.code === weather.country)?.name ?? weather.country
     : '';
   const sceneLocation = displayCountry ? `${displayCity}, ${displayCountry}` : displayCity;
+  const localDateTime = formatTargetLocationDateTime(targetWeatherDate);
+  const ConditionGlyph = weatherConditionGlyph(weather.condition, weather.isDay);
 
   const handleCityChange = (newCity: string, selectedCountry = countryCode, selectedLocation?: WeatherLocation) => {
     setLocation(selectedLocation ?? { name: newCity, country: selectedCountry || '' });
@@ -160,16 +200,20 @@ export default function WeatherWidget({
     <AnimatedWidget contentRef={contentRef} dataWidgetId={widgetId} className="ff-weather-widget h-full">
       <WeatherArtSurface condition={weather.condition} isDay={weather.isDay} location={sceneLocation} localDate={targetWeatherDate} className="ff-weather-full">
         <header className="ff-weather-header">
-          <div className="ff-weather-location-group">
-            <MapPin className="ff-weather-location-icon" size={24} aria-hidden="true" />
-            <div className="ff-weather-location-copy">
-              <div className="ff-weather-title-row">
-                <h3 className="widget-drag-handle cursor-grab select-none active:cursor-grabbing">{title || 'Weather'}</h3>
-                {isDemo && <span className="ff-weather-demo-badge">Demo</span>}
+          <div className="ff-weather-header-copy">
+            <div className="ff-weather-title-row">
+              <h3 className="widget-drag-handle cursor-grab select-none active:cursor-grabbing">{title || 'Weather'}</h3>
+              {isDemo && <span className="ff-weather-demo-badge">Demo</span>}
+            </div>
+            <div className="ff-weather-location-group">
+              <MapPin className="ff-weather-location-icon" size={23} aria-hidden="true" />
+              <div className="ff-weather-location-copy">
+                <button type="button" onClick={() => setIsEditing(true)} className="ff-weather-location-button">
+                  <strong>{displayCity}</strong>
+                  {displayCountry ? <span>, {displayCountry}</span> : null}
+                </button>
+                <time className="ff-weather-local-time" dateTime={targetWeatherDate.toISOString()}>{localDateTime}</time>
               </div>
-              <button type="button" onClick={() => setIsEditing(true)} className="ff-weather-location-button">
-                {displayCity}{displayCountry ? `, ${displayCountry}` : ''}
-              </button>
             </div>
           </div>
 
@@ -294,15 +338,18 @@ export default function WeatherWidget({
               location={sceneLocation}
               variant="full"
               className="ff-weather-hero-layout"
-              visualClassName="ff-weather-hero-visual"
               ariaLabel="Current conditions"
               renderBackdrop={false}
+              showVisual={false}
             >
               <div className="ff-weather-reading">
                 <div className="ff-weather-temperature">
                   {displayTemp}°{unit === 'celsius' ? 'C' : 'F'}
                 </div>
-                <div className="ff-weather-condition">{weather.description}</div>
+                <div className="ff-weather-condition">
+                  <ConditionGlyph className="ff-weather-condition-icon" aria-hidden="true" />
+                  <span>{weather.description}</span>
+                </div>
                 <div className="ff-weather-feels-like">Feels like {displayFeelsLike}°</div>
                 {!weather.isDay && (weather.condition === 'clear' || weather.condition === 'partlyCloudy' || weather.condition === 'scatteredClouds') ? <div className="ff-weather-moon-caption">{formatMoonPhase(calculateMoonPhase(targetWeatherDate))}</div> : null}
               </div>
