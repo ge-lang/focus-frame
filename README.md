@@ -8,7 +8,9 @@ FocusFrame is a calm, visual workspace for turning intentions into focused progr
 
 Most productivity tools separate planning from the conditions in which work actually happens. FocusFrame keeps the essentials in one glance: what needs attention, how much focus time is available, and the surrounding context that helps a day feel manageable. The interface is deliberately atmospheric and low-noise, while each widget can still open into a focused working view.
 
-## What to explore
+Built as a full-stack portfolio project with real authentication, persistent user data, responsive layouts and external API integrations.
+
+## Key Features
 
 - A Google-authenticated personal workspace with user-scoped data.
 - Draggable, persistent dashboard widgets with responsive desktop and mobile layouts.
@@ -125,7 +127,7 @@ The suite contains 29 test files and 155 passing tests covering authentication a
 
 ## Status
 
-FocusFrame is portfolio-ready on `main` and deployed at the live demo URL above. The demo is designed for an authenticated session and may show provider fallback states when optional external services are unavailable. Google OAuth is currently the configured sign-in provider, and `Task.userId` remains nullable for historical compatibility pending a separate data audit.
+FocusFrame is an actively developed full-stack portfolio project deployed on Vercel. The current stable version is published from `main`, and the live demo is available above. The demo is designed for an authenticated session and may show provider fallback states when optional external services are unavailable.
 
 ## License
 
