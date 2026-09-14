@@ -1,53 +1,72 @@
 # FocusFrame
 
-FocusFrame is a personal productivity dashboard built as a learning and portfolio project. It brings tasks, Pomodoro focus sessions, notes, goals, bookmarks, analytics, weather and news into one customizable workspace.
+FocusFrame is a calm, visual workspace for turning intentions into focused progress. It brings tasks, Pomodoro sessions, notes, goals, analytics, calendar planning, bookmarks, news and weather into one adaptable dashboard.
 
-## Core features
+**Live demo:** [focus-frame-taupe.vercel.app](https://focus-frame-taupe.vercel.app/)
 
-- Google OAuth sign-in.
-- User-owned tasks with statuses, priorities, deadlines, search and filters.
-- Pomodoro work and break sessions, optionally linked to a task.
-- Notes, goals and bookmarks stored per signed-in user.
-- A persistent, draggable dashboard layout.
-- Analytics for focus time, completed tasks and goals, trends, streaks and peak hours.
-- Weather and news integrations with clearly labeled demo/fallback states.
+## Product story
 
-## Tech stack
+Most productivity tools separate planning from the conditions in which work actually happens. FocusFrame keeps the essentials in one glance: what needs attention, how much focus time is available, and the surrounding context that helps a day feel manageable. The interface is deliberately atmospheric and low-noise, while each widget can still open into a focused working view.
 
-- Next.js 16 App Router and React 19
-- TypeScript and Tailwind CSS 3
-- TanStack React Query for client data fetching and caching
-- NextAuth.js with Google OAuth and the Prisma adapter
-- Prisma ORM with PostgreSQL
-- Vitest for automated tests
-- Vercel and a PostgreSQL provider for deployment
+## What to explore
 
-## Architecture overview
+- A Google-authenticated personal workspace with user-scoped data.
+- Draggable, persistent dashboard widgets with responsive desktop and mobile layouts.
+- Tasks with status, priority, deadlines, search and filters.
+- Pomodoro focus and break sessions, optionally linked to a task.
+- Goals and analytics for completion, focus time, trends and streaks.
+- Calendar month overview with deadline-aware summaries.
+- Notes, bookmarks and live news in the same workspace.
+- A cinematic Weather widget with condition-aware scenes, day/night treatment and detailed metrics.
 
-The browser renders React components and widgets. Hooks use React Query or small browser-side state helpers to call Next.js API routes. Server routes obtain the authenticated session, validate input, apply user-ownership scoping, and use Prisma to read or write PostgreSQL data. News and weather are server-side proxy routes so their API keys are not sent to the browser.
+## Screenshots
 
-More detail is in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). The interview-oriented explanation is in [docs/PROJECT-WALKTHROUGH.md](docs/PROJECT-WALKTHROUGH.md), with short study answers in [docs/INTERVIEW-CHEATSHEET.md](docs/INTERVIEW-CHEATSHEET.md).
+These are real renders from the authenticated production deployment.
 
-## Authentication and user-data isolation
+### Dashboard themes
 
-NextAuth.js creates the server session after Google sign-in. Personal API routes derive the current user ID from that session; they do not trust a user ID from a request body, query string or route parameter. Queries and object mutations apply both the resource ID and authenticated user ID where applicable, providing an application-level safeguard against cross-user access by guessed IDs.
+![FocusFrame dashboard in Cool theme](docs/screenshots/dashboard-cool.png)
 
-## Database models
+![FocusFrame dashboard in Hot theme](docs/screenshots/dashboard-hot.png)
 
-The main Prisma relationships are:
+### Full widget views
 
-- `User` has many `Task`, `Note`, `Goal`, `Bookmark` and `FocusSession` records.
-- `Task` can have many `FocusSession` records.
-- `User` has one `UserSettings` record and one `UserLayout` record.
-- A focus session may reference a task owned by the same user.
+![Cinematic full Weather view](docs/screenshots/weather-full.png)
 
-The schema and versioned migrations are in `prisma/`. `Task.userId` is currently nullable for historical compatibility; it has not been changed in this phase.
+![Full Tasks view](docs/screenshots/tasks-full.png)
 
-## External APIs
+![Full Calendar view](docs/screenshots/calendar-full.png)
 
-- OpenWeather provides weather and city-search data through `/api/weather`.
-- GNews provides headlines through `/api/news`.
-- `OPENWEATHER_API_KEY` and `GNEWS_API_KEY` are server-only variables. If an external service is unavailable or not configured, the UI may show clearly labeled demo/fallback content.
+![Full Pomodoro view](docs/screenshots/pomodoro-full.png)
+
+![Goals and Analytics view](docs/screenshots/goals-analytics.png)
+
+### Mobile
+
+![FocusFrame mobile dashboard at 390 by 844](docs/screenshots/mobile-dashboard.png)
+
+![FocusFrame mobile Weather card](docs/screenshots/mobile-weather.png)
+
+## Technical highlights
+
+- Next.js 16 App Router with React 19.
+- TypeScript with Tailwind CSS for the visual system.
+- React Grid Layout for persistent, draggable widget placement.
+- TanStack React Query for client-side fetching and cache invalidation.
+- NextAuth with Google OAuth and the Prisma adapter.
+- Prisma ORM backed by PostgreSQL.
+- Vitest and ESLint for automated quality checks.
+- Vercel deployment with server-side integrations for weather and news.
+
+## Architecture
+
+React widgets render the dashboard and use focused hooks for query, mutation and local UI state. Next.js route handlers authenticate each request, validate payloads and scope reads and writes to the signed-in user before calling Prisma. The Weather and News routes proxy external services so API keys remain server-side; Weather composes condition-aware backgrounds, overlays and metrics without changing the underlying data model.
+
+The deeper implementation notes remain in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), with an interview-oriented walkthrough in [docs/PROJECT-WALKTHROUGH.md](docs/PROJECT-WALKTHROUGH.md).
+
+## Authentication and data boundaries
+
+The live demo requires Google sign-in. Server-side session identity is the source of truth for personal API routes; clients cannot select another user's ID through request data. Resource queries and mutations apply ownership checks, and external API secrets are never exposed with a `NEXT_PUBLIC_` prefix.
 
 ## Local setup
 
@@ -64,9 +83,10 @@ The schema and versioned migrations are in `prisma/`. `Task.userId` is currently
 git clone https://github.com/ge-lang/focus-frame.git
 cd focus-frame
 npm ci
+cp .env.example .env.local
 ```
 
-Create a local `.env` file with the variables below. Do not commit it.
+Fill in the values in `.env.local`, then run:
 
 ```bash
 npx prisma migrate dev
@@ -75,7 +95,7 @@ npm run dev
 
 Open <http://localhost:3000>.
 
-## Environment variables
+### Environment variables
 
 | Variable | Required | Purpose |
 | --- | --- | --- |
@@ -87,48 +107,25 @@ Open <http://localhost:3000>.
 | `GNEWS_API_KEY` | No | Server-only GNews key |
 | `OPENWEATHER_API_KEY` | No | Server-only OpenWeather key |
 
-Never use a `NEXT_PUBLIC_` prefix for these API keys.
+Never commit `.env.local`, and never use a `NEXT_PUBLIC_` prefix for server-only API keys.
 
-## Quality commands
+## Quality
+
+The current release candidate was verified with:
 
 ```bash
-npm ci
-npx prisma validate
-npx prisma generate
 npx tsc --noEmit
 npm run lint
 npm test
 npm run build
+git diff --check
 ```
 
-The build also runs `prisma generate`. `next/font/google` fetches the Inter font during a production build, so a network-restricted environment can fail at that step even when the application code is valid.
+The suite contains 29 test files and 155 passing tests covering authentication and ownership, input validation, external API configuration, analytics helpers and task deadline/filter behavior. The production build also runs `prisma generate`; builds need network access when `next/font/google` downloads Inter.
 
-## Testing
+## Status
 
-Vitest covers API authentication, ownership boundaries, validation, weather configuration behavior, analytics helpers and task deadline/filter helpers. The current suite has 31 passing tests across 13 test files. Browser end-to-end testing is not part of the current project.
-
-## Deployment
-
-The intended deployment target is Vercel with PostgreSQL. Configure all required environment variables in the deployment environment, configure the Google OAuth redirect URI for the deployed domain, and apply Prisma migrations separately from the application build. The repository build command is `npm run build`.
-
-## Known limitations
-
-- Google OAuth is the only configured sign-in provider.
-- Weather and news depend on external services and may use demo/fallback content.
-- The build needs access to Google Fonts unless the font strategy is changed deliberately.
-- `Task.userId` remains nullable pending a separate data audit and reviewed migration plan.
-- There is no browser E2E suite or CI database fixture yet.
-
-## Roadmap
-
-- Safely resolve nullable task ownership data after a data audit.
-- Add database/API integration tests.
-- Add browser E2E coverage for core flows.
-- Add deadline reminders and calendar integration.
-
-## AI-assisted development
-
-I used AI to support implementation, debugging, explanations and evaluating alternatives. I reviewed the suggested solutions, tested the application and used the project to deepen my understanding of its architecture. I remain responsible for deciding what to keep and how the application should work.
+FocusFrame is portfolio-ready on `main` and deployed at the live demo URL above. The demo is designed for an authenticated session and may show provider fallback states when optional external services are unavailable. Google OAuth is currently the configured sign-in provider, and `Task.userId` remains nullable for historical compatibility pending a separate data audit.
 
 ## License
 
