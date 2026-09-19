@@ -7,6 +7,7 @@ import {
   completePomodoro,
   createCompletionGate,
   defaultPomodoroState,
+  getElapsedFocusSeconds,
   getRemainingSeconds,
   pausePomodoro,
   resetPomodoro,
@@ -116,8 +117,18 @@ export function PomodoroProvider({ children }: { children: ReactNode }) {
   const startTimer = () => commitState(startPomodoro(stateRef.current, Date.now()));
   const pauseTimer = () => commitState(pausePomodoro(stateRef.current, Date.now()));
   const stopTimer = () => {
+    const current = stateRef.current;
+    const now = Date.now();
+    const duration = getElapsedFocusSeconds(current, now);
+    if (duration > 0) {
+      createFocusSession({
+        duration,
+        type: 'work',
+        ...(current.selectedTaskId ? { taskId: current.selectedTaskId } : {}),
+      });
+    }
     completionGateRef.current = createCompletionGate();
-    commitState(stopPomodoro(stateRef.current));
+    commitState(stopPomodoro(current));
   };
   const resetTimer = () => {
     completionGateRef.current = createCompletionGate();

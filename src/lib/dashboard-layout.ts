@@ -109,6 +109,16 @@ export function withWidgetSizing(item: LayoutItem): LayoutItem {
   return { ...item, w: sizing.w, h: sizing.h };
 }
 
+/** Derives the dimensions RGL should render from the current widget type. */
+export function getCurrentGridLayout(layout: LayoutItem[]): LayoutItem[] {
+  return layout.map(withWidgetSizing);
+}
+
+/** Returns the lowest occupied row using current widget geometry, not saved h values. */
+export function getLayoutBottom(layout: LayoutItem[]): number {
+  return layout.reduce((bottom, item) => Math.max(bottom, item.y + getWidgetSizing(item.type).h), 0);
+}
+
 export function reconcileLayoutTypes(
   layout: LayoutItem[],
   widgets: Pick<Widget, 'id' | 'type'>[],

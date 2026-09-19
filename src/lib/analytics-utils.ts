@@ -21,6 +21,12 @@ export function sumDurations<T extends { duration: number }>(sessions: T[]): num
   return sessions.reduce((total, session) => total + session.duration, 0);
 }
 
+export type FocusSessionKind = 'work' | 'break' | 'long_break';
+
+export function sumFocusDurations<T extends { duration: number; type: FocusSessionKind }>(sessions: T[]): number {
+  return sumDurations(sessions.filter((session) => session.type === 'work'));
+}
+
 export function calculateProductivity(
   focusSeconds: number,
   focusGoalSeconds: number,

@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     const type = body.type;
     const taskId = body.taskId;
     const parsedType = isOneOf(type, validTypes) ? type : null;
-    if (typeof duration !== 'number' || !Number.isInteger(duration) || duration < 60 || duration > 14_400 || !parsedType) {
+    if (typeof duration !== 'number' || !Number.isInteger(duration) || duration < 1 || duration > 14_400 || !parsedType) {
       return NextResponse.json({ error: 'Invalid focus session' }, { status: 400 });
     }
 

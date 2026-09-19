@@ -36,4 +36,18 @@ describe('/api/focus-sessions ownership', () => {
     });
     expect(mocks.create).not.toHaveBeenCalled();
   });
+
+  it('persists a valid partial focus session in seconds', async () => {
+    mocks.getCurrentUserId.mockResolvedValue('user-a');
+    mocks.create.mockResolvedValue({ id: 'session-1', userId: 'user-a', duration: 1, type: 'work' });
+
+    const response = await POST(new Request('http://localhost/api/focus-sessions', {
+      method: 'POST',
+      body: JSON.stringify({ duration: 1, type: 'work' }),
+      headers: { 'Content-Type': 'application/json' },
+    }) as NextRequest);
+
+    expect(response.status).toBe(201);
+    expect(mocks.create).toHaveBeenCalledWith({ data: { userId: 'user-a', duration: 1, type: 'work', taskId: null } });
+  });
 });

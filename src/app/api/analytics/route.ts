@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUserId } from '@/lib/api-auth';
-import { calculateProductivity, calculateStreak, calculateTrend, localDayKey, startOfLocalDay, startOfLocalRange, sumDurations } from '@/lib/analytics-utils';
+import { calculateProductivity, calculateStreak, calculateTrend, localDayKey, startOfLocalDay, startOfLocalRange, sumFocusDurations } from '@/lib/analytics-utils';
 
 type Range = 'today' | 'week' | 'month' | 'year';
 const ranges: Record<Range, number> = { today: 1, week: 7, month: 30, year: 365 };
@@ -19,15 +19,15 @@ export async function GET(request: NextRequest) {
   previousStart.setDate(previousStart.getDate() - days);
 
   const [sessions, previousSessions, completedTasks, completedGoals, settings] = await Promise.all([
-    prisma.focusSession.findMany({ where: { userId, type: 'work', completedAt: { gte: start } }, select: { duration: true, completedAt: true } }),
-    prisma.focusSession.findMany({ where: { userId, type: 'work', completedAt: { gte: previousStart, lt: start } }, select: { duration: true } }),
+    prisma.focusSession.findMany({ where: { userId, type: 'work', completedAt: { gte: start } }, select: { duration: true, type: true, completedAt: true } }),
+    prisma.focusSession.findMany({ where: { userId, type: 'work', completedAt: { gte: previousStart, lt: start } }, select: { duration: true, type: true } }),
     prisma.task.count({ where: { userId, isCompleted: true, updatedAt: { gte: start } } }),
     prisma.goal.count({ where: { userId, completed: true, updatedAt: { gte: start } } }),
     prisma.userSettings.findUnique({ where: { userId } }),
   ]);
 
-  const focusSeconds = sumDurations(sessions);
-  const previousFocusSeconds = sumDurations(previousSessions);
+  const focusSeconds = sumFocusDurations(sessions);
+  const previousFocusSeconds = sumFocusDurations(previousSessions);
   const focusGoalSeconds = days * (settings?.dailyFocusGoal ?? 100) * 60;
   const taskGoal = days * 3;
   const productivity = calculateProductivity(focusSeconds, focusGoalSeconds, completedTasks, taskGoal);
@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
     const date = startOfLocalDay(now);
     date.setDate(date.getDate() - (Math.min(days, 7) - 1 - index));
     const key = localDayKey(date);
-    const seconds = sumDurations(sessions.filter((session) => localDayKey(session.completedAt) === key));
+    const seconds = sumFocusDurations(sessions.filter((session) => localDayKey(session.completedAt) === key));
     return { label: date.toLocaleDateString('en', { weekday: 'short' }).slice(0, 1), minutes: Math.round(seconds / 60) };
   });
 

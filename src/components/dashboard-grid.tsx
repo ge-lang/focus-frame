@@ -6,7 +6,7 @@ import 'react-grid-layout/css/styles.css';
 import { useDashboard } from '@/contexts/dashboard-context';
 import { useStableContainerWidth } from '@/hooks/use-stable-container-width';
 import { SortableWidget } from './sortable-widget';
-import { canPersistDesktopLayout, compactLayoutForColumns, getSquareGridUnit, getWidgetSizing, normalizeLayout, reconcileLayoutTypes } from '@/lib/dashboard-layout';
+import { canPersistDesktopLayout, compactLayoutForColumns, getCurrentGridLayout, getLayoutBottom, getSquareGridUnit, getWidgetSizing, normalizeLayout, reconcileLayoutTypes } from '@/lib/dashboard-layout';
 import type { LayoutItem } from '@/types/dashboard';
 
 const BREAKPOINTS = { lg: 1024, md: 768, sm: 640, xs: 480, xxs: 0 } as const;
@@ -36,6 +36,8 @@ export function DashboardGrid() {
   const isDraggingRef = useRef(false);
   const activeBreakpoint = getBreakpointForWidth(width);
   const rowHeight = getSquareGridUnit(width, COLUMNS[activeBreakpoint as keyof typeof COLUMNS], GRID_MARGIN);
+  const currentGridLayout = useMemo(() => getCurrentGridLayout(layout), [layout]);
+  const currentGridBottom = getLayoutBottom(currentGridLayout);
 
   const stopAutoScroll = useCallback(() => {
     const state = autoScrollRef.current;
@@ -89,12 +91,12 @@ export function DashboardGrid() {
   }, [stopAutoScroll]);
 
   const layouts = useMemo(() => ({
-    lg: layout,
-    md: compactLayoutForColumns(layout, COLUMNS.md),
-    sm: compactLayoutForColumns(layout, COLUMNS.sm),
-    xs: compactLayoutForColumns(layout, COLUMNS.xs),
-    xxs: compactLayoutForColumns(layout, COLUMNS.xxs),
-  }), [layout]);
+    lg: currentGridLayout,
+    md: compactLayoutForColumns(currentGridLayout, COLUMNS.md),
+    sm: compactLayoutForColumns(currentGridLayout, COLUMNS.sm),
+    xs: compactLayoutForColumns(currentGridLayout, COLUMNS.xs),
+    xxs: compactLayoutForColumns(currentGridLayout, COLUMNS.xxs),
+  }), [currentGridLayout]);
 
   const getWidgetById = (id: string) => widgets.find((widget) => widget.id === id);
 
@@ -125,7 +127,7 @@ export function DashboardGrid() {
   };
 
   return (
-    <div ref={containerRef} className="w-full min-w-0">
+    <div ref={containerRef} className="w-full min-w-0" data-grid-bottom-row={currentGridBottom}>
       {!isHydrated || !isStable ? (
         <div className="min-h-24" aria-hidden="true" />
       ) : width < BREAKPOINTS.sm ? (
@@ -158,7 +160,7 @@ export function DashboardGrid() {
             breakpointRef.current = nextBreakpoint;
           }}
         >
-          {layout.map((item) => renderWidget(item, true))}
+          {currentGridLayout.map((item) => renderWidget(item, true))}
         </Responsive>
       )}
     </div>

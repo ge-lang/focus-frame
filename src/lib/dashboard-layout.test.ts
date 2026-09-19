@@ -6,7 +6,9 @@ import {
   migrateToCompactLayout,
   canPersistDesktopLayout,
   compactLayoutForColumns,
+  getCurrentGridLayout,
   getGridHeightForContent,
+  getLayoutBottom,
   getSquareGridUnit,
   getWidgetSizing,
   hasLayoutCollision,
@@ -25,6 +27,21 @@ describe('dashboard layout normalization', () => {
     for (const type of ['todo', 'goals'] as const) expect(getWidgetSizing(type)).toEqual({ w: 4, h: 2 });
     expect(getWidgetSizing('news')).toEqual({ w: 12, h: 1 });
     for (const type of ['analytics', 'weather', 'pomodoro', 'calendar', 'notes', 'bookmarks'] as const) expect(getWidgetSizing(type)).toEqual({ w: 2, h: 2 });
+  });
+
+  it('derives rendered dimensions and bottom extent from current widget geometry', () => {
+    const persisted = [
+      { i: 'news-1', x: 0, y: 0, w: 4, h: 4, type: 'news' as const },
+      { i: 'weather-1', x: 0, y: 1, w: 8, h: 8, type: 'weather' as const },
+    ];
+    const current = getCurrentGridLayout(persisted);
+
+    expect(current).toMatchObject([
+      { i: 'news-1', w: 12, h: 1 },
+      { i: 'weather-1', w: 2, h: 2 },
+    ]);
+    expect(getLayoutBottom(persisted)).toBe(3);
+    expect(getLayoutBottom(current)).toBe(3);
   });
 
   it('derives a square grid unit from the measured container width', () => {

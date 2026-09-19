@@ -5,6 +5,7 @@ import {
   calculateTrend,
   localDayKey,
   startOfLocalRange,
+  sumFocusDurations,
   sumDurations,
 } from './analytics-utils';
 
@@ -23,6 +24,16 @@ describe('analytics helpers', () => {
   it('sums empty and populated duration collections', () => {
     expect(sumDurations([])).toBe(0);
     expect(sumDurations([{ duration: 60 }, { duration: 90 }])).toBe(150);
+  });
+
+  it('aggregates only focus work, regardless of break type or task link', () => {
+    expect(sumFocusDurations([
+      { duration: 1_500, type: 'work', taskId: 'task-1' },
+      { duration: 300, type: 'break' },
+      { duration: 900, type: 'work' },
+      { duration: 600, type: 'long_break', taskId: 'task-1' },
+      { duration: 120, type: 'work' },
+    ])).toBe(2_520);
   });
 
   it('keeps productivity and trend finite when goals or history are zero', () => {
