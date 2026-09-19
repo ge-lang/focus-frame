@@ -911,14 +911,6 @@ body.ff-document-body {
   background: rgba(124, 108, 255, 0.2) !important;
 }
 
-.ff-mobile-widget-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  min-width: 0;
-}
-
-.ff-mobile-widget-stack > div,
 .ff-mobile-task-columns > div,
 .ff-mobile-task-columns .ff-task-column {
   width: 100%;
@@ -1319,6 +1311,9 @@ body.ff-document-body {
 .ff-compact-goal-high { background: #df718b; }
 
 .ff-compact-bookmarks-object { display: flex; min-height: 0; height: 100%; flex-direction: column; justify-content: center; }
+.ff-compact-bookmarks-heading { display: flex; min-width: 0; align-items: center; justify-content: space-between; gap: 0.5rem; color: var(--ff-text-muted, #7b849b); font-size: 0.61rem; }
+.ff-compact-bookmarks-heading .ff-compact-bookmarks-mark { display: inline-flex; min-width: 0; align-items: center; gap: 0.25rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ff-compact-bookmarks-heading strong { color: var(--ff-text-primary, #18213b); font-size: 0.76rem; }
 
 .ff-compact-open {
   color: var(--ff-accent-violet, #6255e8);
@@ -4286,4 +4281,91 @@ html .ff-focus-view[data-widget-type='weather'] {
   .ff-weather-code-effect,
   .ff-weather-external-atmosphere,
   .ff-weather-base-scene { animation: none; }
+}
+
+/* Mobile object dashboard: the responsive presentation is render-only and never becomes saved grid geometry. */
+@media (max-width: 639px) {
+  .ff-page-shell {
+    padding-top: max(1.25rem, env(safe-area-inset-top, 0px));
+    padding-right: max(1rem, env(safe-area-inset-right, 0px));
+    padding-bottom: max(1.25rem, env(safe-area-inset-bottom, 0px));
+    padding-left: max(1rem, env(safe-area-inset-left, 0px));
+  }
+
+  .ff-topbar {
+    gap: 0.75rem;
+    padding-bottom: 0.65rem;
+  }
+
+  .ff-topbar-actions { gap: 0.4rem; }
+
+  .ff-dashboard-stage { padding-top: 0.25rem; }
+
+  .ff-mobile-widget-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(0.7rem, 2.6vw, 1rem);
+    min-width: 0;
+    align-items: stretch;
+  }
+
+  .ff-mobile-widget-grid-item {
+    display: flex;
+    min-width: 0;
+    min-height: 0;
+  }
+
+  .ff-mobile-widget-grid-item-mini { aspect-ratio: 1; }
+  .ff-mobile-widget-grid-item-wide { grid-column: 1 / -1; }
+
+  .ff-mobile-widget-grid-item > .group {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+  }
+
+  .ff-mobile-widget-grid-item .ff-compact-card {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .ff-mobile-widget-grid-item .ff-compact-object {
+    padding: clamp(0.65rem, 2.8vw, 0.9rem);
+  }
+
+  .ff-mobile-widget-grid-item-mini .ff-compact-pomodoro-body { gap: 0.1rem; }
+  .ff-mobile-widget-grid-item-mini .ff-compact-timer-ring-large {
+    width: clamp(5rem, 25vw, 5.75rem);
+    height: clamp(5rem, 25vw, 5.75rem);
+  }
+  .ff-mobile-widget-grid-item-mini .ff-compact-timer-ring-large span { font-size: clamp(0.78rem, 4vw, 0.92rem); }
+  .ff-mobile-widget-grid-item-mini .ff-compact-timer-ring-large small { max-width: 4.2rem; }
+  .ff-mobile-widget-grid-item-mini .ff-compact-pomodoro-controls button { width: 1.45rem; height: 1.45rem; }
+
+  .ff-mobile-widget-grid-item-mini .ff-compact-card-bookmarks {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 88%, 0 100%);
+    border-radius: 0.9rem 0.9rem 0.7rem 0.7rem;
+  }
+
+  .ff-mobile-widget-grid-item-mini .ff-compact-card-bookmarks > .ff-compact-object {
+    height: calc(100% - 2px);
+    margin: 1px;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 88%, 0 100%);
+  }
+
+  .ff-page-signature {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-top: 0.25rem;
+    padding: 1.2rem 0.25rem 0.75rem;
+    color: #719dd7;
+    font-size: 0.65rem;
+    letter-spacing: 0.03em;
+  }
+
+  .ff-page-signature span:last-child { color: #9cb4df; }
+  .ff-page-signature i { margin-right: 0.25rem; font-style: normal; opacity: 0.62; }
 }

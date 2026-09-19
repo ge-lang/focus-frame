@@ -12,14 +12,17 @@ import {
   getSquareGridUnit,
   getWidgetSizing,
   hasLayoutCollision,
+  isMobileWideWidget,
   applyLayoutHeightOverrides,
   normalizeLayout,
   normalizeDesktopOrigin,
   reconcileLayoutTypes,
   removeWidgetFromLayout,
+  orderLayoutForMobile,
   resizeWidgetInLayout,
   stackLayoutForMobile,
 } from './dashboard-layout';
+import type { WidgetType } from '@/types/dashboard';
 
 describe('dashboard layout normalization', () => {
   it('defines fixed desktop dimensions for each widget type', () => {
@@ -27,6 +30,26 @@ describe('dashboard layout normalization', () => {
     for (const type of ['todo', 'goals'] as const) expect(getWidgetSizing(type)).toEqual({ w: 4, h: 2 });
     expect(getWidgetSizing('news')).toEqual({ w: 12, h: 1 });
     for (const type of ['analytics', 'weather', 'pomodoro', 'calendar', 'notes', 'bookmarks'] as const) expect(getWidgetSizing(type)).toEqual({ w: 2, h: 2 });
+  });
+
+  it('classifies the mobile object dashboard without changing desktop geometry', () => {
+    const wideTypes: WidgetType[] = ['todo', 'goals', 'news'];
+    const miniTypes: WidgetType[] = ['pomodoro', 'weather', 'calendar', 'analytics', 'notes', 'bookmarks'];
+    expect(wideTypes.filter(isMobileWideWidget)).toEqual(wideTypes);
+    expect(miniTypes.every((type) => !isMobileWideWidget(type))).toBe(true);
+  });
+
+  it('orders mobile objects canonically without mutating persisted desktop positions', () => {
+    const layout = [
+      { i: 'notes-1', x: 4, y: 20, w: 2, h: 2, type: 'notes' as const },
+      { i: 'news-1', x: 0, y: 12, w: 12, h: 1, type: 'news' as const },
+      { i: 'todo-1', x: 0, y: 0, w: 4, h: 2, type: 'todo' as const },
+      { i: 'pomodoro-1', x: 8, y: 0, w: 2, h: 2, type: 'pomodoro' as const },
+    ];
+    const originalCoordinates = layout.map(({ i, x, y }) => ({ i, x, y }));
+
+    expect(orderLayoutForMobile(layout).map(({ type }) => type)).toEqual(['news', 'todo', 'pomodoro', 'notes']);
+    expect(layout.map(({ i, x, y }) => ({ i, x, y }))).toEqual(originalCoordinates);
   });
 
   it('derives rendered dimensions and bottom extent from current widget geometry', () => {
@@ -131,6 +154,7 @@ describe('dashboard layout normalization', () => {
     expect(canPersistDesktopLayout(false, 1440, 'lg')).toBe(false);
     expect(canPersistDesktopLayout(true, 0, 'lg')).toBe(false);
     expect(canPersistDesktopLayout(true, 800, 'md')).toBe(false);
+    expect(canPersistDesktopLayout(true, 390, 'xxs')).toBe(false);
     expect(canPersistDesktopLayout(true, 1440, 'lg')).toBe(true);
   });
 

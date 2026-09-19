@@ -6,7 +6,7 @@ import 'react-grid-layout/css/styles.css';
 import { useDashboard } from '@/contexts/dashboard-context';
 import { useStableContainerWidth } from '@/hooks/use-stable-container-width';
 import { SortableWidget } from './sortable-widget';
-import { canPersistDesktopLayout, compactLayoutForColumns, getCurrentGridLayout, getLayoutBottom, getSquareGridUnit, getWidgetSizing, normalizeLayout, reconcileLayoutTypes } from '@/lib/dashboard-layout';
+import { canPersistDesktopLayout, compactLayoutForColumns, getCurrentGridLayout, getLayoutBottom, getSquareGridUnit, getWidgetSizing, isMobileWideWidget, normalizeLayout, orderLayoutForMobile, reconcileLayoutTypes } from '@/lib/dashboard-layout';
 import type { LayoutItem } from '@/types/dashboard';
 
 const BREAKPOINTS = { lg: 1024, md: 768, sm: 640, xs: 480, xxs: 0 } as const;
@@ -100,10 +100,10 @@ export function DashboardGrid() {
 
   const getWidgetById = (id: string) => widgets.find((widget) => widget.id === id);
 
-  const renderWidget = (item: LayoutItem, compact = false) => {
+  const renderWidget = (item: LayoutItem, compact = false, className?: string) => {
     const widget = getWidgetById(item.i);
     return widget ? (
-      <div key={item.i}>
+      <div key={item.i} className={className} data-widget-type={item.type}>
         <SortableWidget id={item.i} type={item.type} compact={compact} />
       </div>
     ) : null;
@@ -131,8 +131,12 @@ export function DashboardGrid() {
       {!isHydrated || !isStable ? (
         <div className="min-h-24" aria-hidden="true" />
       ) : width < BREAKPOINTS.sm ? (
-        <div className="ff-mobile-widget-stack">
-          {layout.map((item) => renderWidget(item))}
+        <div className="ff-mobile-widget-grid">
+          {orderLayoutForMobile(layout).map((item) => renderWidget(
+            item,
+            true,
+            `ff-mobile-widget-grid-item ${isMobileWideWidget(item.type) ? 'ff-mobile-widget-grid-item-wide' : 'ff-mobile-widget-grid-item-mini'}`,
+          ))}
         </div>
       ) : (
           <Responsive

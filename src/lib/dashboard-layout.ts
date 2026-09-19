@@ -33,6 +33,9 @@ const widgetSizing: Record<WidgetType, WidgetSizing> = {
   goals: { w: 4, h: 2 },
 };
 
+const mobileWideWidgetTypes: ReadonlySet<WidgetType> = new Set(['todo', 'goals', 'news']);
+const mobileWidgetOrder: readonly WidgetType[] = ['news', 'todo', 'goals', 'pomodoro', 'calendar', 'weather', 'analytics', 'notes', 'bookmarks'];
+
 const compactDefaultPositions: Record<WidgetType, { x: number; y: number }> = {
   news: { x: 0, y: 0 },
   todo: { x: 0, y: 1 },
@@ -47,6 +50,21 @@ const compactDefaultPositions: Record<WidgetType, { x: number; y: number }> = {
 
 export function getWidgetSizing(type: WidgetType): WidgetSizing {
   return widgetSizing[type];
+}
+
+export function isMobileWideWidget(type: WidgetType): boolean {
+  return mobileWideWidgetTypes.has(type);
+}
+
+/** Returns a mobile-only render order without changing persisted desktop coordinates. */
+export function orderLayoutForMobile(layout: LayoutItem[]): LayoutItem[] {
+  const order = new Map(mobileWidgetOrder.map((type, index) => [type, index]));
+  return [...layout].sort((first, second) =>
+    (order.get(first.type) ?? mobileWidgetOrder.length) - (order.get(second.type) ?? mobileWidgetOrder.length) ||
+    first.y - second.y ||
+    first.x - second.x ||
+    first.i.localeCompare(second.i),
+  );
 }
 
 export function canonicalizeWidgetMetadata(widgets: Widget[]): Widget[] {
