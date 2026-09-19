@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { getWidgetAvailability } from './widget-picker';
+import {
+  WIDGET_TYPES,
+  canAddWidget,
+  getWidgetAvailability,
+  shouldCloseWidgetPickerOnKey,
+} from './widget-picker';
 
 describe('widget picker availability', () => {
   it('classifies present and missing widget types from the actual dashboard state', () => {
@@ -34,5 +39,25 @@ describe('widget picker availability', () => {
 
     expect(result.onDashboard).toHaveLength(3);
     expect(result.available).toHaveLength(6);
+  });
+
+  it('keeps the complete registry calm when every widget is already added', () => {
+    const result = getWidgetAvailability(WIDGET_TYPES.map(({ type }) => ({ type })));
+
+    expect(result.available).toHaveLength(0);
+    expect(result.onDashboard).toHaveLength(WIDGET_TYPES.length);
+    expect(canAddWidget(result.available, 'todo')).toBe(false);
+  });
+
+  it('allows only currently available widget types to be added', () => {
+    const result = getWidgetAvailability([{ type: 'todo' }]);
+
+    expect(canAddWidget(result.available, 'weather')).toBe(true);
+    expect(canAddWidget(result.available, 'todo')).toBe(false);
+  });
+
+  it('identifies Escape as the picker close key', () => {
+    expect(shouldCloseWidgetPickerOnKey('Escape')).toBe(true);
+    expect(shouldCloseWidgetPickerOnKey('Enter')).toBe(false);
   });
 });

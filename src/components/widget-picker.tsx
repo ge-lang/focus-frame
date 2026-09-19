@@ -1,9 +1,9 @@
 // src/components/widget-picker.tsx
 'use client';
-import { useState, useRef, useEffect } from 'react';
+
+import { useEffect, useRef, useState } from 'react';
 import { useDashboard } from '@/contexts/dashboard-context';
-import { WidgetType } from '@/types/dashboard';
-import { AnimatedButton } from './animated-button';
+import type { WidgetType } from '@/types/dashboard';
 import {
   BarChart3,
   Bookmark,
@@ -13,20 +13,24 @@ import {
   CloudSun,
   LayoutGrid,
   Newspaper,
+  Plus,
   StickyNote,
   Target,
   Timer,
   X,
   type LucideIcon,
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 
-const WIDGET_TYPES: { 
-  type: WidgetType; 
-  label: string; 
+export type WidgetPickerDefinition = {
+  type: WidgetType;
+  label: string;
   icon: LucideIcon;
   description: string;
-}[] = [
+};
+
+// The picker and dashboard continue to share this one widget vocabulary.
+export const WIDGET_TYPES: WidgetPickerDefinition[] = [
   { type: 'todo', label: 'Tasks', icon: ClipboardList, description: 'Manage your to-do list' },
   { type: 'weather', label: 'Weather', icon: CloudSun, description: 'Check current weather' },
   { type: 'news', label: 'News', icon: Newspaper, description: 'Latest news feed' },
@@ -38,7 +42,7 @@ const WIDGET_TYPES: {
   { type: 'goals', label: 'Goals', icon: Target, description: 'Personal goals' },
 ];
 
-export function getWidgetAvailability(widgets: { type: WidgetType }[]) {
+export function getWidgetAvailability(widgets: readonly { type: WidgetType }[]) {
   const presentTypes = new Set(widgets.map((widget) => widget.type));
   return {
     available: WIDGET_TYPES.filter((widget) => !presentTypes.has(widget.type)),
@@ -46,125 +50,258 @@ export function getWidgetAvailability(widgets: { type: WidgetType }[]) {
   };
 }
 
+export function canAddWidget(available: readonly { type: WidgetType }[], type: WidgetType) {
+  return available.some((widget) => widget.type === type);
+}
+
+export function shouldCloseWidgetPickerOnKey(key: string) {
+  return key === 'Escape';
+}
+
+function WidgetPreview({ widget }: { widget: WidgetPickerDefinition }) {
+  const Icon = widget.icon;
+
+  switch (widget.type) {
+    case 'pomodoro':
+      return (
+        <span className="ff-picker-preview ff-picker-preview-pomodoro" aria-hidden="true">
+          <span className="ff-picker-preview-pomodoro-ring">25</span>
+        </span>
+      );
+    case 'weather':
+      return (
+        <span className="ff-picker-preview ff-picker-preview-weather" aria-hidden="true">
+          <CloudSun size={22} strokeWidth={1.7} />
+          <span className="ff-picker-preview-weather-line" />
+        </span>
+      );
+    case 'calendar':
+      return (
+        <span className="ff-picker-preview ff-picker-preview-calendar" aria-hidden="true">
+          <span className="ff-picker-preview-calendar-top" />
+          <span className="ff-picker-preview-calendar-grid">
+            {Array.from({ length: 9 }, (_, index) => <span key={index} className={index === 4 ? 'is-active' : ''} />)}
+          </span>
+        </span>
+      );
+    case 'analytics':
+      return (
+        <span className="ff-picker-preview ff-picker-preview-analytics" aria-hidden="true">
+          <span className="ff-picker-preview-bars">
+            <span />
+            <span />
+            <span />
+            <span />
+          </span>
+          <span className="ff-picker-preview-kpi">84%</span>
+        </span>
+      );
+    case 'notes':
+      return (
+        <span className="ff-picker-preview ff-picker-preview-notes" aria-hidden="true">
+          <span className="ff-picker-preview-paper-line ff-picker-preview-paper-line-long" />
+          <span className="ff-picker-preview-paper-line" />
+          <span className="ff-picker-preview-paper-line ff-picker-preview-paper-line-short" />
+        </span>
+      );
+    case 'bookmarks':
+      return (
+        <span className="ff-picker-preview ff-picker-preview-bookmarks" aria-hidden="true">
+          <Bookmark size={21} strokeWidth={1.7} />
+          <span className="ff-picker-preview-bookmark-line" />
+        </span>
+      );
+    case 'goals':
+      return (
+        <span className="ff-picker-preview ff-picker-preview-goals" aria-hidden="true">
+          <span className="ff-picker-preview-goals-arc" />
+          <span className="ff-picker-preview-goals-dot" />
+        </span>
+      );
+    case 'news':
+      return (
+        <span className="ff-picker-preview ff-picker-preview-news" aria-hidden="true">
+          <span className="ff-picker-preview-news-image" />
+          <span className="ff-picker-preview-news-lines">
+            <span />
+            <span />
+            <span />
+          </span>
+        </span>
+      );
+    case 'todo':
+      return (
+        <span className="ff-picker-preview ff-picker-preview-todo" aria-hidden="true">
+          <span className="ff-picker-preview-todo-item"><span /><i /></span>
+          <span className="ff-picker-preview-todo-item"><span /><i /></span>
+          <span className="ff-picker-preview-todo-item"><span /><i /></span>
+        </span>
+      );
+    default:
+      return (
+        <span className="ff-picker-preview" aria-hidden="true">
+          <Icon size={20} strokeWidth={1.7} />
+        </span>
+      );
+  }
+}
+
 export function WidgetPicker() {
   const [isOpen, setIsOpen] = useState(false);
   const { addWidget, state } = useDashboard();
   const pickerRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+
+  const closePicker = () => {
+    setIsOpen(false);
+    window.requestAnimationFrame(() => triggerRef.current?.focus());
+  };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (pickerRef.current && !pickerRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
+        closePicker();
       }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  });
+
+  useEffect(() => {
+    if (!isOpen) return undefined;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (shouldCloseWidgetPickerOnKey(event.key)) {
+        event.preventDefault();
+        closePicker();
+      }
+    };
+
+    const focusFrame = window.requestAnimationFrame(() => closeButtonRef.current?.focus());
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.cancelAnimationFrame(focusFrame);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen]);
 
   const { available, onDashboard } = getWidgetAvailability(state.widgets);
 
   const handleAddWidget = (type: WidgetType) => {
-    if (!available.some((widget) => widget.type === type)) return;
-    const widgetConfig = WIDGET_TYPES.find(w => w.type === type);
+    if (!canAddWidget(available, type)) return;
+    const widgetConfig = WIDGET_TYPES.find((widget) => widget.type === type);
     if (widgetConfig) {
-      addWidget(type, {
-        title: widgetConfig.label,
-      });
+      addWidget(type, { title: widgetConfig.label });
     }
-    setIsOpen(false);
+    closePicker();
   };
 
-  const renderWidgetRow = (widget: (typeof WIDGET_TYPES)[number], isAvailable: boolean) => (
+  const renderWidgetRow = (widget: WidgetPickerDefinition, isAvailable: boolean) => (
     <motion.button
       key={widget.type}
       type="button"
-      whileHover={isAvailable ? { scale: 1.02 } : undefined}
-      whileTap={isAvailable ? { scale: 0.98 } : undefined}
+      whileHover={isAvailable ? { scale: 1.01 } : undefined}
+      whileTap={isAvailable ? { scale: 0.985 } : undefined}
       onClick={() => handleAddWidget(widget.type)}
       disabled={!isAvailable}
-      className={`ff-picker-row mb-1 flex w-full items-start rounded-lg p-3 text-left transition-all ${
-        isAvailable
-          ? 'cursor-pointer hover:border-indigo-200 hover:bg-indigo-50'
-          : 'ff-picker-row-added cursor-default'
-      }`}
+      className={`ff-picker-row ${isAvailable ? 'ff-picker-row-available' : 'ff-picker-row-added'}`}
     >
-      <span className={`ff-picker-icon mr-3 mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${isAvailable ? 'bg-indigo-50 text-indigo-600' : ''}`}>
-        {isAvailable ? <widget.icon size={18} aria-hidden="true" /> : <Check size={18} aria-hidden="true" />}
+      <WidgetPreview widget={widget} />
+      <span className="ff-picker-row-copy">
+        <span className="ff-picker-row-title">{widget.label}</span>
+        <span className="ff-picker-row-description">{widget.description}</span>
       </span>
-      <span className="flex-1">
-        <span className="font-medium text-gray-900">{widget.label}</span>
-        <span className="mt-1 block text-sm text-gray-600">{widget.description}</span>
-      </span>
-      {!isAvailable && <span className="ff-picker-added-label ml-2 mt-1 text-xs font-medium">Added</span>}
+      {isAvailable ? (
+        <span className="ff-picker-add-affordance"><Plus size={15} strokeWidth={2.2} /> <span>Add</span></span>
+      ) : (
+        <span className="ff-picker-added-label"><Check size={14} strokeWidth={2.4} /> <span>Added</span></span>
+      )}
     </motion.button>
   );
 
   return (
     <div className="relative" ref={pickerRef}>
-      {/* Add button — use motion.button instead of AnimatedButton for animations */}
       <motion.button
-        onClick={() => setIsOpen(!isOpen)}
+        ref={triggerRef}
+        type="button"
+        onClick={() => setIsOpen((open) => !open)}
         aria-expanded={isOpen}
-        aria-haspopup="menu"
+        aria-haspopup="dialog"
+        aria-controls="widget-picker-dialog"
         className="ff-header-action ff-glass-control ff-glass-control-primary inline-flex h-8 items-center gap-1.5 px-2.5 text-sm font-medium text-indigo-700 shadow-sm transition-colors hover:bg-indigo-50/80"
       >
         <LayoutGrid className="ff-widget-icon" size={17} aria-hidden="true" />
         <span>Widget</span>
       </motion.button>
 
-      {/* Dropdown menu */}
       <AnimatePresence>
         {isOpen && (
           <>
-            {/* Backdrop overlay */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               className="ff-widget-picker-backdrop fixed inset-0 z-[var(--ff-z-modal)] bg-black bg-opacity-50"
-              onClick={() => setIsOpen(false)}
+              onClick={closePicker}
+              aria-hidden="true"
             />
-            
-            {/* Selection menu */}
+
             <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: -10 }}
+              id="widget-picker-dialog"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="widget-picker-title"
+              aria-describedby="widget-picker-description"
+              initial={{ opacity: 0, scale: 0.97, y: -8 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: -10 }}
+              exit={{ opacity: 0, scale: 0.97, y: -8 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="ff-widget-picker-menu absolute right-0 top-full z-[var(--ff-z-dialog)] mt-2 w-80 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg"
+              className="ff-widget-picker-menu absolute right-0 top-full z-[var(--ff-z-dialog)] mt-2 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg"
             >
-              {/* Header */}
-              <div className="flex justify-between items-center p-4 border-b border-gray-100">
-                <h3 className="font-semibold text-gray-900">Add Widget</h3>
+              <div className="ff-picker-header">
+                <div>
+                  <h2 id="widget-picker-title" className="ff-picker-heading">Add Widget</h2>
+                  <p id="widget-picker-description" className="ff-picker-subheading">Customize your workspace</p>
+                </div>
                 <button
-                  onClick={() => setIsOpen(false)}
+                  ref={closeButtonRef}
+                  type="button"
+                  onClick={closePicker}
                   aria-label="Close add widget menu"
-                  className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                  className="ff-picker-close"
                 >
-                  <X size={16} />
+                  <X size={17} strokeWidth={1.8} aria-hidden="true" />
                 </button>
               </div>
 
-              {/* Widget list */}
-              <div className="max-h-96 overflow-y-auto">
-                <div className="space-y-4 p-2">
+              <div className="ff-widget-picker-scroll">
+                <div className="ff-picker-list">
                   <section aria-labelledby="available-widgets-heading">
-                    <h4 id="available-widgets-heading" className="px-2 pb-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Available to add</h4>
-                    {available.length > 0 ? available.map((widget) => renderWidgetRow(widget, true)) : <p className="px-2 py-3 text-sm text-slate-500">All widgets are already on your dashboard.</p>}
+                    <div className="ff-picker-section-heading">
+                      <h3 id="available-widgets-heading">Available</h3>
+                      <span>{available.length}</span>
+                    </div>
+                    {available.length > 0 ? (
+                      available.map((widget) => renderWidgetRow(widget, true))
+                    ) : (
+                      <p className="ff-picker-empty">All widgets are already on your dashboard.</p>
+                    )}
                   </section>
+
                   <section aria-labelledby="dashboard-widgets-heading">
-                    <h4 id="dashboard-widgets-heading" className="px-2 pb-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">On your dashboard</h4>
+                    <div className="ff-picker-section-heading">
+                      <h3 id="dashboard-widgets-heading">On your dashboard</h3>
+                      <span>{onDashboard.length}</span>
+                    </div>
                     {onDashboard.map((widget) => renderWidgetRow(widget, false))}
                   </section>
                 </div>
               </div>
 
-              {/* Informational footer */}
-              <div className="border-t border-slate-100 bg-slate-50/70 p-3">
-                <p className="text-xs text-gray-500 text-center">
-                  {onDashboard.length} of {WIDGET_TYPES.length} widget types on dashboard · {available.length} available
-                </p>
+              <div className="ff-picker-status" aria-live="polite">
+                {onDashboard.length} of {WIDGET_TYPES.length} widget types added
               </div>
             </motion.div>
           </>
