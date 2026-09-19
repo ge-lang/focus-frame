@@ -11,6 +11,7 @@ import {
   getGridHeightForContent,
   getLayoutBottom,
   getSquareGridUnit,
+  getMobileWidgetFrameClass,
   getWidgetSizing,
   hasLayoutCollision,
   isMobileWideWidget,
@@ -40,6 +41,7 @@ describe('dashboard layout normalization', () => {
     const miniTypes: WidgetType[] = ['pomodoro', 'weather', 'calendar', 'analytics', 'notes', 'bookmarks'];
     expect(wideTypes.filter(isMobileWideWidget)).toEqual(wideTypes);
     expect(miniTypes.every((type) => !isMobileWideWidget(type))).toBe(true);
+    expect(new Set(miniTypes.map(getMobileWidgetFrameClass))).toEqual(new Set(['ff-mobile-widget-grid-item-mini ff-mobile-widget-mini-frame']));
   });
 
   it('orders mobile objects canonically without mutating persisted desktop positions', () => {

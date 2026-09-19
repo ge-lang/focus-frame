@@ -10,8 +10,10 @@ export async function POST(request: NextRequest) {
   const userId = await getCurrentUserId();
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
+  let diagnosticBody: Record<string, unknown> = {};
   try {
     const body = await readJsonObject(request);
+    diagnosticBody = body;
     const duration = body.duration;
     const type = body.type;
     const taskId = body.taskId;
@@ -34,6 +36,13 @@ export async function POST(request: NextRequest) {
     if (error instanceof InvalidRequestError) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
+    console.error('Failed to save focus session', {
+      userId,
+      duration: diagnosticBody.duration,
+      type: diagnosticBody.type,
+      taskId: typeof diagnosticBody.taskId === 'string' ? diagnosticBody.taskId : null,
+      error,
+    });
     return NextResponse.json({ error: 'Failed to save focus session' }, { status: 500 });
   }
 }

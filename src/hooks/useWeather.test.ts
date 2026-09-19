@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import {
   getWeatherLocationKey,
+  getAccountWeatherLocation,
   resolveInitialWeatherLocation,
   restoreWeatherLocation,
+  shouldSyncAccountWeatherLocation,
   type WeatherLocation,
 } from './useWeather';
 
@@ -43,5 +45,11 @@ describe('shared weather location helpers', () => {
     expect(getWeatherLocationKey({ name: 'Paris', country: 'FR' })).not.toBe(
       getWeatherLocationKey({ name: 'Minsk', country: 'BY' }),
     );
+  });
+
+  it('syncs a late account location into the shared weather store', () => {
+    const account = getAccountWeatherLocation('Yalta', 'UA');
+    expect(shouldSyncAccountWeatherLocation(null, account, { name: 'Krasnoyarsk', country: 'RU' })).toBe(true);
+    expect(shouldSyncAccountWeatherLocation('yalta_ua', account, { name: 'Yalta', country: 'UA' })).toBe(false);
   });
 });

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { compactFullViewLabel, compactPomodoroControlAction, compactPresentationLimits, compactWeatherPageCount, formatCompactForecastTime, getCompactCalendarGrid, initialCompactWeatherPage, isCompactInteractiveTarget, nextCompactWeatherPage, previousCompactWeatherPage, shouldOpenCompactFocusView, shouldResetCompactWeatherPage, summarizeCompactTasks } from './compact-widget-renderer';
+import { compactFullViewLabel, compactPomodoroControlAction, compactPresentationLimits, compactWeatherPageCount, formatCompactForecastTime, getCompactAnalyticsMiniSummary, getCompactCalendarGrid, initialCompactWeatherPage, isCompactInteractiveTarget, nextCompactWeatherPage, previousCompactWeatherPage, shouldOpenCompactFocusView, shouldResetCompactWeatherPage, summarizeCompactTasks } from './compact-widget-renderer';
 import type { Task } from '@/types/task';
 
 const task = (overrides: Partial<Task>): Task => ({
@@ -82,5 +82,29 @@ describe('compact widget presentation helpers', () => {
 
   it('formats forecast times from the existing location timezone', () => {
     expect(formatCompactForecastTime(Date.UTC(2026, 8, 19, 10, 0, 0) / 1000, 7200)).toBe('12:00');
+  });
+
+  it('keeps the mobile summary to productivity, focus, tasks, and goals', () => {
+    expect(getCompactAnalyticsMiniSummary({
+      productivity: 4,
+      focusMinutes: 25,
+      completedTasks: 3,
+      completedGoals: 1,
+      trend: 0,
+      streak: 0,
+      peakHours: [],
+      dailyFocus: [],
+      dailyFocusGoal: 25,
+    })).toEqual({
+      productivity: 4,
+      productivityLabel: '4%',
+      focusLabel: '25m',
+      tasksLabel: '3',
+      goalsLabel: '1',
+    });
+  });
+
+  it('uses safe zero progress while analytics is loading', () => {
+    expect(getCompactAnalyticsMiniSummary(undefined)).toMatchObject({ productivity: 0, productivityLabel: '—', focusLabel: '—' });
   });
 });

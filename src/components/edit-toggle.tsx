@@ -11,7 +11,7 @@ export function EditToggle() {
       type="button"
       onClick={toggleEdit}
       aria-label={isEditing ? 'Finish editing layout' : 'Edit dashboard layout'}
-      className="ff-header-action ff-glass-control text-indigo-700 hover:bg-indigo-50/80"
+      className="ff-header-action ff-edit-toggle ff-glass-control text-indigo-700 hover:bg-indigo-50/80"
     >
       {isEditing ? (
         <span>Done</span>

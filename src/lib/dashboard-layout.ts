@@ -56,6 +56,10 @@ export function isMobileWideWidget(type: WidgetType): boolean {
   return mobileWideWidgetTypes.has(type);
 }
 
+export function getMobileWidgetFrameClass(type: WidgetType): 'ff-mobile-widget-grid-item-wide' | 'ff-mobile-widget-grid-item-mini ff-mobile-widget-mini-frame' {
+  return isMobileWideWidget(type) ? 'ff-mobile-widget-grid-item-wide' : 'ff-mobile-widget-grid-item-mini ff-mobile-widget-mini-frame';
+}
+
 export function getDefaultMobileOrder(
   widgets: Pick<Widget, 'id' | 'type'>[],
   layout: Pick<LayoutItem, 'i' | 'x' | 'y'>[] = [],

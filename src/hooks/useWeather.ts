@@ -105,6 +105,7 @@ let snapshot: WeatherSnapshot = {
   isDemo: false,
 };
 let initialized = false;
+let initializedAccountLocationKey: string | null = null;
 let requestSequence = 0;
 let activeRequest: AbortController | null = null;
 let refreshTimerStarted = false;
@@ -171,10 +172,24 @@ export function resolveInitialWeatherLocation(
   initialCountryCode: string | undefined,
   storedLocation: WeatherLocation | null,
 ): WeatherLocation | null {
-  const accountLocation = initialCity.trim()
+  return getAccountWeatherLocation(initialCity, initialCountryCode) ?? storedLocation;
+}
+
+export function getAccountWeatherLocation(initialCity: string, initialCountryCode?: string): WeatherLocation | null {
+  return initialCity.trim()
     ? normalizedLocation({ name: initialCity, country: initialCountryCode ?? '' })
     : null;
-  return accountLocation ?? storedLocation;
+}
+
+export function shouldSyncAccountWeatherLocation(
+  initializedLocationKey: string | null,
+  accountLocation: WeatherLocation | null,
+  currentLocation: WeatherLocation | null,
+): boolean {
+  if (!accountLocation) return false;
+  const accountLocationKey = getWeatherLocationKey(accountLocation);
+  const currentLocationKey = currentLocation ? getWeatherLocationKey(currentLocation) : null;
+  return accountLocationKey !== initializedLocationKey && accountLocationKey !== currentLocationKey;
 }
 
 function demoWeather(location: WeatherLocation, error: string | null = null): WeatherData {
@@ -281,8 +296,26 @@ async function loadWeather(location: WeatherLocation, forceRefresh = false) {
 }
 
 function ensureInitialized(initialCity: string, initialCountryCode?: string) {
-  if (initialized) return;
+  const accountLocation = getAccountWeatherLocation(initialCity, initialCountryCode);
+
+  if (initialized) {
+    if (shouldSyncAccountWeatherLocation(initializedAccountLocationKey, accountLocation, snapshot.location)) {
+      initializedAccountLocationKey = accountLocation ? getWeatherLocationKey(accountLocation) : null;
+      persistLocation(accountLocation!);
+      updateSnapshot({
+        location: accountLocation,
+        weather: { ...emptyWeather, city: accountLocation!.name, country: accountLocation!.country, location: accountLocation, loading: true },
+        forecast: [],
+        isLoading: true,
+        isDemo: false,
+      });
+      void loadWeather(accountLocation!);
+    }
+    return;
+  }
+
   initialized = true;
+  initializedAccountLocationKey = accountLocation ? getWeatherLocationKey(accountLocation) : null;
   const storedLocation = readStoredLocation();
   const location = resolveInitialWeatherLocation(initialCity, initialCountryCode, storedLocation);
   if (location) {

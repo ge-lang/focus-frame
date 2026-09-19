@@ -33,7 +33,7 @@ import {
 } from 'lucide-react';
 import { AnimatedWidget } from '@/components/animated-widget';
 import { WeatherArtScene, WeatherArtSurface } from '@/components/weather-art-scene';
-import { useAnalytics } from '@/hooks/use-analytics';
+import { useAnalytics, type AnalyticsData } from '@/hooks/use-analytics';
 import { useNews } from '@/hooks/use-news';
 import { useTasks } from '@/hooks/use-tasks';
 import { getWeatherLocationKey, useWeather } from '@/hooks/useWeather';
@@ -87,6 +87,25 @@ export function formatCompactForecastTime(timestamp: number, timezoneOffsetSecon
   const date = getTargetLocationDate(new Date(timestamp * 1000), timezoneOffsetSeconds);
   if (Number.isNaN(date.getTime())) return '—';
   return date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' });
+}
+
+export interface CompactAnalyticsMiniSummary {
+  productivity: number;
+  productivityLabel: string;
+  focusLabel: string;
+  tasksLabel: string;
+  goalsLabel: string;
+}
+
+export function getCompactAnalyticsMiniSummary(data: AnalyticsData | undefined): CompactAnalyticsMiniSummary {
+  const productivity = Math.min(100, Math.max(0, data?.productivity ?? 0));
+  return {
+    productivity,
+    productivityLabel: data ? `${productivity}%` : '—',
+    focusLabel: data ? `${data.focusMinutes}m` : '—',
+    tasksLabel: data ? String(data.completedTasks) : '—',
+    goalsLabel: data ? String(data.completedGoals) : '—',
+  };
 }
 
 function CompactShell({ widget, onOpen, icon, children }: CompactWidgetProps & { icon: ReactNode; children: ReactNode }) {
@@ -415,6 +434,7 @@ function CompactCalendar({ widget, onOpen }: CompactWidgetProps) {
 
 function CompactAnalytics({ widget, onOpen }: CompactWidgetProps) {
   const { data, isLoading } = useAnalytics('week');
+  const miniSummary = getCompactAnalyticsMiniSummary(data);
   const metrics = [
     ['Productivity', data ? `${data.productivity}%` : '—', 'text-indigo-600', TrendingUp],
     ['Focus', data ? `${data.focusMinutes}m` : '—', 'text-cyan-600', Clock3],
@@ -425,8 +445,15 @@ function CompactAnalytics({ widget, onOpen }: CompactWidgetProps) {
     {isLoading ? <p className="text-xs text-slate-500">Loading analytics…</p> : <>
       <div className="ff-compact-analytics-grid ff-compact-analytics-desktop">{metrics.map(([label, value, color, Icon]) => <div key={label} className="ff-compact-kpi"><Icon size={15} className={`ff-compact-kpi-icon ${color}`} aria-hidden="true" /><span className={`ff-compact-kpi-value ${color}`}>{value}</span><span className="ff-compact-kpi-label text-[10px] text-slate-500">{label}</span></div>)}</div>
       <div className="ff-compact-analytics-mini" aria-label="Analytics summary">
-        <div className="ff-compact-analytics-mini-primary"><span>Productivity</span><strong className={metrics[0][2]}>{metrics[0][1]}</strong></div>
-        <div className="ff-compact-analytics-mini-secondary">{metrics.slice(1).map(([label, value, color]) => <span key={label}><small>{label}</small><strong className={color}>{value}</strong></span>)}</div>
+        <div className="ff-compact-analytics-mini-primary">
+          <div className="ff-compact-analytics-mini-heading"><span>Productivity</span><strong className="text-indigo-600">{miniSummary.productivityLabel}</strong></div>
+          <span className="ff-compact-analytics-mini-bar" aria-hidden="true"><span style={{ width: `${miniSummary.productivity}%` }} /></span>
+        </div>
+        <div className="ff-compact-analytics-mini-secondary">
+          <span><small>Focus</small><strong className="text-cyan-600">{miniSummary.focusLabel}</strong></span>
+          <span><small>Tasks</small><strong className="text-emerald-600">{miniSummary.tasksLabel}</strong></span>
+          <span><small>Goals</small><strong className="text-pink-600">{miniSummary.goalsLabel}</strong></span>
+        </div>
       </div>
     </>}
   </CompactShell>;
