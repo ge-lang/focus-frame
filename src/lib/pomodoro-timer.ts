@@ -29,6 +29,12 @@ export interface PomodoroState {
   settings: PomodoroSettings;
 }
 
+export interface FocusSessionPayload {
+  duration: number;
+  type: 'work' | 'break' | 'long_break';
+  taskId?: string;
+}
+
 export const defaultPomodoroSettings: PomodoroSettings = {
   workTime: 25,
   breakTime: 5,
@@ -129,6 +135,18 @@ export function completePomodoro(state: PomodoroState, now = Date.now()): { next
       durationSeconds,
       pomodoroCount,
     },
+  };
+}
+
+export function focusSessionPayloadForCompletion(
+  state: PomodoroState,
+  completedMode = state.mode,
+  completedDuration = state.durationSeconds,
+): FocusSessionPayload {
+  return {
+    duration: completedDuration,
+    type: completedMode === 'longBreak' ? 'long_break' : completedMode,
+    ...(completedMode === 'work' && state.selectedTaskId ? { taskId: state.selectedTaskId } : {}),
   };
 }
 

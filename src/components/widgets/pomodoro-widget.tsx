@@ -290,8 +290,11 @@ export default function PomodoroWidget({ widgetId, title }: PomodoroWidgetProps)
 
           {mode === 'work' && (
             <select
+              data-no-drag
               value={selectedTaskId}
               onChange={(event) => selectTask(event.target.value)}
+              onPointerDown={(event) => event.stopPropagation()}
+              onClick={(event) => event.stopPropagation()}
               className="mb-4 w-full max-w-xs rounded-lg border border-slate-200 bg-slate-50 p-2 text-sm"
               aria-label="Task for this focus session"
             >

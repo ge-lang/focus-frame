@@ -7,6 +7,7 @@ import {
   completePomodoro,
   createCompletionGate,
   defaultPomodoroState,
+  focusSessionPayloadForCompletion,
   getElapsedFocusSeconds,
   getRemainingSeconds,
   pausePomodoro,
@@ -38,7 +39,7 @@ export function PomodoroProvider({ children }: { children: ReactNode }) {
   const stateRef = useRef(state);
   const audioContextRef = useRef<AudioContext | null>(null);
   const completionGateRef = useRef(createCompletionGate());
-  const { mutate: createFocusSession } = useCreateFocusSession();
+  const { mutateAsync: createFocusSessionAsync } = useCreateFocusSession();
   const { data: userSettings } = useUserSettings();
 
   const commitState = useCallback((nextState: PomodoroState) => {
@@ -87,15 +88,16 @@ export function PomodoroProvider({ children }: { children: ReactNode }) {
         body: current.mode === 'work' ? 'Great work. Time for a break.' : 'Ready for another focus session?',
       });
     }
-    createFocusSession({
-      duration: current.durationSeconds,
-      type: current.mode === 'longBreak' ? 'long_break' : current.mode,
-      ...(current.mode === 'work' && current.selectedTaskId ? { taskId: current.selectedTaskId } : {}),
-    });
+    const completedAt = Date.now();
+    const { nextState, completedMode, completedDuration } = completePomodoro(current, completedAt);
+    const session = focusSessionPayloadForCompletion(current, completedMode, completedDuration);
 
-    const { nextState } = completePomodoro(current, Date.now());
-    commitState(nextState);
-  }, [commitState, createFocusSession, playNotificationSound, userSettings?.notificationsEnabled]);
+    void createFocusSessionAsync(session)
+      .catch((error: unknown) => {
+        console.error('Failed to persist completed focus session:', error);
+      })
+      .finally(() => commitState(nextState));
+  }, [commitState, createFocusSessionAsync, playNotificationSound, userSettings?.notificationsEnabled]);
 
   useEffect(() => {
     if (!state.isRunning || state.endAt === null) return;
@@ -121,10 +123,8 @@ export function PomodoroProvider({ children }: { children: ReactNode }) {
     const now = Date.now();
     const duration = getElapsedFocusSeconds(current, now);
     if (duration > 0) {
-      createFocusSession({
-        duration,
-        type: 'work',
-        ...(current.selectedTaskId ? { taskId: current.selectedTaskId } : {}),
+      void createFocusSessionAsync(focusSessionPayloadForCompletion(current, 'work', duration)).catch((error: unknown) => {
+        console.error('Failed to persist stopped focus session:', error);
       });
     }
     completionGateRef.current = createCompletionGate();

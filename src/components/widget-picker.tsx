@@ -1,8 +1,9 @@
 // src/components/widget-picker.tsx
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { useDashboard } from '@/contexts/dashboard-context';
+import { ModalPortal } from './modal-portal';
 import type { WidgetType } from '@/types/dashboard';
 import {
   BarChart3,
@@ -148,8 +149,8 @@ function WidgetPreview({ widget }: { widget: WidgetPickerDefinition }) {
 
 export function WidgetPicker() {
   const [isOpen, setIsOpen] = useState(false);
+  const [anchor, setAnchor] = useState<{ top: number; right: number } | null>(null);
   const { addWidget, state } = useDashboard();
-  const pickerRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -159,18 +160,16 @@ export function WidgetPicker() {
   };
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (pickerRef.current && !pickerRef.current.contains(event.target as Node)) {
-        closePicker();
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  });
-
-  useEffect(() => {
     if (!isOpen) return undefined;
+
+    const updateAnchor = () => {
+      const rect = triggerRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      setAnchor({
+        top: Math.round(rect.bottom + 8),
+        right: Math.max(12, Math.round(window.innerWidth - rect.right)),
+      });
+    };
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (shouldCloseWidgetPickerOnKey(event.key)) {
@@ -179,10 +178,15 @@ export function WidgetPicker() {
       }
     };
 
-    const focusFrame = window.requestAnimationFrame(() => closeButtonRef.current?.focus());
+    updateAnchor();
+    window.addEventListener('resize', updateAnchor);
+    window.addEventListener('scroll', updateAnchor, true);
+    const focusFrame = window.requestAnimationFrame(() => window.requestAnimationFrame(() => closeButtonRef.current?.focus()));
     document.addEventListener('keydown', handleKeyDown);
     return () => {
       window.cancelAnimationFrame(focusFrame);
+      window.removeEventListener('resize', updateAnchor);
+      window.removeEventListener('scroll', updateAnchor, true);
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, [isOpen]);
@@ -222,7 +226,7 @@ export function WidgetPicker() {
   );
 
   return (
-    <div className="relative" ref={pickerRef}>
+    <div className="relative">
       <motion.button
         ref={triggerRef}
         type="button"
@@ -238,28 +242,34 @@ export function WidgetPicker() {
 
       <AnimatePresence>
         {isOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="ff-widget-picker-backdrop fixed inset-0 z-[var(--ff-z-modal)] bg-black bg-opacity-50"
-              onClick={closePicker}
-              aria-hidden="true"
-            />
+          <ModalPortal>
+            <div className="ff-widget-picker-layer fixed inset-0">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="ff-widget-picker-backdrop absolute inset-0"
+                onClick={closePicker}
+                aria-hidden="true"
+              />
 
-            <motion.div
-              id="widget-picker-dialog"
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="widget-picker-title"
-              aria-describedby="widget-picker-description"
-              initial={{ opacity: 0, scale: 0.97, y: -8 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.97, y: -8 }}
-              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="ff-widget-picker-menu absolute right-0 top-full z-[var(--ff-z-dialog)] mt-2 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg"
-            >
+              <motion.div
+                id="widget-picker-dialog"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="widget-picker-title"
+                aria-describedby="widget-picker-description"
+                initial={{ opacity: 0, scale: 0.97, y: -8 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.97, y: -8 }}
+                transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                style={anchor ? {
+                  '--ff-picker-anchor-top': `${anchor.top}px`,
+                  '--ff-picker-anchor-right': `${anchor.right}px`,
+                } as CSSProperties : undefined}
+                className="ff-widget-picker-menu fixed overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg"
+                onClick={(event) => event.stopPropagation()}
+              >
               <div className="ff-picker-header">
                 <div>
                   <h2 id="widget-picker-title" className="ff-picker-heading">Add Widget</h2>
@@ -303,8 +313,9 @@ export function WidgetPicker() {
               <div className="ff-picker-status" aria-live="polite">
                 {onDashboard.length} of {WIDGET_TYPES.length} widget types added
               </div>
-            </motion.div>
-          </>
+              </motion.div>
+            </div>
+          </ModalPortal>
         )}
       </AnimatePresence>
     </div>

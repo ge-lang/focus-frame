@@ -166,6 +166,17 @@ function readStoredLocation() {
   }
 }
 
+export function resolveInitialWeatherLocation(
+  initialCity: string,
+  initialCountryCode: string | undefined,
+  storedLocation: WeatherLocation | null,
+): WeatherLocation | null {
+  const accountLocation = initialCity.trim()
+    ? normalizedLocation({ name: initialCity, country: initialCountryCode ?? '' })
+    : null;
+  return accountLocation ?? storedLocation;
+}
+
 function demoWeather(location: WeatherLocation, error: string | null = null): WeatherData {
   const now = Date.now();
   const baseTemp = 15 + Math.sin(now / 10_000_000) * 10;
@@ -273,8 +284,7 @@ function ensureInitialized(initialCity: string, initialCountryCode?: string) {
   if (initialized) return;
   initialized = true;
   const storedLocation = readStoredLocation();
-  const fallbackLocation = initialCity.trim() ? normalizedLocation({ name: initialCity, country: initialCountryCode ?? '' }) : null;
-  const location = storedLocation ?? fallbackLocation;
+  const location = resolveInitialWeatherLocation(initialCity, initialCountryCode, storedLocation);
   if (location) {
     updateSnapshot({
       location,

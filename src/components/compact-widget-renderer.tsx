@@ -73,6 +73,11 @@ export function shouldResetCompactWeatherPage(previousLocationKey: string, nextL
   return previousLocationKey !== nextLocationKey;
 }
 
+export function isCompactInteractiveTarget(target: EventTarget | null): boolean {
+  if (!target || typeof (target as Element).closest !== 'function') return false;
+  return Boolean((target as Element).closest('button, input, textarea, select, a, [data-no-drag]'));
+}
+
 export function formatCompactForecastTime(timestamp: number, timezoneOffsetSeconds = 0): string {
   const date = getTargetLocationDate(new Date(timestamp * 1000), timezoneOffsetSeconds);
   if (Number.isNaN(date.getTime())) return '—';
@@ -84,9 +89,8 @@ function CompactShell({ widget, onOpen, icon, children }: CompactWidgetProps & {
   const suppressClickRef = useRef(false);
   const label = labelForType(widget.type);
 
-  const isInteractiveTarget = (target: EventTarget | null) => target instanceof HTMLElement && Boolean(target.closest('button, input, textarea, select, a, [data-no-drag]'));
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (isInteractiveTarget(event.target)) return;
+    if (isCompactInteractiveTarget(event.target)) return;
     pointerRef.current = { x: event.clientX, y: event.clientY };
     suppressClickRef.current = false;
   };
@@ -98,14 +102,14 @@ function CompactShell({ widget, onOpen, icon, children }: CompactWidgetProps & {
     window.requestAnimationFrame(() => { pointerRef.current = null; });
   };
   const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (!shouldOpenCompactFocusView(isInteractiveTarget(event.target), suppressClickRef.current)) {
+    if (!shouldOpenCompactFocusView(isCompactInteractiveTarget(event.target), suppressClickRef.current)) {
       suppressClickRef.current = false;
       return;
     }
     onOpen();
   };
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
-    if ((event.key === 'Enter' || event.key === ' ') && !isInteractiveTarget(event.target)) {
+    if ((event.key === 'Enter' || event.key === ' ') && !isCompactInteractiveTarget(event.target)) {
       event.preventDefault();
       onOpen();
     }
@@ -402,7 +406,13 @@ function CompactAnalytics({ widget, onOpen }: CompactWidgetProps) {
     ['Goals', data?.completedGoals ?? '—', 'text-pink-600', Target],
   ] as const;
   return <CompactShell widget={widget} onOpen={onOpen} icon={<BarChart3 size={16} className="text-indigo-600" />}>
-    {isLoading ? <p className="text-xs text-slate-500">Loading analytics…</p> : <div className="ff-compact-analytics-grid">{metrics.map(([label, value, color, Icon]) => <div key={label} className="ff-compact-kpi"><Icon size={15} className={`ff-compact-kpi-icon ${color}`} aria-hidden="true" /><span className={`ff-compact-kpi-value ${color}`}>{value}</span><span className="ff-compact-kpi-label text-[10px] text-slate-500">{label}</span></div>)}</div>}
+    {isLoading ? <p className="text-xs text-slate-500">Loading analytics…</p> : <>
+      <div className="ff-compact-analytics-grid ff-compact-analytics-desktop">{metrics.map(([label, value, color, Icon]) => <div key={label} className="ff-compact-kpi"><Icon size={15} className={`ff-compact-kpi-icon ${color}`} aria-hidden="true" /><span className={`ff-compact-kpi-value ${color}`}>{value}</span><span className="ff-compact-kpi-label text-[10px] text-slate-500">{label}</span></div>)}</div>
+      <div className="ff-compact-analytics-mini" aria-label="Analytics summary">
+        <div className="ff-compact-analytics-mini-primary"><span>Productivity</span><strong className={metrics[0][2]}>{metrics[0][1]}</strong></div>
+        <div className="ff-compact-analytics-mini-secondary">{metrics.slice(1).map(([label, value, color]) => <span key={label}><small>{label}</small><strong className={color}>{value}</strong></span>)}</div>
+      </div>
+    </>}
   </CompactShell>;
 }
 

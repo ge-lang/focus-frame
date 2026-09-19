@@ -3,6 +3,7 @@ import {
   completePomodoro,
   createCompletionGate,
   defaultPomodoroState,
+  focusSessionPayloadForCompletion,
   getElapsedFocusSeconds,
   getRemainingSeconds,
   pausePomodoro,
@@ -67,5 +68,18 @@ describe('shared Pomodoro timer state', () => {
     expect(completed.completedMode).toBe('work');
     expect(completed.completedDuration).toBe(1_500);
     expect(completed.nextState).toMatchObject({ mode: 'break', pomodoroCount: 1, remainingSeconds: 300 });
+  });
+
+  it('builds exact work and break persistence payloads for the completed-cycle path', () => {
+    const completed = completePomodoro(startPomodoro({ ...defaultPomodoroState, selectedTaskId: 'task-1' }, 0), 1_500_000);
+    expect(focusSessionPayloadForCompletion({ ...defaultPomodoroState, selectedTaskId: 'task-1' }, completed.completedMode, completed.completedDuration)).toEqual({
+      duration: 1_500,
+      type: 'work',
+      taskId: 'task-1',
+    });
+
+    const breakState = skipPomodoro(defaultPomodoroState);
+    expect(focusSessionPayloadForCompletion(breakState)).toEqual({ duration: 300, type: 'break' });
+    expect(focusSessionPayloadForCompletion(defaultPomodoroState)).toEqual({ duration: 1_500, type: 'work' });
   });
 });

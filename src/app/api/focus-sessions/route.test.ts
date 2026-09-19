@@ -37,17 +37,32 @@ describe('/api/focus-sessions ownership', () => {
     expect(mocks.create).not.toHaveBeenCalled();
   });
 
-  it('persists a valid partial focus session in seconds', async () => {
+  it('persists an unlinked 25-minute focus session in seconds', async () => {
     mocks.getCurrentUserId.mockResolvedValue('user-a');
-    mocks.create.mockResolvedValue({ id: 'session-1', userId: 'user-a', duration: 1, type: 'work' });
+    mocks.create.mockResolvedValue({ id: 'session-1', userId: 'user-a', duration: 1500, type: 'work' });
 
     const response = await POST(new Request('http://localhost/api/focus-sessions', {
       method: 'POST',
-      body: JSON.stringify({ duration: 1, type: 'work' }),
+      body: JSON.stringify({ duration: 1500, type: 'work' }),
       headers: { 'Content-Type': 'application/json' },
     }) as NextRequest);
 
     expect(response.status).toBe(201);
-    expect(mocks.create).toHaveBeenCalledWith({ data: { userId: 'user-a', duration: 1, type: 'work', taskId: null } });
+    expect(mocks.create).toHaveBeenCalledWith({ data: { userId: 'user-a', duration: 1500, type: 'work', taskId: null } });
+  });
+
+  it('persists a task-linked 25-minute focus session for the authenticated owner', async () => {
+    mocks.getCurrentUserId.mockResolvedValue('user-a');
+    mocks.findFirst.mockResolvedValue({ id: 'task-owned-by-a', userId: 'user-a' });
+    mocks.create.mockResolvedValue({ id: 'session-2', userId: 'user-a', duration: 1500, type: 'work', taskId: 'task-owned-by-a' });
+
+    const response = await POST(new Request('http://localhost/api/focus-sessions', {
+      method: 'POST',
+      body: JSON.stringify({ duration: 1500, type: 'work', taskId: 'task-owned-by-a' }),
+      headers: { 'Content-Type': 'application/json' },
+    }) as NextRequest);
+
+    expect(response.status).toBe(201);
+    expect(mocks.create).toHaveBeenCalledWith({ data: { userId: 'user-a', duration: 1500, type: 'work', taskId: 'task-owned-by-a' } });
   });
 });

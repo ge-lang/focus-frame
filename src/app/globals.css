@@ -1198,7 +1198,7 @@ body.ff-document-body {
     outline-offset: 3px;
   }
 
-       .ff-topbar .ff-theme-control select { color: transparent; }
+       .ff-topbar .ff-theme-control select { color: inherit; }
        .ff-topbar .ff-theme-icon,
        .ff-topbar .ff-widget-icon { display: none; }
        .ff-topbar .ff-account-trigger { background: transparent; }
@@ -1700,6 +1700,7 @@ body.ff-document-body {
 .ff-compact-kpi:nth-child(-n + 2) { border-bottom: 1px solid rgba(148, 163, 184, 0.16); }
 .ff-compact-kpi-value { display: block; font-size: 1.6rem; font-weight: 700; line-height: 1; }
 .ff-compact-kpi-label { margin-top: 0.3rem; letter-spacing: 0.01em; }
+.ff-compact-analytics-mini { display: none; }
 
 .ff-compact-note-paper {
   border: 0;
@@ -2273,6 +2274,8 @@ html[data-ff-theme='light'] .ff-modal-panel textarea { border-color: rgba(239, 1
   .ff-page-shell .ff-compact-news-story > .min-w-0 { flex: 1; }
   .ff-page-shell .ff-compact-news-image-wrap { display: flex; width: clamp(6rem, 28%, 11rem); height: 100%; max-width: 11rem; flex: 0 0 auto; align-items: center; }
   .ff-page-shell .ff-compact-news-image { display: block; width: 100%; height: 4.6rem; border-radius: 0.55rem; object-fit: cover; opacity: 0.86; }
+  .ff-page-shell .ff-compact-news-image-wrap { width: clamp(8rem, 26%, 14rem); max-width: 14rem; }
+  .ff-page-shell .ff-compact-news-image { height: 5.25rem; }
   .ff-page-shell .ff-compact-analytics-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(2, minmax(0, 1fr)); min-height: 0; flex: 1; border-radius: 0.8rem; }
   .ff-page-shell .ff-compact-kpi { position: relative; display: flex; min-height: 0; align-items: center; justify-content: center; flex-direction: column; gap: 0.45rem; border-radius: 0; padding: 0.45rem 0.65rem; text-align: center; }
   .ff-page-shell .ff-compact-kpi:nth-child(odd) { border-right-width: 1px; border-right-style: solid; }
@@ -3237,7 +3240,11 @@ html[data-ff-theme='light'] body.ff-document-body {
 }
 
 .ff-theme-control { position: relative; }
-.ff-theme-select { position: absolute; inset: 0; width: 100%; opacity: 0; }
+.ff-theme-select {
+  min-width: 0;
+  flex: 1 1 auto;
+  padding: 0;
+}
 .ff-header-action { min-height: 2rem; }
 
 .ff-dark-workspace .ff-account-trigger { color: #c9c7e7; }
@@ -4362,6 +4369,111 @@ html .ff-focus-view[data-widget-type='weather'] {
   .ff-mobile-widget-grid-item-mini .ff-compact-timer-ring-large small { max-width: 4.2rem; }
   .ff-mobile-widget-grid-item-mini .ff-compact-pomodoro-controls button { width: 1.45rem; height: 1.45rem; }
 
+  /* Half-width weather is a vertical mini composition, not the desktop hero row. */
+  .ff-mobile-widget-grid-item-mini .ff-compact-weather-object {
+    gap: 0.3rem;
+    overflow: hidden;
+    padding: 0.55rem;
+  }
+  .ff-mobile-widget-grid-item-mini .ff-compact-weather-main {
+    width: 100%;
+    flex-direction: column;
+    gap: 0.18rem;
+    text-align: center;
+  }
+  .ff-mobile-widget-grid-item-mini .ff-compact-weather-main-current { justify-content: center; }
+  .ff-mobile-widget-grid-item-mini .ff-compact-weather-visual {
+    width: 3.7rem;
+    height: 2.65rem;
+  }
+  .ff-mobile-widget-grid-item-mini .ff-compact-weather-visual svg {
+    width: 3.7rem;
+    height: 2.65rem;
+  }
+  .ff-mobile-widget-grid-item-mini .ff-compact-weather-copy { width: 100%; gap: 0.08rem; }
+  .ff-mobile-widget-grid-item-mini .ff-compact-weather-temperature { font-size: 1.6rem; }
+  .ff-mobile-widget-grid-item-mini .ff-compact-weather-copy > p:first-of-type { font-size: 0.72rem; }
+  .ff-mobile-widget-grid-item-mini .ff-compact-weather-copy > p:last-of-type { font-size: 0.6rem; }
+  .ff-mobile-widget-grid-item-mini .ff-compact-weather-meta { width: 100%; padding-top: 0.25rem; font-size: 0.54rem; }
+  .ff-mobile-widget-grid-item-mini .ff-compact-weather-meta svg { width: 0.75rem; height: 0.75rem; }
+  .ff-mobile-widget-grid-item-mini .ff-compact-weather-navigation button { width: 1.7rem; height: 1.7rem; }
+  .ff-mobile-widget-grid-item-mini .ff-compact-weather-navigation > span { top: 0.25rem; font-size: 0.48rem; }
+  .ff-mobile-widget-grid-item-mini .ff-compact-weather-page { gap: 0.3rem; }
+  .ff-mobile-widget-grid-item-mini .ff-compact-weather-page-title { font-size: 0.64rem; }
+  .ff-mobile-widget-grid-item-mini .ff-compact-weather-details-grid { gap: 0.25rem; }
+  .ff-mobile-widget-grid-item-mini .ff-compact-weather-details-grid small { font-size: 0.48rem; }
+  .ff-mobile-widget-grid-item-mini .ff-compact-weather-details-grid strong { font-size: 0.62rem; }
+  .ff-mobile-widget-grid-item-mini .ff-compact-weather-forecast { gap: 0.22rem; }
+  .ff-mobile-widget-grid-item-mini .ff-compact-weather-forecast-row {
+    grid-template-columns: 2.25rem 1.65rem minmax(0, 1fr);
+    gap: 0.18rem;
+    padding-top: 0.22rem;
+  }
+  .ff-mobile-widget-grid-item-mini .ff-compact-weather-forecast-row time,
+  .ff-mobile-widget-grid-item-mini .ff-compact-weather-forecast-row span { font-size: 0.48rem; }
+  .ff-mobile-widget-grid-item-mini .ff-compact-weather-forecast-row strong { font-size: 0.6rem; }
+
+  /* Analytics gets a dedicated mini hierarchy so four desktop KPI cells never fight for width. */
+  .ff-mobile-widget-grid-item-mini .ff-compact-analytics-desktop { display: none; }
+  .ff-mobile-widget-grid-item-mini .ff-compact-analytics-mini {
+    display: flex;
+    min-width: 0;
+    min-height: 0;
+    flex: 1;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 0.55rem;
+    overflow: hidden;
+  }
+  .ff-mobile-widget-grid-item-mini .ff-compact-analytics-mini-primary {
+    display: flex;
+    min-width: 0;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.35rem;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+    padding-bottom: 0.4rem;
+  }
+  .ff-mobile-widget-grid-item-mini .ff-compact-analytics-mini-primary span,
+  .ff-mobile-widget-grid-item-mini .ff-compact-analytics-mini-secondary small {
+    overflow: hidden;
+    color: var(--ff-text-muted, #7b849b);
+    font-size: 0.52rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .ff-mobile-widget-grid-item-mini .ff-compact-analytics-mini-primary strong {
+    flex: 0 0 auto;
+    font-size: 1.35rem;
+    line-height: 1;
+  }
+  .ff-mobile-widget-grid-item-mini .ff-compact-analytics-mini-secondary {
+    display: grid;
+    min-width: 0;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.25rem;
+  }
+  .ff-mobile-widget-grid-item-mini .ff-compact-analytics-mini-secondary span {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 0.12rem;
+  }
+  .ff-mobile-widget-grid-item-mini .ff-compact-analytics-mini-secondary strong {
+    overflow: hidden;
+    font-size: 0.76rem;
+    line-height: 1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .ff-mobile-widget-grid-item-mini .ff-compact-card-notes .ff-compact-object,
+  .ff-mobile-widget-grid-item-mini .ff-compact-note-paper,
+  .ff-mobile-widget-grid-item-mini .ff-compact-bookmarks-object,
+  .ff-mobile-widget-grid-item-mini .ff-compact-calendar { min-width: 0; overflow: hidden; }
+  .ff-mobile-widget-grid-item-mini .ff-compact-bookmark-row,
+  .ff-mobile-widget-grid-item-mini .ff-compact-calendar-month { min-width: 0; }
+
   .ff-mobile-widget-grid-item-mini .ff-compact-card-bookmarks {
     clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 88%, 0 100%);
     border-radius: 0.9rem 0.9rem 0.7rem 0.7rem;
@@ -4395,6 +4507,11 @@ html .ff-focus-view[data-widget-type='weather'] {
   backdrop-filter: blur(3px);
 }
 
+.ff-widget-picker-layer {
+  z-index: var(--ff-z-modal);
+  pointer-events: auto;
+}
+
 .ff-widget-picker-menu {
   --ff-picker-accent: #675cf6;
   --ff-picker-accent-soft: rgba(103, 92, 246, 0.1);
@@ -4410,6 +4527,9 @@ html .ff-focus-view[data-widget-type='weather'] {
   color: var(--ff-text-primary, #18213b);
   box-shadow: var(--ff-shadow-card, 0 22px 60px rgba(48, 57, 101, 0.18));
   backdrop-filter: blur(22px);
+  top: var(--ff-picker-anchor-top, 4.5rem);
+  right: var(--ff-picker-anchor-right, 1rem);
+  margin: 0;
 }
 
 .ff-dark-workspace .ff-widget-picker-menu {

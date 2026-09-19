@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { compactPomodoroControlAction, compactPresentationLimits, compactWeatherPageCount, formatCompactForecastTime, getCompactCalendarGrid, initialCompactWeatherPage, nextCompactWeatherPage, previousCompactWeatherPage, shouldOpenCompactFocusView, shouldResetCompactWeatherPage, summarizeCompactTasks } from './compact-widget-renderer';
+import { compactPomodoroControlAction, compactPresentationLimits, compactWeatherPageCount, formatCompactForecastTime, getCompactCalendarGrid, initialCompactWeatherPage, isCompactInteractiveTarget, nextCompactWeatherPage, previousCompactWeatherPage, shouldOpenCompactFocusView, shouldResetCompactWeatherPage, summarizeCompactTasks } from './compact-widget-renderer';
 import type { Task } from '@/types/task';
 
 const task = (overrides: Partial<Task>): Task => ({
@@ -45,6 +45,12 @@ describe('compact widget presentation helpers', () => {
     expect(shouldOpenCompactFocusView(false, false)).toBe(true);
     expect(shouldOpenCompactFocusView(true, false)).toBe(false);
     expect(shouldOpenCompactFocusView(false, true)).toBe(false);
+  });
+
+  it('treats SVG descendants of controls as interactive targets', () => {
+    const svgPath = { closest: (selector: string) => selector.includes('button') ? {} : null } as unknown as EventTarget;
+    expect(isCompactInteractiveTarget(svgPath)).toBe(true);
+    expect(shouldOpenCompactFocusView(isCompactInteractiveTarget(svgPath), false)).toBe(false);
   });
 
   it('starts or resumes compact Pomodoro in place only when a selected task exists', () => {
