@@ -2,7 +2,7 @@
 
 import { createPortal } from 'react-dom';
 import { useEffect, useState, type ReactNode } from 'react';
-import { useTheme } from './theme-provider';
+import { useTheme, type ResolvedTheme } from './theme-provider';
 
 let activeModalCount = 0;
 let previousDocumentStyles: {
@@ -51,7 +51,8 @@ function acquireScrollLock() {
   };
 }
 
-export function getThemeScopeClass(theme: 'light' | 'dark') {
+export function getThemeScopeClass(theme: ResolvedTheme) {
+  if (theme === 'graphite') return 'ff-graphite-workspace';
   return theme === 'dark' ? 'ff-dark-workspace' : 'ff-light-workspace';
 }
 

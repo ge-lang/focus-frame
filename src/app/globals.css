@@ -4720,3 +4720,302 @@ html .ff-focus-view[data-widget-type='weather'] {
   .ff-picker-row { min-height: 3.95rem; }
   .ff-picker-status { padding-bottom: max(0.78rem, env(safe-area-inset-bottom, 0px)); }
 }
+
+/* GRAPHITE: a neutral paint layer with the shared workspace geometry intact. */
+html[data-ff-theme='graphite'] body.ff-document-body {
+  background: #101315;
+  color: #edf1f2;
+}
+
+.ff-graphite-workspace {
+  --ff-bg-page: #101315;
+  --ff-bg-elevated: rgba(31, 36, 39, 0.94);
+  --ff-bg-card: rgba(27, 32, 35, 0.94);
+  --ff-bg-surface: rgba(49, 56, 60, 0.76);
+  --ff-bg-surface-muted: rgba(38, 44, 47, 0.78);
+  --ff-text-primary: #edf1f2;
+  --ff-text-secondary: #c3ccd1;
+  --ff-text-muted: #9aa7ae;
+  --ff-border: rgba(185, 198, 204, 0.2);
+  --ff-border-subtle: rgba(185, 198, 204, 0.16);
+  --ff-shadow-card: 0 18px 46px rgba(0, 0, 0, 0.32);
+  --ff-accent-violet: #aebdc6;
+  --ff-accent-cyan: #9bd2dc;
+  --ff-accent-green: #9bc7a8;
+  --ff-accent-amber: #d0b47a;
+  --ff-accent-rose: #d49aa7;
+  --ff-accent-orange: #d0a77b;
+  --ff-dark-text: #edf1f2;
+  --ff-dark-muted: #aab6bc;
+  --ff-dark-indigo: #aebdc6;
+  --ff-dark-lime: #9bc7a8;
+  --ff-dark-cyan: #9bd2dc;
+  --ff-dark-orange: #d0a77b;
+  --ff-dark-pink: #d49aa7;
+  position: relative;
+  isolation: isolate;
+  min-height: 100dvh;
+  color: var(--ff-text-primary);
+  background:
+    radial-gradient(62rem 32rem at 8% -10%, rgba(174, 189, 198, 0.13), transparent 68%),
+    radial-gradient(48rem 26rem at 94% 4%, rgba(93, 111, 120, 0.11), transparent 72%),
+    radial-gradient(52rem 30rem at 52% 100%, rgba(67, 79, 85, 0.1), transparent 74%),
+    linear-gradient(180deg, #1a1f22 0%, #121618 46%, #0f1214 100%);
+}
+
+.ff-graphite-workspace::before {
+  top: -6rem;
+  left: -12%;
+  width: 124%;
+  height: 31rem;
+  border-radius: 0 0 48% 38% / 0 0 34% 24%;
+  background: linear-gradient(112deg, rgba(218, 229, 234, 0.1), rgba(116, 138, 147, 0.06) 45%, rgba(91, 108, 116, 0.05) 78%, transparent 96%);
+  filter: blur(38px);
+}
+
+.ff-graphite-workspace::after {
+  top: 8rem;
+  right: -14rem;
+  width: 36rem;
+  height: 32rem;
+  background: radial-gradient(circle, rgba(120, 142, 151, 0.12), transparent 70%);
+  filter: blur(44px);
+}
+
+.ff-graphite-workspace .ff-topbar { border-bottom: 0; background: transparent; backdrop-filter: none; }
+.ff-graphite-workspace .ff-brand-mark { filter: none; }
+.ff-graphite-workspace .ff-brand-title { color: #f2f5f6; }
+.ff-graphite-workspace .ff-brand-subtitle { color: #9daab0; }
+.ff-graphite-workspace .ff-user-greeting { color: #c3ccd1; }
+.ff-graphite-workspace .ff-signout { color: #98a5ab; }
+.ff-graphite-workspace .ff-signout:hover { color: #d7e2e7; }
+.ff-graphite-workspace .ff-action-divider { background: rgba(185, 198, 204, 0.2); }
+
+.ff-graphite-workspace .ff-glass-control,
+.ff-graphite-workspace .ff-theme-control {
+  border-color: rgba(185, 198, 204, 0.24) !important;
+  background: rgba(36, 42, 45, 0.78) !important;
+  color: #dce4e7 !important;
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(238, 244, 246, 0.07);
+}
+
+.ff-graphite-workspace .ff-glass-control-primary {
+  border-color: rgba(174, 189, 198, 0.38) !important;
+  background: rgba(72, 84, 90, 0.82) !important;
+  color: #f0f4f5 !important;
+}
+
+.ff-graphite-workspace .ff-glass-control:hover,
+.ff-graphite-workspace .ff-glass-control-primary:hover,
+.ff-graphite-workspace .ff-theme-control:hover,
+.ff-graphite-workspace .ff-theme-control:focus-within {
+  border-color: rgba(215, 228, 234, 0.5) !important;
+  background: rgba(76, 90, 97, 0.9) !important;
+  color: #ffffff !important;
+}
+
+.ff-graphite-workspace .ff-card,
+.ff-graphite-workspace .ff-card.ff-card-solid,
+.ff-graphite-workspace .ff-widget-surface {
+  border-color: rgba(185, 198, 204, 0.18) !important;
+  background: linear-gradient(145deg, rgba(34, 40, 43, 0.96), rgba(22, 27, 29, 0.98)) !important;
+  box-shadow: var(--ff-shadow-card), inset 0 1px 0 rgba(238, 244, 246, 0.055);
+  backdrop-filter: blur(16px);
+}
+
+.ff-graphite-workspace .ff-card:hover { border-color: rgba(201, 216, 222, 0.3) !important; }
+.ff-graphite-workspace .ff-card::before,
+.ff-graphite-workspace .ff-widget-surface::before { background: linear-gradient(90deg, transparent, rgba(218, 229, 234, 0.12), transparent); }
+
+.ff-graphite-workspace .text-slate-900,
+.ff-graphite-workspace .text-slate-800,
+.ff-graphite-workspace .text-gray-900,
+.ff-graphite-workspace .text-gray-800,
+.ff-graphite-workspace .text-slate-700,
+.ff-graphite-workspace .text-gray-700 { color: var(--ff-text-primary) !important; }
+.ff-graphite-workspace .text-slate-600,
+.ff-graphite-workspace .text-gray-600 { color: var(--ff-text-secondary) !important; }
+.ff-graphite-workspace .text-slate-500,
+.ff-graphite-workspace .text-gray-500,
+.ff-graphite-workspace .text-slate-400,
+.ff-graphite-workspace .text-gray-400 { color: var(--ff-text-muted) !important; }
+.ff-graphite-workspace .text-indigo-600,
+.ff-graphite-workspace .text-indigo-700,
+.ff-graphite-workspace .text-purple-700 { color: var(--ff-accent-violet) !important; }
+.ff-graphite-workspace .text-cyan-600,
+.ff-graphite-workspace .text-blue-600 { color: var(--ff-accent-cyan) !important; }
+.ff-graphite-workspace .text-emerald-600,
+.ff-graphite-workspace .text-green-600 { color: var(--ff-accent-green) !important; }
+.ff-graphite-workspace .text-amber-600,
+.ff-graphite-workspace .text-orange-600,
+.ff-graphite-workspace .text-yellow-700 { color: var(--ff-accent-amber) !important; }
+.ff-graphite-workspace .text-red-600,
+.ff-graphite-workspace .text-red-700 { color: var(--ff-accent-rose) !important; }
+
+.ff-graphite-workspace .bg-white,
+.ff-graphite-workspace .bg-slate-50,
+.ff-graphite-workspace .bg-gray-50,
+.ff-graphite-workspace .bg-gray-100,
+.ff-graphite-workspace .bg-slate-100 { background: rgba(49, 56, 60, 0.72) !important; color: var(--ff-text-primary); }
+.ff-graphite-workspace .bg-gray-200,
+.ff-graphite-workspace .bg-slate-200 { background: rgba(128, 143, 151, 0.34) !important; }
+.ff-graphite-workspace .bg-indigo-50,
+.ff-graphite-workspace .bg-emerald-50,
+.ff-graphite-workspace .bg-amber-50,
+.ff-graphite-workspace .bg-rose-50 { background: rgba(174, 189, 198, 0.12) !important; }
+.ff-graphite-workspace .bg-indigo-600,
+.ff-graphite-workspace .bg-indigo-500 { background-color: var(--ff-accent-violet) !important; }
+.ff-graphite-workspace .bg-emerald-600,
+.ff-graphite-workspace .bg-green-600 { background-color: var(--ff-accent-green) !important; }
+.ff-graphite-workspace .bg-amber-500,
+.ff-graphite-workspace .bg-orange-500 { background-color: var(--ff-accent-amber) !important; }
+.ff-graphite-workspace .border-slate-100,
+.ff-graphite-workspace .border-slate-200,
+.ff-graphite-workspace .border-gray-200,
+.ff-graphite-workspace .border-gray-300 { border-color: var(--ff-border-subtle) !important; }
+.ff-graphite-workspace .hover\:bg-slate-50:hover,
+.ff-graphite-workspace .hover\:bg-indigo-50:hover,
+.ff-graphite-workspace .hover\:bg-white\/90:hover { background: rgba(174, 189, 198, 0.12) !important; }
+
+.ff-graphite-workspace .ff-compact-card {
+  border-color: rgba(185, 198, 204, 0.24) !important;
+  background: linear-gradient(145deg, rgba(47, 56, 61, 0.96), rgba(21, 26, 29, 0.98)) !important;
+  box-shadow: 0 18px 38px rgba(0, 0, 0, 0.34), 0 0 20px rgba(174, 189, 198, 0.06), inset 0 1px 0 rgba(238, 244, 246, 0.1) !important;
+}
+.ff-graphite-workspace .ff-compact-card:hover { border-color: rgba(215, 228, 234, 0.38) !important; }
+.ff-graphite-workspace .ff-compact-object:hover { background: rgba(174, 189, 198, 0.07); }
+.ff-graphite-workspace .ff-compact-card-weather:has(.ff-weather-art-surface-compact) { background: transparent !important; }
+.ff-graphite-workspace .ff-compact-card-notes { background: linear-gradient(145deg, rgba(62, 68, 71, 0.96), rgba(24, 29, 31, 0.99)) !important; }
+.ff-graphite-workspace .ff-compact-card-bookmarks { background: linear-gradient(145deg, #6f8088, #344047 62%, #20272b) !important; }
+.ff-graphite-workspace .ff-compact-card-bookmarks > .ff-compact-object { background: linear-gradient(145deg, rgba(32, 39, 43, 0.98), rgba(17, 21, 23, 1) 72%) !important; }
+.ff-graphite-workspace .ff-compact-status,
+.ff-graphite-workspace .ff-compact-kpi { background: rgba(50, 58, 62, 0.76); }
+.ff-graphite-workspace .ff-compact-status-summary,
+.ff-graphite-workspace .ff-compact-status-summary > div + div,
+.ff-graphite-workspace .ff-compact-kpi:nth-child(odd),
+.ff-graphite-workspace .ff-compact-kpi:nth-child(-n + 2),
+.ff-graphite-workspace .ff-compact-news-story + .ff-compact-news-story { border-color: rgba(185, 198, 204, 0.2); }
+.ff-graphite-workspace .ff-compact-note-paper { border-color: rgba(185, 198, 204, 0.2); background: rgba(37, 44, 47, 0.72); }
+.ff-graphite-workspace .ff-compact-note-paper::after { border-color: rgba(185, 198, 204, 0.2); background: #31383c; }
+.ff-graphite-workspace .ff-compact-timer-ring-large { box-shadow: inset 0 0 0 1px rgba(155, 210, 220, 0.2), 0 0 22px rgba(174, 189, 198, 0.09); }
+.ff-graphite-workspace .ff-compact-task-progress-track { stroke: rgba(185, 198, 204, 0.24); }
+.ff-graphite-workspace .ff-compact-relevant-task,
+.ff-graphite-workspace .ff-compact-weather-meta { border-top-color: rgba(185, 198, 204, 0.2); }
+.ff-graphite-workspace .ff-compact-news-headline,
+.ff-graphite-workspace .ff-compact-bookmark-row strong,
+.ff-graphite-workspace .ff-compact-timer-ring span,
+.ff-graphite-workspace .ff-compact-goals-ring strong { color: var(--ff-text-primary); }
+.ff-graphite-workspace .ff-compact-news-meta,
+.ff-graphite-workspace .ff-compact-bookmark-row small,
+.ff-graphite-workspace .ff-compact-goal-copy small { color: var(--ff-text-muted); }
+.ff-graphite-workspace .ff-compact-status-badge-todo { border-color: #aebdc6; color: #dce5e8; background: transparent; }
+.ff-graphite-workspace .ff-compact-status-badge-in-progress { border-color: var(--ff-accent-cyan); color: #c2edf0; background: transparent; }
+.ff-graphite-workspace .ff-compact-status-badge-done { border-color: var(--ff-accent-green); color: var(--ff-accent-green); background: transparent; }
+
+.ff-graphite-workspace .ff-task-column,
+.ff-graphite-workspace .ff-task-items,
+.ff-graphite-workspace .ff-analytics-panel,
+.ff-graphite-workspace .ff-news-article,
+.ff-graphite-workspace .ff-metric-tile,
+.ff-graphite-workspace .ff-calendar-agenda-row { border-color: var(--ff-border-subtle) !important; background: rgba(46, 53, 57, 0.68) !important; }
+.ff-graphite-workspace .ff-news-article:hover,
+.ff-graphite-workspace .ff-calendar-day:not(.ff-calendar-day-empty):hover { background: rgba(174, 189, 198, 0.1) !important; }
+.ff-graphite-workspace .ff-news-category,
+.ff-graphite-workspace .ff-news-source { background: rgba(174, 189, 198, 0.13) !important; color: var(--ff-text-secondary) !important; }
+.ff-graphite-workspace .ff-news-status { background: rgba(155, 199, 168, 0.14) !important; color: var(--ff-accent-green) !important; }
+.ff-graphite-workspace .ff-calendar-weekdays { color: #aab6bc; }
+.ff-graphite-workspace .ff-calendar-day.is-today .ff-calendar-day-number { background: linear-gradient(135deg, #aebdc6, #71828b); color: #111619; }
+.ff-graphite-workspace .ff-calendar-day.is-selected { border-color: var(--ff-accent-cyan); }
+.ff-graphite-workspace .ff-calendar-day.is-selected.is-today .ff-calendar-day-number { box-shadow: 0 0 0 2px var(--ff-accent-cyan); }
+.ff-graphite-workspace .ff-analytics-panel { box-shadow: inset 0 1px 0 rgba(238, 244, 246, 0.05); }
+
+.ff-graphite-workspace .ff-goal-priority-low { border-color: rgba(155, 199, 168, 0.35); background: rgba(155, 199, 168, 0.13); color: #b9e0c3; }
+.ff-graphite-workspace .ff-goal-priority-medium { border-color: rgba(208, 180, 122, 0.35); background: rgba(208, 180, 122, 0.13); color: #e2ca98; }
+.ff-graphite-workspace .ff-goal-priority-high { border-color: rgba(212, 154, 167, 0.35); background: rgba(212, 154, 167, 0.13); color: #e4b5c0; }
+.ff-graphite-workspace .ff-accent-green { border-top-color: rgba(155, 199, 168, 0.72) !important; }
+.ff-graphite-workspace .ff-accent-amber { border-top-color: rgba(208, 180, 122, 0.72) !important; }
+.ff-graphite-workspace .ff-accent-rose { border-top-color: rgba(212, 154, 167, 0.72) !important; }
+
+.ff-graphite-workspace .ff-focus-view,
+.ff-theme-portal.ff-graphite-workspace .ff-focus-view {
+  border: 1px solid rgba(185, 198, 204, 0.2);
+  background: linear-gradient(145deg, rgba(35, 41, 44, 0.98), rgba(18, 22, 24, 0.99)) !important;
+  color: var(--ff-text-primary);
+  box-shadow: 0 24px 72px rgba(0, 0, 0, 0.48), inset 0 1px 0 rgba(238, 244, 246, 0.06);
+}
+.ff-graphite-workspace .ff-focus-view-close { color: var(--ff-text-secondary); }
+.ff-graphite-workspace .ff-focus-view-close:hover,
+.ff-graphite-workspace .ff-focus-view-close:focus-visible { color: #f4f7f8; outline-color: rgba(174, 189, 198, 0.62); }
+.ff-graphite-workspace .ff-focus-view-content > .ff-card.ff-widget-surface { border: 0 !important; background: transparent !important; box-shadow: none !important; }
+.ff-graphite-workspace .ff-modal-backdrop { background: rgba(5, 8, 10, 0.72) !important; }
+.ff-graphite-workspace .ff-modal-panel {
+  border-color: rgba(185, 198, 204, 0.24) !important;
+  background: linear-gradient(145deg, rgba(38, 45, 48, 0.98), rgba(19, 24, 26, 0.99)) !important;
+  color: var(--ff-text-primary) !important;
+  box-shadow: 0 24px 72px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(238, 244, 246, 0.06);
+}
+.ff-graphite-workspace .ff-modal-panel input,
+.ff-graphite-workspace .ff-modal-panel select,
+.ff-graphite-workspace .ff-modal-panel textarea {
+  border-color: rgba(185, 198, 204, 0.24) !important;
+  background: rgba(22, 27, 29, 0.84) !important;
+  color: var(--ff-text-primary) !important;
+}
+.ff-graphite-workspace .ff-modal-panel input::placeholder,
+.ff-graphite-workspace .ff-modal-panel textarea::placeholder { color: var(--ff-text-muted) !important; }
+.ff-graphite-workspace .ff-modal-panel input:focus,
+.ff-graphite-workspace .ff-modal-panel select:focus,
+.ff-graphite-workspace .ff-modal-panel textarea:focus { border-color: var(--ff-accent-cyan) !important; box-shadow: 0 0 0 3px rgba(155, 210, 220, 0.16) !important; }
+.ff-graphite-workspace .ff-modal-panel label { color: var(--ff-text-secondary) !important; }
+
+/* Weather keeps its scene art and condition mapping; Graphite only changes chrome and readability. */
+.ff-graphite-workspace .ff-weather-full {
+  --ff-weather-primary: #f1f5f6;
+  --ff-weather-secondary: #d0dade;
+  --ff-weather-muted: #a3b0b6;
+  --ff-weather-rule: rgba(185, 198, 204, 0.22);
+  --ff-weather-divider: rgba(185, 198, 204, 0.12);
+  --ff-weather-label: #b9c6cb;
+  --ff-weather-accent: #9bd2dc;
+  --ff-weather-warm: #d7bf86;
+  --ff-weather-scrim-rgb: 9 13 15;
+  --ff-weather-tint-rgb: 79 96 103;
+}
+.ff-graphite-workspace .ff-weather-art-surface,
+.ff-graphite-workspace .ff-weather-art-surface-compact { --ff-weather-scrim-rgb: 9 13 15; --ff-weather-tint-rgb: 79 96 103; }
+.ff-graphite-workspace .ff-weather-widget { border: 0 !important; background: transparent !important; }
+.ff-graphite-workspace .ff-weather-sun { color: #d9c184; }
+.ff-graphite-workspace .ff-weather-moon-object { color: #d6e1e5; }
+.ff-graphite-workspace .ff-weather-moon-shadow { fill: rgba(12, 18, 21, 0.66); }
+.ff-graphite-workspace .ff-weather-stars { fill: #dce7ea; }
+.ff-graphite-workspace .ff-weather-unit-control { background: rgba(31, 38, 41, 0.4); }
+.ff-graphite-workspace .ff-weather-controls button:hover,
+.ff-graphite-workspace .ff-weather-controls button:focus-visible { color: var(--ff-weather-primary); }
+
+.ff-graphite-workspace .ff-widget-picker-menu {
+  --ff-picker-accent: #b8c7ce;
+  --ff-picker-accent-soft: rgba(174, 189, 198, 0.15);
+  --ff-picker-row-hover: rgba(174, 189, 198, 0.1);
+  --ff-picker-preview-bg: rgba(174, 189, 198, 0.1);
+  --ff-picker-preview-line: rgba(185, 209, 216, 0.42);
+  border-color: rgba(185, 198, 204, 0.24) !important;
+  background: linear-gradient(145deg, rgba(38, 45, 48, 0.98), rgba(19, 24, 26, 0.99)) !important;
+  color: var(--ff-text-primary);
+  box-shadow: 0 24px 72px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(238, 244, 246, 0.06);
+}
+.ff-graphite-workspace .ff-picker-header,
+.ff-graphite-workspace .ff-picker-status { border-color: rgba(185, 198, 204, 0.16); }
+.ff-graphite-workspace .ff-picker-row-added { border-color: rgba(185, 198, 204, 0.18); background: rgba(174, 189, 198, 0.11); }
+.ff-graphite-workspace .ff-picker-add-affordance { color: #c5e2e6; }
+.ff-graphite-workspace .ff-picker-added-label { color: #a9d1b3; }
+
+@media (min-width: 640px) {
+  .ff-graphite-workspace .ff-topbar .ff-header-action,
+  .ff-graphite-workspace .ff-topbar .ff-theme-control { color: #c7d2d7 !important; }
+  .ff-graphite-workspace .ff-topbar .ff-header-action:hover,
+  .ff-graphite-workspace .ff-topbar .ff-header-action:focus-visible,
+  .ff-graphite-workspace .ff-topbar .ff-theme-control:hover,
+  .ff-graphite-workspace .ff-topbar .ff-theme-control:focus-within { color: #f0f5f6 !important; }
+  .ff-graphite-workspace .ff-topbar .ff-header-action:focus-visible,
+  .ff-graphite-workspace .ff-topbar .ff-theme-control:focus-within { outline: 2px solid rgba(174, 189, 198, 0.62); outline-offset: 3px; }
+}

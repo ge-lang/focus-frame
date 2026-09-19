@@ -8,17 +8,18 @@ const EVVA_PATH = 'M9419.12 14240.71l-749.68 0 0 -3233.39 749.68 0 0 3233.39zm16
 export function EvvaMark() {
   const { resolvedTheme } = useTheme();
   const gradientId = `evva-mark-gradient-${useId().replace(/:/g, '')}`;
-  const isLight = resolvedTheme === 'light';
+  const isHot = resolvedTheme === 'light';
+  const isGraphite = resolvedTheme === 'graphite';
 
   return (
     <svg className="ff-evva-mark" viewBox="0 0 21000 29700" role="img" aria-label="EVVA" focusable="false" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <linearGradient id={gradientId} x1="50%" x2="50%" y1="0%" y2="100%">
-          <stop offset="0%" stopColor={isLight ? '#f531b4' : '#3ad5f6'}>
-            <animate attributeName="stop-color" dur="4s" repeatCount="indefinite" values={isLight ? '#ffaf3d; #f531b4; #ffaf3d' : '#8d1fea; #3ad5f6; #8d1fea'} />
+          <stop offset="0%" stopColor={isHot ? '#f531b4' : isGraphite ? '#d8e1e7' : '#3ad5f6'}>
+            <animate attributeName="stop-color" dur="4s" repeatCount="indefinite" values={isHot ? '#ffaf3d; #f531b4; #ffaf3d' : isGraphite ? '#f2f5f6; #aebdc6; #f2f5f6' : '#8d1fea; #3ad5f6; #8d1fea'} />
           </stop>
-          <stop offset="100%" stopColor={isLight ? '#ffaf3d' : '#8d1fea'}>
-            <animate attributeName="stop-color" dur="4s" repeatCount="indefinite" values={isLight ? '#f531b4; #ffaf3d; #f531b4' : '#3ad5f6; #8d1fea; #3ad5f6'} />
+          <stop offset="100%" stopColor={isHot ? '#ffaf3d' : isGraphite ? '#738590' : '#8d1fea'}>
+            <animate attributeName="stop-color" dur="4s" repeatCount="indefinite" values={isHot ? '#f531b4; #ffaf3d; #f531b4' : isGraphite ? '#aebdc6; #5d6c76; #aebdc6' : '#3ad5f6; #8d1fea; #3ad5f6'} />
           </stop>
         </linearGradient>
       </defs>

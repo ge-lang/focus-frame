@@ -2,8 +2,16 @@
 
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
-export type ThemePreference = 'system' | 'light' | 'dark';
-type ResolvedTheme = 'light' | 'dark';
+export type ThemePreference = 'system' | 'light' | 'dark' | 'graphite';
+export type SystemTheme = 'light' | 'dark';
+export type ResolvedTheme = 'light' | 'dark' | 'graphite';
+
+export const THEME_OPTIONS = [
+  { value: 'system', label: 'System' },
+  { value: 'light', label: 'Hot' },
+  { value: 'dark', label: 'Cool' },
+  { value: 'graphite', label: 'Graphite' },
+] as const;
 
 interface ThemeContextValue {
   theme: ThemePreference;
@@ -15,26 +23,27 @@ const STORAGE_KEY = 'focus-frame-theme';
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 export function isThemePreference(value: string | null): value is ThemePreference {
-  return value === 'system' || value === 'light' || value === 'dark';
+  return value === 'system' || value === 'light' || value === 'dark' || value === 'graphite';
 }
 
-export function resolveThemePreference(preference: ThemePreference, systemTheme: ResolvedTheme): ResolvedTheme {
+export function resolveThemePreference(preference: ThemePreference, systemTheme: SystemTheme): ResolvedTheme {
   return preference === 'system' ? systemTheme : preference;
 }
 
-function getStoredTheme(): ThemePreference {
-  if (typeof window === 'undefined') return 'dark';
-  const stored = window.localStorage.getItem(STORAGE_KEY);
+export function getStoredTheme(storage?: Pick<Storage, 'getItem'> | null): ThemePreference {
+  const source = storage ?? (typeof window !== 'undefined' ? window.localStorage : null);
+  if (!source) return 'dark';
+  const stored = source.getItem(STORAGE_KEY);
   return isThemePreference(stored) ? stored : 'dark';
 }
 
-function getSystemTheme(): ResolvedTheme {
+function getSystemTheme(): SystemTheme {
   return typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<ThemePreference>('dark');
-  const [systemTheme, setSystemTheme] = useState<ResolvedTheme>('dark');
+  const [systemTheme, setSystemTheme] = useState<SystemTheme>('dark');
   const resolvedTheme = resolveThemePreference(theme, systemTheme);
 
   useEffect(() => {
