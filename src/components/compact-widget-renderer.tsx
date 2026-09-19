@@ -35,9 +35,9 @@ import { WeatherArtScene, WeatherArtSurface } from '@/components/weather-art-sce
 import { useAnalytics } from '@/hooks/use-analytics';
 import { useNews } from '@/hooks/use-news';
 import { useTasks } from '@/hooks/use-tasks';
-import { useWeather } from '@/hooks/useWeather';
+import { getWeatherLocationKey, useWeather } from '@/hooks/useWeather';
 import { getWeatherDisplayName } from '@/lib/weather-location';
-import { getTargetLocationDate } from '@/lib/weather-visual';
+import { formatWeatherVisibility, getTargetLocationDate } from '@/lib/weather-visual';
 import { useBookmarks, useCreateBookmark, useCreateGoal, useGoals, useNote, useSaveNote } from '@/hooks/use-personal-widgets';
 import { usePomodoro } from '@/contexts/pomodoro-context';
 import type { Widget, WidgetType } from '@/types/dashboard';
@@ -49,6 +49,8 @@ interface CompactWidgetProps {
 }
 
 export const compactPresentationLimits = { news: 2, bookmarks: 3, goals: 2, relevantTasks: 1 } as const;
+export const compactWeatherPageCount = 3;
+export const initialCompactWeatherPage = 0;
 
 export function shouldOpenCompactFocusView(targetIsInteractive: boolean, didMove: boolean): boolean {
   return !targetIsInteractive && !didMove;
@@ -57,6 +59,24 @@ export function shouldOpenCompactFocusView(targetIsInteractive: boolean, didMove
 export function compactPomodoroControlAction(isRunning: boolean, hasSelectedTask: boolean): 'pause' | 'start' | 'open' {
   if (isRunning) return 'pause';
   return hasSelectedTask ? 'start' : 'open';
+}
+
+export function nextCompactWeatherPage(page: number, pageCount = compactWeatherPageCount): number {
+  return (page + 1) % pageCount;
+}
+
+export function previousCompactWeatherPage(page: number, pageCount = compactWeatherPageCount): number {
+  return (page - 1 + pageCount) % pageCount;
+}
+
+export function shouldResetCompactWeatherPage(previousLocationKey: string, nextLocationKey: string): boolean {
+  return previousLocationKey !== nextLocationKey;
+}
+
+export function formatCompactForecastTime(timestamp: number, timezoneOffsetSeconds = 0): string {
+  const date = getTargetLocationDate(new Date(timestamp * 1000), timezoneOffsetSeconds);
+  if (Number.isNaN(date.getTime())) return '—';
+  return date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' });
 }
 
 function CompactShell({ widget, onOpen, icon, children }: CompactWidgetProps & { icon: ReactNode; children: ReactNode }) {
@@ -307,12 +327,46 @@ function CompactPomodoro({ widget, onOpen }: CompactWidgetProps) {
 function CompactWeather({ widget, onOpen }: CompactWidgetProps) {
   const city = typeof widget.config?.city === 'string' ? widget.config.city : '';
   const country = typeof widget.config?.country === 'string' ? widget.config.country : undefined;
-  const { weather, isLoading, isDemo } = useWeather(city, country);
+  const { weather, forecast, selectedLocation, isLoading, isDemo } = useWeather(city, country);
+  const [page, setPage] = useState<number>(initialCompactWeatherPage);
+  const locationKey = selectedLocation ? getWeatherLocationKey(selectedLocation) : '';
+  const previousLocationKey = useRef(locationKey);
+  useEffect(() => {
+    if (shouldResetCompactWeatherPage(previousLocationKey.current, locationKey)) setPage(initialCompactWeatherPage);
+    previousLocationKey.current = locationKey;
+  }, [locationKey]);
+
+  const pageCount = forecast.length > 0 ? compactWeatherPageCount : 2;
+  const activePage = Math.min(page, pageCount - 1);
   const targetWeatherDate = getTargetLocationDate(new Date(), weather.location?.timezone ?? 0);
   const displayCity = getWeatherDisplayName(weather.city);
   const sceneLocation = weather.country ? `${displayCity}, ${weather.country}` : displayCity;
+
   return <CompactShell widget={widget} onOpen={onOpen} icon={<CloudSun size={16} className="text-indigo-600" />}>
-    {isLoading ? <p className="text-xs text-slate-500">Loading weather…</p> : !weather.city ? <div className="ff-compact-weather-empty">Choose a location to see weather.</div> : <WeatherArtSurface condition={weather.condition} isDay={weather.isDay} variant="compact" location={sceneLocation} localDate={targetWeatherDate} className="ff-compact-weather-object"><WeatherArtScene condition={weather.condition} isDay={weather.isDay} icon={weather.icon} conditionCode={weather.conditionCode} date={targetWeatherDate} location={sceneLocation} variant="compact" className="ff-compact-weather-main" renderBackdrop={false}><div className="ff-compact-weather-copy min-w-0"><strong className="ff-compact-weather-temperature block leading-none text-slate-900">{Math.round(weather.temp)}°C</strong><p className="mt-1 truncate text-sm font-medium text-slate-800">{displayCity}</p><p className="truncate text-xs capitalize text-slate-500">{weather.description}{isDemo ? ' · Demo' : ''}</p></div></WeatherArtScene><div className="ff-compact-weather-meta"><span><Droplet size={15} aria-hidden="true" />{weather.humidity}%</span><span><Wind size={15} aria-hidden="true" />{weather.windSpeed} m/s</span></div></WeatherArtSurface>}
+    {isLoading ? <p className="text-xs text-slate-500">Loading weather…</p> : !weather.city ? <div className="ff-compact-weather-empty">Choose a location to see weather.</div> : <WeatherArtSurface condition={weather.condition} isDay={weather.isDay} variant="compact" location={sceneLocation} localDate={targetWeatherDate} className="ff-compact-weather-object">
+      <div className="ff-compact-weather-navigation" data-no-drag>
+        <button type="button" data-no-drag aria-label="Show previous compact weather page" onClick={(event) => { event.stopPropagation(); setPage(previousCompactWeatherPage(activePage, pageCount)); }}><ChevronLeft size={15} aria-hidden="true" /></button>
+        <span aria-live="polite">{activePage + 1} / {pageCount}</span>
+        <button type="button" data-no-drag aria-label="Show next compact weather page" onClick={(event) => { event.stopPropagation(); setPage(nextCompactWeatherPage(activePage, pageCount)); }}><ChevronRight size={15} aria-hidden="true" /></button>
+      </div>
+
+      <WeatherArtScene
+        condition={weather.condition}
+        isDay={weather.isDay}
+        icon={weather.icon}
+        conditionCode={weather.conditionCode}
+        date={targetWeatherDate}
+        location={sceneLocation}
+        variant="compact"
+        className={`ff-compact-weather-main ${activePage === 0 ? 'ff-compact-weather-main-current' : activePage === 1 ? 'ff-compact-weather-main-details' : 'ff-compact-weather-main-forecast'}`}
+        ariaLabel={activePage === 0 ? 'Current weather' : activePage === 1 ? 'Weather details' : 'Short weather forecast'}
+        renderBackdrop={false}
+        showVisual={activePage === 0}
+      >
+        {activePage === 0 ? <div className="ff-compact-weather-copy min-w-0"><strong className="ff-compact-weather-temperature block leading-none text-slate-900">{Math.round(weather.temp)}°C</strong><p className="mt-1 truncate text-sm font-medium text-slate-800">{displayCity}</p><p className="truncate text-xs capitalize text-slate-500">{weather.description}{isDemo ? ' · Demo' : ''}</p></div> : activePage === 1 ? <div className="ff-compact-weather-page"><strong className="ff-compact-weather-page-title">Details · {displayCity}</strong><div className="ff-compact-weather-details-grid"><span><small>Feels like</small><strong>{Math.round(weather.feelsLike)}°C</strong></span><span><small>Humidity</small><strong>{weather.humidity}%</strong></span><span><small>Wind</small><strong>{weather.windSpeed} m/s</strong></span><span><small>Visibility</small><strong>{formatWeatherVisibility(weather.visibility)}</strong></span></div></div> : <div className="ff-compact-weather-page"><strong className="ff-compact-weather-page-title">Next hours</strong><div className="ff-compact-weather-forecast">{forecast.slice(0, 3).map((item) => <div key={item.dt} className="ff-compact-weather-forecast-row"><time>{formatCompactForecastTime(item.dt, weather.location?.timezone ?? 0)}</time><strong>{Math.round(item.temp)}°</strong><span title={item.description}>{item.description}</span></div>)}</div></div>}
+      </WeatherArtScene>
+      {activePage === 0 && <div className="ff-compact-weather-meta"><span><Droplet size={15} aria-hidden="true" />{weather.humidity}%</span><span><Wind size={15} aria-hidden="true" />{weather.windSpeed} m/s</span></div>}
+    </WeatherArtSurface>}
   </CompactShell>;
 }
 

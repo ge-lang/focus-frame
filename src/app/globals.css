@@ -1263,6 +1263,25 @@ body.ff-document-body {
   font-size: 0.62rem;
 }
 .ff-compact-weather-empty { display: grid; min-height: 100%; place-items: center; color: var(--ff-text-muted, #7b849b); font-size: 0.72rem; text-align: center; }
+.ff-compact-weather-object { position: relative; }
+.ff-compact-weather-navigation { position: absolute; z-index: 2; inset: 0; display: flex; align-items: center; justify-content: space-between; padding: 0.2rem; pointer-events: none; }
+.ff-compact-weather-navigation button { display: grid; width: 2.5rem; height: 2.5rem; place-items: center; border: 0; border-radius: 9999px; background: transparent; color: var(--ff-text-primary, #18213b); opacity: 0.68; pointer-events: auto; transition: background-color 160ms ease, color 160ms ease, opacity 160ms ease; }
+.ff-compact-weather-navigation button:hover,
+.ff-compact-weather-navigation button:focus-visible { background: rgba(99, 102, 241, 0.1); color: var(--ff-accent-violet, #6255e8); opacity: 1; outline: none; }
+.ff-compact-weather-navigation > span { position: absolute; top: 0.45rem; left: 50%; color: var(--ff-text-muted, #7b849b); font-size: 0.56rem; letter-spacing: 0.08em; transform: translateX(-50%); }
+.ff-compact-weather-main-details,
+.ff-compact-weather-main-forecast { width: 100%; flex: 1; justify-content: center; }
+.ff-compact-weather-page { display: flex; width: 100%; min-width: 0; flex-direction: column; gap: 0.55rem; }
+.ff-compact-weather-page-title { overflow: hidden; color: var(--ff-text-primary, #18213b); font-size: 0.76rem; text-overflow: ellipsis; white-space: nowrap; }
+.ff-compact-weather-details-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.45rem; }
+.ff-compact-weather-details-grid span { display: flex; min-width: 0; flex-direction: column; gap: 0.12rem; }
+.ff-compact-weather-details-grid small { color: var(--ff-text-muted, #7b849b); font-size: 0.56rem; }
+.ff-compact-weather-details-grid strong { overflow: hidden; color: var(--ff-text-primary, #18213b); font-size: 0.72rem; text-overflow: ellipsis; white-space: nowrap; }
+.ff-compact-weather-forecast { display: grid; gap: 0.38rem; }
+.ff-compact-weather-forecast-row { display: grid; min-width: 0; grid-template-columns: 2.7rem 2.15rem minmax(0, 1fr); align-items: center; gap: 0.35rem; border-top: 1px solid rgba(148, 163, 184, 0.16); padding-top: 0.34rem; }
+.ff-compact-weather-forecast-row time,
+.ff-compact-weather-forecast-row span { overflow: hidden; color: var(--ff-text-muted, #7b849b); font-size: 0.58rem; text-overflow: ellipsis; white-space: nowrap; }
+.ff-compact-weather-forecast-row strong { color: var(--ff-text-primary, #18213b); font-size: 0.72rem; }
 
 .ff-compact-note-paper {
   position: relative;

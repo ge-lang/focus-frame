@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { compactPomodoroControlAction, compactPresentationLimits, getCompactCalendarGrid, shouldOpenCompactFocusView, summarizeCompactTasks } from './compact-widget-renderer';
+import { compactPomodoroControlAction, compactPresentationLimits, compactWeatherPageCount, formatCompactForecastTime, getCompactCalendarGrid, initialCompactWeatherPage, nextCompactWeatherPage, previousCompactWeatherPage, shouldOpenCompactFocusView, shouldResetCompactWeatherPage, summarizeCompactTasks } from './compact-widget-renderer';
 import type { Task } from '@/types/task';
 
 const task = (overrides: Partial<Task>): Task => ({
@@ -52,5 +52,23 @@ describe('compact widget presentation helpers', () => {
     expect(compactPomodoroControlAction(true, true)).toBe('pause');
     expect(compactPomodoroControlAction(false, false)).toBe('open');
     expect(compactPomodoroControlAction(true, false)).toBe('pause');
+  });
+
+  it('starts compact Weather on Current and loops forward and backward through three pages', () => {
+    expect(initialCompactWeatherPage).toBe(0);
+    expect(compactWeatherPageCount).toBe(3);
+    expect(nextCompactWeatherPage(0)).toBe(1);
+    expect(nextCompactWeatherPage(2)).toBe(0);
+    expect(previousCompactWeatherPage(0)).toBe(2);
+    expect(previousCompactWeatherPage(2)).toBe(1);
+  });
+
+  it('resets compact Weather paging only when the canonical location changes', () => {
+    expect(shouldResetCompactWeatherPage('50.8:4.3', '50.8:4.3')).toBe(false);
+    expect(shouldResetCompactWeatherPage('50.8:4.3', '52.4:4.9')).toBe(true);
+  });
+
+  it('formats forecast times from the existing location timezone', () => {
+    expect(formatCompactForecastTime(Date.UTC(2026, 8, 19, 10, 0, 0) / 1000, 7200)).toBe('12:00');
   });
 });
