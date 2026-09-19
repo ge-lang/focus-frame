@@ -6,8 +6,9 @@ import 'react-grid-layout/css/styles.css';
 import { useDashboard } from '@/contexts/dashboard-context';
 import { useStableContainerWidth } from '@/hooks/use-stable-container-width';
 import { SortableWidget } from './sortable-widget';
-import { canPersistDesktopLayout, compactLayoutForColumns, getCurrentGridLayout, getLayoutBottom, getSquareGridUnit, getWidgetSizing, isMobileWideWidget, normalizeLayout, orderLayoutForMobile, reconcileLayoutTypes } from '@/lib/dashboard-layout';
+import { canPersistDesktopLayout, compactLayoutForColumns, getCurrentGridLayout, getLayoutBottom, getSquareGridUnit, getWidgetSizing, moveMobileWidget, normalizeLayout, normalizeMobileOrder, orderLayoutForMobile, reconcileLayoutTypes } from '@/lib/dashboard-layout';
 import type { LayoutItem } from '@/types/dashboard';
+import { MobileWidgetList } from './mobile-widget-list';
 
 const BREAKPOINTS = { lg: 1024, md: 768, sm: 640, xs: 480, xxs: 0 } as const;
 const COLUMNS = { lg: 12, md: 6, sm: 6, xs: 4, xxs: 2 } as const;
@@ -24,8 +25,8 @@ function getBreakpointForWidth(width: number) {
 }
 
 export function DashboardGrid() {
-  const { state, isHydrated, updateLayout } = useDashboard();
-  const { layout, isEditing, widgets } = state;
+  const { state, isHydrated, updateLayout, updateMobileOrder } = useDashboard();
+  const { layout, isEditing, mobileOrder, widgets } = state;
   const { width, containerRef, isStable } = useStableContainerWidth();
   const breakpointRef = useRef('lg');
   const autoScrollRef = useRef<AutoScrollState>({
@@ -34,10 +35,25 @@ export function DashboardGrid() {
     frame: null,
   });
   const isDraggingRef = useRef(false);
+  const mobileOrderRef = useRef(mobileOrder);
   const activeBreakpoint = getBreakpointForWidth(width);
   const rowHeight = getSquareGridUnit(width, COLUMNS[activeBreakpoint as keyof typeof COLUMNS], GRID_MARGIN);
   const currentGridLayout = useMemo(() => getCurrentGridLayout(layout), [layout]);
   const currentGridBottom = getLayoutBottom(currentGridLayout);
+  const currentMobileOrder = useMemo(() => normalizeMobileOrder(mobileOrder, widgets, layout), [layout, mobileOrder, widgets]);
+  const currentMobileOrderLayout = useMemo(() => orderLayoutForMobile(layout, currentMobileOrder), [currentMobileOrder, layout]);
+
+  useEffect(() => {
+    mobileOrderRef.current = currentMobileOrder;
+  }, [currentMobileOrder]);
+
+  const handleMobileReorder = useCallback((activeId: string, overId: string) => {
+    const current = mobileOrderRef.current;
+    const next = moveMobileWidget(current, activeId, overId);
+    if (next.every((id, index) => id === current[index])) return;
+    mobileOrderRef.current = next;
+    updateMobileOrder(next);
+  }, [updateMobileOrder]);
 
   const stopAutoScroll = useCallback(() => {
     const state = autoScrollRef.current;
@@ -131,13 +147,12 @@ export function DashboardGrid() {
       {!isHydrated || !isStable ? (
         <div className="min-h-24" aria-hidden="true" />
       ) : width < BREAKPOINTS.sm ? (
-        <div className="ff-mobile-widget-grid">
-          {orderLayoutForMobile(layout).map((item) => renderWidget(
-            item,
-            true,
-            `ff-mobile-widget-grid-item ${isMobileWideWidget(item.type) ? 'ff-mobile-widget-grid-item-wide' : 'ff-mobile-widget-grid-item-mini'}`,
-          ))}
-        </div>
+        <MobileWidgetList
+          items={currentMobileOrderLayout}
+          isEditing={isEditing}
+          onReorder={handleMobileReorder}
+          renderWidget={(item, className) => renderWidget(item, true, className)}
+        />
       ) : (
           <Responsive
           width={width}

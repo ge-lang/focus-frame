@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   addWidgetToLayout,
+  appendMobileWidget,
   COMPACT_LAYOUT_VERSION,
   OBJECT_LAYOUT_VERSION,
   migrateToCompactLayout,
@@ -13,9 +14,11 @@ import {
   getWidgetSizing,
   hasLayoutCollision,
   isMobileWideWidget,
+  moveMobileWidget,
   applyLayoutHeightOverrides,
   normalizeLayout,
   normalizeDesktopOrigin,
+  normalizeMobileOrder,
   reconcileLayoutTypes,
   removeWidgetFromLayout,
   orderLayoutForMobile,
@@ -49,6 +52,35 @@ describe('dashboard layout normalization', () => {
     const originalCoordinates = layout.map(({ i, x, y }) => ({ i, x, y }));
 
     expect(orderLayoutForMobile(layout).map(({ type }) => type)).toEqual(['news', 'todo', 'pomodoro', 'notes']);
+    expect(layout.map(({ i, x, y }) => ({ i, x, y }))).toEqual(originalCoordinates);
+  });
+
+  it('restores a persisted mobile order, ignores stale ids, and appends new widgets predictably', () => {
+    const widgets = [
+      { id: 'weather-1', type: 'weather' as const },
+      { id: 'pomodoro-1', type: 'pomodoro' as const },
+      { id: 'analytics-1', type: 'analytics' as const },
+    ];
+
+    expect(normalizeMobileOrder(['pomodoro-1', 'missing-widget', 'pomodoro-1'], widgets)).toEqual([
+      'pomodoro-1',
+      'weather-1',
+      'analytics-1',
+    ]);
+    expect(appendMobileWidget(['pomodoro-1', 'weather-1'], 'analytics-1')).toEqual(['pomodoro-1', 'weather-1', 'analytics-1']);
+  });
+
+  it('moves only mobile sequence and leaves desktop layout coordinates untouched', () => {
+    const order = ['news-1', 'weather-1', 'pomodoro-1'];
+    const layout = [
+      { i: 'news-1', x: 0, y: 0, w: 12, h: 1, type: 'news' as const },
+      { i: 'weather-1', x: 8, y: 6, w: 2, h: 2, type: 'weather' as const },
+      { i: 'pomodoro-1', x: 0, y: 2, w: 2, h: 2, type: 'pomodoro' as const },
+    ];
+    const originalCoordinates = layout.map(({ i, x, y }) => ({ i, x, y }));
+
+    expect(moveMobileWidget(order, 'weather-1', 'news-1')).toEqual(['weather-1', 'news-1', 'pomodoro-1']);
+    expect(orderLayoutForMobile(layout, ['weather-1', 'news-1', 'pomodoro-1']).map(({ i }) => i)).toEqual(['weather-1', 'news-1', 'pomodoro-1']);
     expect(layout.map(({ i, x, y }) => ({ i, x, y }))).toEqual(originalCoordinates);
   });
 

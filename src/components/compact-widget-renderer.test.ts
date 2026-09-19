@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { compactPomodoroControlAction, compactPresentationLimits, compactWeatherPageCount, formatCompactForecastTime, getCompactCalendarGrid, initialCompactWeatherPage, isCompactInteractiveTarget, nextCompactWeatherPage, previousCompactWeatherPage, shouldOpenCompactFocusView, shouldResetCompactWeatherPage, summarizeCompactTasks } from './compact-widget-renderer';
+import { compactFullViewLabel, compactPomodoroControlAction, compactPresentationLimits, compactWeatherPageCount, formatCompactForecastTime, getCompactCalendarGrid, initialCompactWeatherPage, isCompactInteractiveTarget, nextCompactWeatherPage, previousCompactWeatherPage, shouldOpenCompactFocusView, shouldResetCompactWeatherPage, summarizeCompactTasks } from './compact-widget-renderer';
 import type { Task } from '@/types/task';
 
 const task = (overrides: Partial<Task>): Task => ({
@@ -51,6 +51,12 @@ describe('compact widget presentation helpers', () => {
     const svgPath = { closest: (selector: string) => selector.includes('button') ? {} : null } as unknown as EventTarget;
     expect(isCompactInteractiveTarget(svgPath)).toBe(true);
     expect(shouldOpenCompactFocusView(isCompactInteractiveTarget(svgPath), false)).toBe(false);
+  });
+
+  it('provides one explicit, accessible full-view label for every compact widget type', () => {
+    expect(compactFullViewLabel('news')).toBe('Open News full view');
+    expect(compactFullViewLabel('todo')).toBe('Open Tasks full view');
+    expect(compactFullViewLabel('weather')).toBe('Open Weather full view');
   });
 
   it('starts or resumes compact Pomodoro in place only when a selected task exists', () => {

@@ -34,7 +34,7 @@ const widgetSizing: Record<WidgetType, WidgetSizing> = {
 };
 
 const mobileWideWidgetTypes: ReadonlySet<WidgetType> = new Set(['todo', 'goals', 'news']);
-const mobileWidgetOrder: readonly WidgetType[] = ['news', 'todo', 'goals', 'pomodoro', 'calendar', 'weather', 'analytics', 'notes', 'bookmarks'];
+export const DEFAULT_MOBILE_WIDGET_ORDER: readonly WidgetType[] = ['news', 'todo', 'goals', 'pomodoro', 'calendar', 'weather', 'analytics', 'notes', 'bookmarks'];
 
 const compactDefaultPositions: Record<WidgetType, { x: number; y: number }> = {
   news: { x: 0, y: 0 },
@@ -56,11 +56,64 @@ export function isMobileWideWidget(type: WidgetType): boolean {
   return mobileWideWidgetTypes.has(type);
 }
 
+export function getDefaultMobileOrder(
+  widgets: Pick<Widget, 'id' | 'type'>[],
+  layout: Pick<LayoutItem, 'i' | 'x' | 'y'>[] = [],
+): string[] {
+  const typeOrder = new Map(DEFAULT_MOBILE_WIDGET_ORDER.map((type, index) => [type, index]));
+  const layoutOrder = new Map(layout.map((item, index) => [item.i, { index, x: item.x, y: item.y }]));
+  return [...widgets]
+    .sort((first, second) => {
+      const typeDifference = (typeOrder.get(first.type) ?? DEFAULT_MOBILE_WIDGET_ORDER.length) - (typeOrder.get(second.type) ?? DEFAULT_MOBILE_WIDGET_ORDER.length);
+      if (typeDifference !== 0) return typeDifference;
+      const firstPosition = layoutOrder.get(first.id);
+      const secondPosition = layoutOrder.get(second.id);
+      if (firstPosition && secondPosition) return firstPosition.y - secondPosition.y || firstPosition.x - secondPosition.x || firstPosition.index - secondPosition.index;
+      if (firstPosition) return -1;
+      if (secondPosition) return 1;
+      return first.id.localeCompare(second.id);
+    })
+    .map((widget) => widget.id);
+}
+
+export function normalizeMobileOrder(
+  mobileOrder: readonly string[] | null | undefined,
+  widgets: Pick<Widget, 'id' | 'type'>[],
+  layout: Pick<LayoutItem, 'i' | 'x' | 'y'>[] = [],
+): string[] {
+  const validIds = new Set(widgets.map((widget) => widget.id));
+  const seen = new Set<string>();
+  const stored = (mobileOrder ?? []).filter((id) => {
+    if (!validIds.has(id) || seen.has(id)) return false;
+    seen.add(id);
+    return true;
+  });
+  const defaults = getDefaultMobileOrder(widgets, layout).filter((id) => !seen.has(id));
+  return [...stored, ...defaults];
+}
+
+export function moveMobileWidget(order: readonly string[], activeId: string, overId: string): string[] {
+  const activeIndex = order.indexOf(activeId);
+  const overIndex = order.indexOf(overId);
+  if (activeIndex < 0 || overIndex < 0 || activeIndex === overIndex) return [...order];
+  const next = [...order];
+  next.splice(activeIndex, 1);
+  next.splice(overIndex, 0, activeId);
+  return next;
+}
+
+export function appendMobileWidget(order: readonly string[], widgetId: string): string[] {
+  return [...order.filter((id) => id !== widgetId), widgetId];
+}
+
 /** Returns a mobile-only render order without changing persisted desktop coordinates. */
-export function orderLayoutForMobile(layout: LayoutItem[]): LayoutItem[] {
-  const order = new Map(mobileWidgetOrder.map((type, index) => [type, index]));
+export function orderLayoutForMobile(layout: LayoutItem[], mobileOrder?: readonly string[]): LayoutItem[] {
+  const order = mobileOrder
+    ? new Map(mobileOrder.map((id, index) => [id, index]))
+    : new Map(DEFAULT_MOBILE_WIDGET_ORDER.map((type, index) => [type, index]));
   return [...layout].sort((first, second) =>
-    (order.get(first.type) ?? mobileWidgetOrder.length) - (order.get(second.type) ?? mobileWidgetOrder.length) ||
+    (order.get(mobileOrder ? first.i : first.type) ?? (mobileOrder ?? DEFAULT_MOBILE_WIDGET_ORDER).length) -
+      (order.get(mobileOrder ? second.i : second.type) ?? (mobileOrder ?? DEFAULT_MOBILE_WIDGET_ORDER).length) ||
     first.y - second.y ||
     first.x - second.x ||
     first.i.localeCompare(second.i),

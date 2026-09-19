@@ -3,6 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { useCreateFocusSession } from '@/hooks/use-analytics';
 import { useUserSettings } from '@/hooks/use-settings';
+import { showToast } from '@/lib/toast';
 import {
   completePomodoro,
   createCompletionGate,
@@ -39,6 +40,7 @@ export function PomodoroProvider({ children }: { children: ReactNode }) {
   const stateRef = useRef(state);
   const audioContextRef = useRef<AudioContext | null>(null);
   const completionGateRef = useRef(createCompletionGate());
+  const pendingCompletionEndAtRef = useRef<number | null>(null);
   const { mutateAsync: createFocusSessionAsync } = useCreateFocusSession();
   const { data: userSettings } = useUserSettings();
 
@@ -91,12 +93,17 @@ export function PomodoroProvider({ children }: { children: ReactNode }) {
     const completedAt = Date.now();
     const { nextState, completedMode, completedDuration } = completePomodoro(current, completedAt);
     const session = focusSessionPayloadForCompletion(current, completedMode, completedDuration);
+    pendingCompletionEndAtRef.current = expectedEndAt;
 
     void createFocusSessionAsync(session)
       .catch((error: unknown) => {
         console.error('Failed to persist completed focus session:', error);
+        showToast('Focus session could not be saved. Check your connection and try again.', 'error');
       })
-      .finally(() => commitState(nextState));
+      .finally(() => {
+        pendingCompletionEndAtRef.current = null;
+        commitState(nextState);
+      });
   }, [commitState, createFocusSessionAsync, playNotificationSound, userSettings?.notificationsEnabled]);
 
   useEffect(() => {
@@ -117,24 +124,31 @@ export function PomodoroProvider({ children }: { children: ReactNode }) {
   }, [commitState, completeTimer, state.endAt, state.isRunning]);
 
   const startTimer = () => commitState(startPomodoro(stateRef.current, Date.now()));
-  const pauseTimer = () => commitState(pausePomodoro(stateRef.current, Date.now()));
+  const pauseTimer = () => {
+    if (pendingCompletionEndAtRef.current !== null) return;
+    commitState(pausePomodoro(stateRef.current, Date.now()));
+  };
   const stopTimer = () => {
     const current = stateRef.current;
+    if (pendingCompletionEndAtRef.current !== null && pendingCompletionEndAtRef.current === current.endAt) return;
     const now = Date.now();
     const duration = getElapsedFocusSeconds(current, now);
     if (duration > 0) {
       void createFocusSessionAsync(focusSessionPayloadForCompletion(current, 'work', duration)).catch((error: unknown) => {
         console.error('Failed to persist stopped focus session:', error);
+        showToast('Focus session could not be saved. Check your connection and try again.', 'error');
       });
     }
     completionGateRef.current = createCompletionGate();
     commitState(stopPomodoro(current));
   };
   const resetTimer = () => {
+    if (pendingCompletionEndAtRef.current !== null) return;
     completionGateRef.current = createCompletionGate();
     commitState(resetPomodoro(stateRef.current));
   };
   const skipToNext = () => {
+    if (pendingCompletionEndAtRef.current !== null) return;
     completionGateRef.current = createCompletionGate();
     commitState(skipPomodoro(stateRef.current));
   };

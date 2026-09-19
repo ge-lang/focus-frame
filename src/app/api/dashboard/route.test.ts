@@ -48,8 +48,8 @@ describe('/api/dashboard ownership', () => {
     expect(response.status).toBe(200);
     expect(mocks.upsert).toHaveBeenCalledWith({
       where: { userId: 'user-a' },
-      create: { userId: 'user-a', layout: JSON.stringify({ ...state, layoutVersion: 5 }) },
-      update: { layout: JSON.stringify({ ...state, layoutVersion: 5 }) },
+      create: { userId: 'user-a', layout: JSON.stringify({ ...state, layoutVersion: 5, mobileOrder: [] }) },
+      update: { layout: JSON.stringify({ ...state, layoutVersion: 5, mobileOrder: [] }) },
     });
   });
 
@@ -104,6 +104,7 @@ describe('/api/dashboard ownership', () => {
         layout: JSON.stringify({
           ...mismatchedState,
           layoutVersion: 5,
+          mobileOrder: ['todo-123'],
           widgets: [{ id: 'todo-123', type: 'todo', colSpan: 4, rowSpan: 2 }],
           layout: [{ i: 'todo-123', x: 0, y: 0, w: 4, h: 2, type: 'todo' }],
         }),
@@ -112,6 +113,7 @@ describe('/api/dashboard ownership', () => {
         layout: JSON.stringify({
           ...mismatchedState,
           layoutVersion: 5,
+          mobileOrder: ['todo-123'],
           widgets: [{ id: 'todo-123', type: 'todo', colSpan: 4, rowSpan: 2 }],
           layout: [{ i: 'todo-123', x: 0, y: 0, w: 4, h: 2, type: 'todo' }],
         }),
@@ -139,8 +141,44 @@ describe('/api/dashboard ownership', () => {
         layout: JSON.stringify({
           ...newsState,
           layoutVersion: 5,
+          mobileOrder: ['news-123'],
           widgets: [{ id: 'news-123', type: 'news', colSpan: 12, rowSpan: 1 }],
           layout: [{ i: 'news-123', x: 0, y: 7, w: 12, h: 1, type: 'news' }],
+        }),
+      }),
+    }));
+  });
+
+  it('canonicalizes mobile order independently and ignores stale widget ids', async () => {
+    mocks.getServerSession.mockResolvedValue({ user: { id: 'user-a' } });
+    mocks.upsert.mockResolvedValue({});
+
+    const mobileState = {
+      widgets: [
+        { id: 'weather-1', type: 'weather', colSpan: 2, rowSpan: 2 },
+        { id: 'pomodoro-1', type: 'pomodoro', colSpan: 2, rowSpan: 2 },
+      ],
+      layout: [
+        { i: 'weather-1', x: 8, y: 6, w: 2, h: 2, type: 'weather' },
+        { i: 'pomodoro-1', x: 0, y: 2, w: 2, h: 2, type: 'pomodoro' },
+      ],
+      mobileOrder: ['pomodoro-1', 'stale-id', 'pomodoro-1'],
+    };
+    const response = await PUT(new Request('http://localhost/api/dashboard', {
+      method: 'PUT',
+      body: JSON.stringify({ state: mobileState }),
+      headers: { 'Content-Type': 'application/json' },
+    }) as NextRequest);
+
+    expect(response.status).toBe(200);
+    expect(mocks.upsert).toHaveBeenCalledWith(expect.objectContaining({
+      create: expect.objectContaining({
+        layout: JSON.stringify({
+          ...mobileState,
+          layoutVersion: 5,
+          mobileOrder: ['pomodoro-1', 'weather-1'],
+          widgets: mobileState.widgets.map((widget) => ({ ...widget, colSpan: 2, rowSpan: 2 })),
+          layout: mobileState.layout,
         }),
       }),
     }));

@@ -1264,7 +1264,7 @@ body.ff-document-body {
 }
 .ff-compact-weather-empty { display: grid; min-height: 100%; place-items: center; color: var(--ff-text-muted, #7b849b); font-size: 0.72rem; text-align: center; }
 .ff-compact-weather-object { position: relative; }
-.ff-compact-weather-navigation { position: absolute; z-index: 2; inset: 0; display: flex; align-items: center; justify-content: space-between; padding: 0.2rem; pointer-events: none; }
+.ff-compact-weather-navigation { position: absolute; z-index: 2; inset: 0; display: flex; align-items: center; justify-content: space-between; padding: 0.2rem 2.45rem 0.2rem 0.2rem; pointer-events: none; }
 .ff-compact-weather-navigation button { display: grid; width: 2.5rem; height: 2.5rem; place-items: center; border: 0; border-radius: 9999px; background: transparent; color: var(--ff-text-primary, #18213b); opacity: 0.68; pointer-events: auto; transition: background-color 160ms ease, color 160ms ease, opacity 160ms ease; }
 .ff-compact-weather-navigation button:hover,
 .ff-compact-weather-navigation button:focus-visible { background: rgba(99, 102, 241, 0.1); color: var(--ff-accent-violet, #6255e8); opacity: 1; outline: none; }
@@ -1338,6 +1338,33 @@ body.ff-document-body {
   color: var(--ff-accent-violet, #6255e8);
   transition: color 160ms ease, background-color 160ms ease;
 }
+
+.ff-compact-open-full {
+  position: absolute;
+  z-index: 5;
+  top: 0.55rem;
+  right: 0.55rem;
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border: 0;
+  border-radius: 0.55rem;
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--ff-text-muted, #7b849b);
+  opacity: 0.82;
+  transition: color 160ms ease, background-color 160ms ease, opacity 160ms ease;
+}
+
+.ff-compact-open-full:hover,
+.ff-compact-open-full:focus-visible {
+  background: rgba(99, 102, 241, 0.12);
+  color: var(--ff-accent-violet, #6255e8);
+  opacity: 1;
+  outline: none;
+}
+
+.ff-compact-card + button[aria-label^='Remove'] { top: 2.75rem; }
 
 .ff-compact-open:hover,
 .ff-compact-open:focus-visible,
@@ -2007,6 +2034,11 @@ html[data-ff-theme='light'] .ff-modal-panel textarea { border-color: rgba(239, 1
 @media (min-width: 640px) {
   .ff-page-shell .ff-dashboard-stage { padding-top: 0; }
 
+  .ff-page-shell .ff-compact-card-news,
+  .ff-page-shell .ff-compact-news-object {
+    min-height: 0;
+  }
+
   .ff-page-shell .ff-compact-card {
     position: relative;
     isolation: isolate;
@@ -2124,7 +2156,7 @@ html[data-ff-theme='light'] .ff-modal-panel textarea { border-color: rgba(239, 1
   .ff-page-shell .ff-compact-pomodoro-tools {
     position: absolute;
     top: -0.15rem;
-    right: 0;
+    right: 2.45rem;
     left: 0;
     z-index: 2;
     display: flex;
@@ -2201,6 +2233,7 @@ html[data-ff-theme='light'] .ff-modal-panel textarea { border-color: rgba(239, 1
     grid-template-columns: 1.5rem minmax(0, 1fr) 1.5rem;
     align-items: center;
     gap: 0.15rem;
+    padding-right: 2.45rem;
     font-size: 1.08rem;
     font-weight: 700;
     line-height: normal;
@@ -4336,6 +4369,7 @@ html .ff-focus-view[data-widget-type='weather'] {
   }
 
   .ff-mobile-widget-grid-item {
+    position: relative;
     display: flex;
     min-width: 0;
     min-height: 0;
@@ -4343,6 +4377,47 @@ html .ff-focus-view[data-widget-type='weather'] {
 
   .ff-mobile-widget-grid-item-mini { aspect-ratio: 1; }
   .ff-mobile-widget-grid-item-wide { grid-column: 1 / -1; }
+
+  .ff-mobile-widget-grid-item-content,
+  .ff-mobile-widget-grid-item-renderer {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+  }
+  .ff-mobile-widget-grid .ff-compact-object { cursor: default; }
+
+  .ff-mobile-widget-drag-handle {
+    position: absolute;
+    z-index: 20;
+    top: 0.5rem;
+    left: 0.5rem;
+    display: grid;
+    width: 2rem;
+    height: 2rem;
+    place-items: center;
+    border: 1px solid rgba(148, 163, 184, 0.28);
+    border-radius: 0.55rem;
+    background: var(--ff-bg-elevated, rgba(255, 255, 255, 0.86));
+    color: var(--ff-text-muted, #7b849b);
+    box-shadow: 0 3px 10px rgba(15, 23, 42, 0.12);
+    touch-action: none;
+  }
+  .ff-mobile-widget-drag-handle:hover,
+  .ff-mobile-widget-drag-handle:focus-visible,
+  .ff-mobile-widget-drag-handle[aria-pressed='true'] {
+    border-color: var(--ff-accent-violet, #6255e8);
+    color: var(--ff-accent-violet, #6255e8);
+    outline: none;
+  }
+  .ff-mobile-widget-grid-dragging {
+    user-select: none;
+    touch-action: none;
+  }
+  .ff-mobile-widget-grid-item-dragging { opacity: 0.72; }
+  .ff-mobile-widget-grid-item .group > button[aria-label^='Remove'] { top: 2.75rem; }
+  .ff-mobile-widget-grid-item .ff-compact-pomodoro-tools { right: 2.45rem; }
+  .ff-mobile-widget-grid-item .ff-compact-calendar-month { padding-right: 2.45rem; }
 
   .ff-mobile-widget-grid-item > .group {
     display: flex;

@@ -13,6 +13,7 @@ import {
   CloudSun,
   Clock3,
   Droplet,
+  Maximize2,
   Flag,
   Github,
   Bell,
@@ -54,6 +55,10 @@ export const initialCompactWeatherPage = 0;
 
 export function shouldOpenCompactFocusView(targetIsInteractive: boolean, didMove: boolean): boolean {
   return !targetIsInteractive && !didMove;
+}
+
+export function compactFullViewLabel(type: WidgetType): string {
+  return `Open ${labelForType(type)} full view`;
 }
 
 export function compactPomodoroControlAction(isRunning: boolean, hasSelectedTask: boolean): 'pause' | 'start' | 'open' {
@@ -118,7 +123,7 @@ function CompactShell({ widget, onOpen, icon, children }: CompactWidgetProps & {
   return (
     <AnimatedWidget className={`ff-compact-card ff-compact-card-${widget.type}`}>
       <div
-        className="ff-compact-object ff-compact-drag-surface flex h-full min-h-0 flex-col"
+        className="ff-compact-object ff-compact-drag-surface relative flex h-full min-h-0 flex-col"
         aria-label={`Open ${label} Focus View`}
         aria-labelledby={`${widget.id}-compact-label`}
         role="group"
@@ -131,6 +136,17 @@ function CompactShell({ widget, onOpen, icon, children }: CompactWidgetProps & {
       >
         <h3 id={`${widget.id}-compact-label`} className="sr-only">{widget.title || label}</h3>
         <span className="sr-only">{icon}</span>
+        <button
+          type="button"
+          data-no-drag
+          className="ff-compact-open-full"
+          aria-label={compactFullViewLabel(widget.type)}
+          title={compactFullViewLabel(widget.type)}
+          onPointerDown={(event) => event.stopPropagation()}
+          onClick={(event) => { event.stopPropagation(); onOpen(); }}
+        >
+          <Maximize2 size={13} aria-hidden="true" />
+        </button>
         {children}
       </div>
     </AnimatedWidget>

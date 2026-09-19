@@ -40,6 +40,9 @@ export function useCreateFocusSession() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(session),
     }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['analytics'] }),
+    retry: false,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['analytics'], refetchType: 'active' });
+    },
   });
 }

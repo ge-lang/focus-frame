@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useEffect, useReducer, useState, ReactNode } from 'react';
 import { useSession } from 'next-auth/react';
 import { WidgetType } from '@/types/dashboard';
-import { addWidgetToLayout, COMPACT_LAYOUT_VERSION, getWidgetSizing, migrateToCompactLayout, normalizeLayout, removeWidgetFromLayout } from '@/lib/dashboard-layout';
+import { addWidgetToLayout, appendMobileWidget, COMPACT_LAYOUT_VERSION, getWidgetSizing, migrateToCompactLayout, normalizeLayout, normalizeMobileOrder, removeWidgetFromLayout } from '@/lib/dashboard-layout';
 import { resolveHydrationPersistence, shouldPersistDashboard } from '@/lib/dashboard-persistence';
 
 export interface Widget {
@@ -27,6 +27,7 @@ export interface LayoutItem {
 export interface DashboardState {
   widgets: Widget[];
   layout: LayoutItem[];
+  mobileOrder: string[];
   layoutVersion: number;
   isEditing: boolean;
 }
@@ -35,6 +36,7 @@ type DashboardAction =
   | { type: 'ADD_WIDGET'; payload: Widget }
   | { type: 'REMOVE_WIDGET'; payload: string }
   | { type: 'UPDATE_LAYOUT'; payload: LayoutItem[] }
+  | { type: 'UPDATE_MOBILE_ORDER'; payload: string[] }
   | { type: 'UPDATE_WIDGET_CONFIG'; payload: { id: string; config: Record<string, unknown> } }
   | { type: 'LOAD_STATE'; payload: DashboardState }
   | { type: 'TOGGLE_EDIT' };
@@ -62,6 +64,7 @@ const initialState: DashboardState = {
     { i: 'notes-1', x: 4, y: 3, w: 2, h: 2, type: 'notes' },
     { i: 'bookmarks-1', x: 6, y: 3, w: 2, h: 2, type: 'bookmarks' },
   ],
+  mobileOrder: ['news-1', 'todo-1', 'goals-1', 'pomodoro-1', 'calendar-1', 'weather-1', 'analytics-1', 'notes-1', 'bookmarks-1'],
   layoutVersion: COMPACT_LAYOUT_VERSION,
   isEditing: false,
 };
@@ -69,15 +72,18 @@ const initialState: DashboardState = {
 function dashboardReducer(state: DashboardState, action: DashboardAction): DashboardState {
   switch (action.type) {
     case 'ADD_WIDGET':
-      return { ...state, widgets: [...state.widgets, action.payload] };
+      return { ...state, widgets: [...state.widgets, action.payload], mobileOrder: appendMobileWidget(state.mobileOrder, action.payload.id) };
     case 'REMOVE_WIDGET':
       return {
         ...state,
         widgets: state.widgets.filter((widget) => widget.id !== action.payload),
         layout: removeWidgetFromLayout(state.layout, action.payload),
+        mobileOrder: state.mobileOrder.filter((id) => id !== action.payload),
       };
     case 'UPDATE_LAYOUT':
       return { ...state, layout: action.payload };
+    case 'UPDATE_MOBILE_ORDER':
+      return { ...state, mobileOrder: action.payload };
     case 'UPDATE_WIDGET_CONFIG':
       return {
         ...state,
@@ -101,6 +107,7 @@ interface DashboardContextType {
   addWidget: (type: WidgetType, config?: { title?: string; colSpan?: number; rowSpan?: number }) => void;
   removeWidget: (id: string) => void;
   updateLayout: (items: LayoutItem[], options?: { markDirty?: boolean }) => void;
+  updateMobileOrder: (order: string[]) => void;
   updateWidgetConfig: (id: string, config: Record<string, unknown>) => void;
   toggleEdit: () => void;
 }
@@ -143,6 +150,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
               ...data.state,
               widgets: migrated.widgets,
               layout: migrated.layout,
+              mobileOrder: normalizeMobileOrder(data.state.mobileOrder, migrated.widgets, migrated.layout),
               layoutVersion: COMPACT_LAYOUT_VERSION,
               isEditing: false,
             },
@@ -174,7 +182,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       fetch('/api/dashboard', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ state: { widgets: state.widgets, layout: state.layout, layoutVersion: state.layoutVersion } }),
+        body: JSON.stringify({ state: { widgets: state.widgets, layout: state.layout, mobileOrder: state.mobileOrder, layoutVersion: state.layoutVersion } }),
       }).then((response) => {
         if (response.ok && mutationVersion === mutationVersionRef.current) {
           isDirtyRef.current = false;
@@ -183,7 +191,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     }, 750);
 
     return () => window.clearTimeout(timeoutId);
-  }, [dashboardHydration, sessionStatus, state.widgets, state.layout, state.layoutVersion]);
+  }, [dashboardHydration, sessionStatus, state.widgets, state.layout, state.mobileOrder, state.layoutVersion]);
 
   const addWidget = (type: WidgetType, config?: { title?: string; colSpan?: number; rowSpan?: number }) => {
     markDirty();
@@ -217,6 +225,10 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     if (options?.markDirty !== false) markDirty();
     dispatch({ type: 'UPDATE_LAYOUT', payload: items });
   };
+  const updateMobileOrder = (order: string[]) => {
+    markDirty();
+    dispatch({ type: 'UPDATE_MOBILE_ORDER', payload: normalizeMobileOrder(order, state.widgets, state.layout) });
+  };
   const updateWidgetConfig = (id: string, config: Record<string, unknown>) => {
     markDirty();
     dispatch({ type: 'UPDATE_WIDGET_CONFIG', payload: { id, config } });
@@ -224,7 +236,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
   const toggleEdit = () => dispatch({ type: 'TOGGLE_EDIT' });
 
   return (
-    <DashboardContext.Provider value={{ state, isHydrated: dashboardHydration === 'ready', dispatch, addWidget, removeWidget, updateLayout, updateWidgetConfig, toggleEdit }}>
+    <DashboardContext.Provider value={{ state, isHydrated: dashboardHydration === 'ready', dispatch, addWidget, removeWidget, updateLayout, updateMobileOrder, updateWidgetConfig, toggleEdit }}>
       {children}
     </DashboardContext.Provider>
   );

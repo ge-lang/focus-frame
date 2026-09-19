@@ -3,12 +3,13 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { isIntegerBetween } from '@/lib/api-validation';
-import { COMPACT_LAYOUT_VERSION, canonicalizeWidgetMetadata, getWidgetSizing, reconcileLayoutTypes } from '@/lib/dashboard-layout';
+import { COMPACT_LAYOUT_VERSION, canonicalizeWidgetMetadata, getWidgetSizing, normalizeMobileOrder, reconcileLayoutTypes } from '@/lib/dashboard-layout';
 import type { LayoutItem, Widget } from '@/types/dashboard';
 
 type PersistedDashboardState = {
   widgets: Widget[];
   layout: LayoutItem[];
+  mobileOrder?: string[];
   layoutVersion?: number;
 };
 
@@ -25,6 +26,7 @@ function isDashboardState(value: unknown): value is PersistedDashboardState {
   if (!Array.isArray(state.widgets) || !Array.isArray(state.layout) ||
       state.widgets.length > MAX_WIDGETS || state.layout.length > MAX_LAYOUT_ITEMS) return false;
   if (state.layoutVersion !== undefined && !isIntegerBetween(state.layoutVersion, 0, COMPACT_LAYOUT_VERSION)) return false;
+  if (state.mobileOrder !== undefined && (!Array.isArray(state.mobileOrder) || state.mobileOrder.length > MAX_WIDGETS || state.mobileOrder.some((id) => typeof id !== 'string' || id.length < 1 || id.length > 100))) return false;
 
   const widgetIds = new Set<string>();
   for (const widget of state.widgets) {
@@ -113,6 +115,7 @@ export async function PUT(request: NextRequest) {
       ...getWidgetSizing(item.type),
     })),
   };
+  canonicalState.mobileOrder = normalizeMobileOrder(state.mobileOrder, canonicalWidgets, canonicalState.layout);
 
   try {
     await prisma.userLayout.upsert({
